@@ -3,8 +3,7 @@
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
   --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
 
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
+
 
   display: grid;
   grid-template-rows: 20px 1fr 20px;
@@ -69,7 +68,6 @@
   border: none;
   border: 1px solid transparent;
   transition:
-    background 0.2s,
     color 0.2s,
     border-color 0.2s;
   cursor: pointer;
@@ -165,4 +163,42 @@ a.secondary {
   .logo {
     filter: invert();
   }
+}
+
+/* Additional styles for FormControl and Select components */
+.MuiFormControl-root {
+  width: 100%;
+}
+
+.MuiInputLabel-root {
+  color: #1976d2; /* Blue color for the label */
+}
+
+.MuiSelect-root {
+  background-color: white;
+}
+
+.MuiSelect-select {
+  padding: 10px;
+  color: #1976d2; /* Blue color for the selected text */
+}
+
+.MuiMenuItem-root {
+  padding: 10px;
+}
+
+.MuiSelect-icon {
+  color: #1976d2; /* Blue color for the dropdown icon */
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important; /* Blue border color */
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important; /* Blue border color when focused */
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important; /* Blue border color on hover */
 }
