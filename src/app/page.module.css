@@ -3,8 +3,6 @@
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
   --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
 
-
-
   display: grid;
   grid-template-rows: 20px 1fr 20px;
   align-items: center;
@@ -45,6 +43,18 @@
 
 .main li:not(:last-of-type) {
   margin-bottom: 8px;
+}
+
+.timeTypeButtonContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px; /* Space between buttons */
+  justify-content: space-between; /* Align buttons to the sides */
+}
+
+.timeTypeButton {
+  flex: 1 1 calc(50% - 16px); /* Two buttons per row with space between them */
+  margin-bottom: 16px; /* Space below each button */
 }
 
 .main code {

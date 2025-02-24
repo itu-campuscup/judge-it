@@ -22,6 +22,7 @@
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hcaptcha": "^0.1.1",
     "shadcn-ui": "^0.9.4",
     "tailwindcss": "^4.0.7"
   },
