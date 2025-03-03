@@ -4,6 +4,7 @@ import PlayerSelect from './PlayerSelect';
 import { Button } from '@mui/material';
 import { supabase } from '@/SupabaseClient';
 import AlertComponent from '../components/AlertComponent';
+import SetHeat from './SetHeat';
 
 const MainJudge = ({ user, parentTeam, parentPlayer, time_types }) => {
   const [teams, setTeams] = useState([]);
@@ -76,6 +77,9 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types }) => {
         text={alertText}
         open={alertOpen}
         setOpen={setAlertOpen}
+      />
+      <SetHeat
+        user={user}
       />
       {/**
        * Show team selection as a dropdown

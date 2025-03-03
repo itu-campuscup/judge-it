@@ -5,27 +5,48 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '../SupabaseClient';
 import { useAuth } from '../AuthContext';
-import { Button, TextField, Box, Typography, Card, CardContent, Container, AppBar, Toolbar } from '@mui/material';
+import { Button, TextField, Box, Typography, Card, CardContent, Container } from '@mui/material';
 import Header from './components/Header';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import AlertComponent from './components/AlertComponent';
 
 function Home() {
   const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [hcaptchaToken, setHcaptchaToken] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState('error');
+  const [alertText, setAlertText] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!hcaptchaToken) {
+    if (process.env.NODE_ENV !== 'development' && !hcaptchaToken) {
+      const err = 'Please complete the captcha';
+      setAlertOpen(true);
+      setAlertSeverity('error');
+      setAlertText(err);
       console.error('Please complete the captcha');
       return;
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) console.error('Error logging in:', error.message);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: {
+        captchaToken: process.env.NODE_ENV === 'development' ? 'dummy-token' : hcaptchaToken,
+      },
+    });
+    if (error) {
+      const err = 'Error logging in: ' + error.message;
+      setAlertOpen(true);
+      setAlertSeverity('error');
+      setAlertText(err);
+      console.error(err);
+    }
   };
 
   const handleHcaptchaVerify = (token) => {
+    console.log('hCaptcha token:', token);
     setHcaptchaToken(token);
   };
 
@@ -51,6 +72,12 @@ function Home() {
 
   return (
     <Container>
+      <AlertComponent
+        open={alertOpen}
+        severity={alertSeverity}
+        text={alertText}
+        setOpen={setAlertOpen}
+      />
       <Box>
         <Image
           src='/next.svg'
@@ -78,10 +105,12 @@ function Home() {
                 fullWidth
                 margin='normal'
               />
-              <HCaptcha
-                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
-                onVerify={handleHcaptchaVerify}
-              />
+              {process.env.NODE_ENV !== 'development' && (
+                <HCaptcha
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
+                  onVerify={handleHcaptchaVerify}
+                />
+              )}
               <Button type='submit' variant='contained' color='primary'>Login</Button>
             </form>
           </CardContent>
