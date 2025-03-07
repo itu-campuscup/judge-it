@@ -122,8 +122,8 @@ const SetHeat = ({ user }) => {
     } else {
       const setNotCurrentHeatResult = await setNotCurrentHeat();
       if (setNotCurrentHeatResult === 'error') { return; }
-      // const createHeatResult = await createHeat(heatNumber);
-      // if (createHeatResult === 'error') { return; }
+      const createHeatResult = await createHeat(heatNumber);
+      if (createHeatResult === 'error') { return; }
     }
 
     setAlertOpen(true);

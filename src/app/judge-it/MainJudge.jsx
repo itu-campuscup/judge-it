@@ -17,16 +17,35 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types }) => {
   const [alertText, setAlertText] = useState('');
 
   /**
+   * Get current heat
+   */
+  const getHeat = async () => {
+    const { data, error } = await supabase
+      .from('heats')
+      .select('*')
+      .eq('is_current', true);
+    if (error) {
+      const err = 'Error fetching current heat: ' + error.message;
+      setAlertOpen(true);
+      setAlertSeverity('error');
+      setAlertText(err);
+      console.error(err);
+    }
+    return data[0];
+  }
+
+  /**
    * Handle global start timer
    */
   const handleGlobalStart = async () => {
     checkInputs();
     const time_type_id = time_types.find((e) => e.time_eng === 'Sail').id;
+    const heatId = (await getHeat()).id;
     const { data, error } = await supabase
       .from('time_logs')
       .insert([
-        { team_id: parentTeam, player_id: parentPlayer, time_type_id: time_type_id, is_start_time: true},
-        { team_id: selectedTeam, player_id: selectedPlayer, time_type_id: time_type_id, is_start_time: true}
+        { team_id: parentTeam, player_id: parentPlayer, time_type_id: time_type_id, heat_id: heatId},
+        { team_id: selectedTeam, player_id: selectedPlayer, time_type_id: time_type_id, heat_id: heatId}
       ])
       if (error) {
         const err = 'Error starting global timer' + error.message;

@@ -129,10 +129,10 @@ const BeerChugger = ({ timeLogs = [], players = [], timeTypes = [], teams = [], 
     const offset = -10;
     return (
       <g transform={`translate(${x + width / 2},${y - 10})`}>
-        <image href={barData.imageUrl} x={-45} y={offset -100} height="6em" width="6em" />
-        <text x={0} y={offset + 0} textAnchor="middle" dominantBaseline="middle">{barData.playerName}</text>
-        <text x={0} y={offset + 15} textAnchor="middle" dominantBaseline="middle">{barData.teamName}</text>
-        <text x={0} y={offset + 35} textAnchor="middle" dominantBaseline="middle">{barData.heatNumber}</text>
+        <image href={barData.imageUrl} x={-45} y={offset -100} height='6em' width='6em' />
+        <text x={0} y={offset + 0} textAnchor='middle' dominantBaseline='middle'>{barData.playerName}</text>
+        <text x={0} y={offset + 15} textAnchor='middle' dominantBaseline='middle'>{barData.teamName}</text>
+        <text x={0} y={offset + 35} textAnchor='middle' dominantBaseline='middle'>{barData.heatNumber}</text>
       </g>
     );
   };
@@ -168,12 +168,12 @@ const BeerChugger = ({ timeLogs = [], players = [], timeTypes = [], teams = [], 
           <Typography key={idx}>{`Chug Time: ${timeLog.formattedChugTime}`}</Typography>
         ))} */}
         <BarChart width={900} height={500} data={barChart}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <CartesianGrid strokeDasharray='3 3' />
+          <XAxis dataKey='name' />
           <YAxis tickFormatter={formatYAxisTick}/>
           <Tooltip formatter={formatTooltip} />
           <Legend />
-          <Bar dataKey="time" fill="#8884d8">
+          <Bar dataKey='time' fill='#8884d8'>
             <LabelList dataKey='name' content={renderCustomLabel} />
           </Bar>
         </BarChart>

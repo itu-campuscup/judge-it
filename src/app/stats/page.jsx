@@ -5,6 +5,7 @@ import { supabase } from '../../SupabaseClient';
 import { Container, Box, Typography, AppBar, Toolbar, IconButton, Menu, MenuItem, Button } from '@mui/material';
 import Header from '../components/Header';
 import BeerChugger from './BeerChugger';
+import Sailing from './Sailing';
 import { useAuth } from '../../AuthContext';
 import NotLoggedIn from '../components/NotLoggedIn';
 import AlertComponent from '../components/AlertComponent';
@@ -156,7 +157,6 @@ function Stats() {
       supabase.removeChannel(timeLogsListener);
     };
   }, []);
-  // }, [selectedStat]);
 
   if (!user) {
     return <NotLoggedIn />;
@@ -182,7 +182,7 @@ function Stats() {
             onClose={handleMenuClose}
           >
             <MenuItem onClick={() => handleMenuItemClick('BeerChugger')}>Beer Chugger</MenuItem>
-            {/* Add more menu items here */}
+            <MenuItem onClick={() => handleMenuItemClick('Sailing')}>Sailing</MenuItem>
           </Menu>
           <Typography variant="h6">
             Stats
@@ -197,7 +197,13 @@ function Stats() {
                                               teams={teams}
                                               heats={heats}
                                             />}
-        {/* Add more stat components here */}
+        {selectedStat === 'Sailing' && <Sailing
+                                          timeLogs={timeLogs}
+                                          players={players}
+                                          timeTypes={timeTypes}
+                                          teams={teams}
+                                          heats={heats}
+                                        />}
       </Box>
     </Container>
   );
