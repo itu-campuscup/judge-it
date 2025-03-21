@@ -2,7 +2,7 @@ import { Typography } from '@mui/material';
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from 'recharts';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { timeToMilli, formatTime, calcTimeDifference } from '../../utils/timeUtils';
+import { formatTime } from '../../utils/timeUtils';
 import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
 
 const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heats = [] }) => {

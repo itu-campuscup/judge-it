@@ -1,10 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from 'recharts';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
 import { formatTime } from '../../utils/timeUtils';
-import { getPlayerNameGivenId } from '../../utils/getUtils';
 
 const BeerChugger = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heats = [] }) => {
   const [selectedYear, setSelectedYear] = useState('');
