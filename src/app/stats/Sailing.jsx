@@ -2,7 +2,7 @@ import { Typography } from '@mui/material';
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from 'recharts';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { formatTime } from '../../utils/timeUtils';
+import { formatTime, getUniqueYearsGivenHeats } from '../../utils/timeUtils';
 import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
 
 const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heats = [] }) => {
@@ -15,7 +15,7 @@ const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
   const sailingType = timeTypes.find(e => e.time_eng === 'Sail');
   const sailingTypeId = sailingType ? sailingType.id : null;
 
-  const uniqueYears = [...new Set(heats.map(heat => new Date(heat.date).getFullYear()))];
+  const uniqueYears = getUniqueYearsGivenHeats(heats);
 
   const logsForHeatsSortByTime = filterAndSortTimeLogs(timeLogs, heats, selectedYear, sailingTypeId);
 

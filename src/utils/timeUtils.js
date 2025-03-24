@@ -34,3 +34,13 @@ export const calcTimeDifference = (startTime, endTime) => {
   const end = timeToMilli(endTime);
   return end - start;
 };
+
+/**
+ * Gives the unique years given an array of heats.
+ * @param {Array} heats - The array of heats.
+ * @returns {Array} The unique years.
+ */
+export const getUniqueYearsGivenHeats = (heats) => {
+  // return [...new Set(heats.map(heat => new Date(heats.date).getFullYear()))];
+  return [...new Set(heats.map(heat => new Date(heat.date).getFullYear()))];
+};

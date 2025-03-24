@@ -41,3 +41,55 @@ export const getPlayerImageGivenPlayerId = (id, players) => {
   const player = players.find(p => p.id === id);
   return player ? player.image_url : '';
 };
+
+/**
+ * Gets the current still active teams.
+ * @param {Array} teams - The list of teams.
+ * @returns {Array} The list of active teams.
+ */
+export const getActiveTeams = (teams) => {
+  return teams.filter(t => t.is_out === false);
+};
+
+/**
+ * Get player given the player ID.
+ * @param {number} id - The player ID.
+ * @param {Array} players - The list of players.
+ * @returns {Object} The player.
+ */
+export const getPlayerGivenId = (id, players) => {
+  return players.find(p => p.id === id);
+};
+
+/**
+ * Gets the players given the team ID.
+ * @param {number} id - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @returns {Array} The list of players.
+ */
+export const getPlayerIdsGivenTeamId = (id, teams) => {
+  console.log('teams', teams);
+  const team = teams.filter(t => t.id === id)[0];
+  return [team.player_1_id, team.player_2_id, team.player_3_id, team.player_4_id].filter(id => id !== null && id !== undefined);
+};
+
+/**
+ * Get current heat given the context.
+ * @param {Object} supabase - The Supabase object.
+ * @param {Object} alert - The alert object.
+ * @returns {Object} The current heat.
+ */
+export const getCurrentHeatGivenCtx = async (supabase, alert) => {
+  const { data, error } = await supabase
+    .from('heats')
+    .select('*')
+    .eq('is_current', true);
+  if (error) {
+    const err = 'Error fetching current heat: ' + error.message;
+    alert.setOpen(true);
+    alert.setSeverity('error');
+    alert.setText(err);
+    console.error(err);
+  }
+  return data[0];
+};

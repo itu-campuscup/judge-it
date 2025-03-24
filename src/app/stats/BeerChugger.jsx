@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from 'recharts';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
-import { formatTime } from '../../utils/timeUtils';
+import { formatTime, getUniqueYearsGivenHeats } from '../../utils/timeUtils';
 
 const BeerChugger = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heats = [] }) => {
   const [selectedYear, setSelectedYear] = useState('');
@@ -15,7 +15,7 @@ const BeerChugger = ({ timeLogs = [], players = [], timeTypes = [], teams = [], 
   const beerType = timeTypes.find(timeType => timeType.time_eng === 'Beer');
   const beerTypeId = beerType ? beerType.id : null;
 
-  const uniqueYears = [...new Set(heats.map(heat => new Date(heat.date).getFullYear()))];
+  const uniqueYears = getUniqueYearsGivenHeats(heats);
 
   const logsForHeatsSortByTime = filterAndSortTimeLogs(timeLogs, heats, selectedYear, beerTypeId);
 

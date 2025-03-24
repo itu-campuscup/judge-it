@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../SupabaseClient';
-import { Container, Box, Typography, FormControl, InputLabel, Select, MenuItem, AppBar, Toolbar, Button, Radio, RadioGroup, FormControlLabel } from '@mui/material';
+import { Container, Box, Typography, FormControl, Radio, RadioGroup, FormControlLabel } from '@mui/material';
 import { useAuth } from '../../AuthContext';
 import styles from '../page.module.css';
 import TeamSelect from './TeamSelect';
@@ -12,38 +12,25 @@ import Header from '../components/Header';
 import ParticipantsJudge from './ParticipantsJudge';
 import BeerJudge from './BeerJudge';
 import NotLoggedIn from '../components/NotLoggedIn';
+import AlertComponent from '../components/AlertComponent';
+import useFetchData from '../hooks/useFetchData';
 
 function Judge() {
   const { user } = useAuth();
-  const [teams, setTeams] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState('');
+  const [selectedTeamId, setSelectedTeam] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectPlayerString, setSelectPlayerString] = useState('Select player');
-  const [timeTypes, setTimeTypes] = useState([]);
   const [judgeType, setJudgeType] = useState('');
+  const [teamPlayers, setTeamPlayers] = useState([]);
 
-  /**
-   * Fetch time types from the database
-   */
-  useEffect(() => {
-    if (user) {
-      const fetchTimeTypes = async () => {
-        const { data, error } = await supabase
-          .from('time_types')
-          .select('*');
-        if (error) {
-          console.error('Error fetching time types:', error.message);
-        } else {
-          console.log('Fetching time types:', data);
-          setTimeTypes(data);
-        }
-      };
-
-      fetchTimeTypes();
-    }
-  }, [user]);
-
+  const {
+    players,
+    heats,
+    teams,
+    timeTypes,
+    timeLogs,
+    alert,
+  } = useFetchData();
 
   /**
    * Handle button click to start/stop the timers to send a row to the db
@@ -54,7 +41,7 @@ function Judge() {
     }
     const { data, error } = await supabase
       .from('time_logs')
-      .insert([{ team_id: selectedTeam, player_id: selectedPlayer, time_type_id: timeTypeId, is_start_time: true}]);
+      .insert([{ team_id: selectedTeamId, player_id: selectedPlayer, time_type_id: timeTypeId, is_start_time: true }]);
     if (error) {
       console.error('Error inserting time log:', error.message);
     } else {
@@ -88,23 +75,26 @@ function Judge() {
          */}
         <TeamSelect
           user={user}
-          selectedTeam={selectedTeam}
+          selectedTeamId={selectedTeamId}
           setSelectedTeam={setSelectedTeam}
           teams={teams}
-          setTeams={setTeams}
+          alert={alert}
         />
         {/**
          * Show player selection as a group of radio buttons
          * Disable the radio group if there are no players
         */}
         <PlayerSelect
-          selectedTeam={selectedTeam}
+          teams={teams}
+          selectedTeamId={selectedTeamId}
           selectedPlayer={selectedPlayer}
           setSelectedPlayer={setSelectedPlayer}
           players={players}
-          setPlayers={setPlayers}
+          teamPlayers={teamPlayers}
+          setTeamPlayers={setTeamPlayers}
           selectPlayerString={selectPlayerString}
           setSelectPlayerString={setSelectPlayerString}
+          alert={alert}
         />
         {/**
          * Display the specific judge extra functionality
@@ -115,34 +105,28 @@ function Judge() {
          */}
         {judgeType === 'main' && <MainJudge
                                     user={user}
-                                    parentTeam={selectedTeam}
+                                    parentTeam={selectedTeamId}
                                     parentPlayer={selectedPlayer}
                                     time_types={timeTypes}
+                                    alert={alert}
                                   />}
         {judgeType === 'participants' && <ParticipantsJudge
-                                            selectedTeam={selectedTeam}
+                                            selectedTeam={selectedTeamId}
                                             selectedPlayer={selectedPlayer}
                                             timeTypes={timeTypes}
                                           />}
         {judgeType === 'beer' && <BeerJudge
-                                    selectedTeam={selectedTeam}
+                                    selectedTeam={selectedTeamId}
                                     selectedPlayer={selectedPlayer}
                                     timeTypes={timeTypes}
                                   />}
-        {/* <FormControl fullWidth margin='normal' variant='filled'>
-          <Box className={styles.timeTypeButtonContainer}>
-            <Button
-              variant='contained'
-              color='primary'
-              className={styles.timeTypeButton}
-              onClick={() => handleTimeTypeClick(-1)}
-            >
-              STOP
-            </Button>
-            {timeTypeButtons}
-          </Box>
-        </FormControl> */}
       </Box>
+      <AlertComponent
+        severity={alert.severity}
+        text={alert.text}
+        open={alert.open}
+        setOpen={alert.setOpen}
+      />
     </Container>
   )
 }
