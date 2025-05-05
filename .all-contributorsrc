@@ -1,4 +1,21 @@
 {
   "projectName": "judge-it",
-  "projectOwner": "itu-campuscup"
+  "projectOwner": "itu-campuscup",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "lucasfth",
+      "name": "Lucas Hanson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94063597?v=4",
+      "profile": "https://linktr.ee/lucashanson",
+      "contributions": [
+        "code"
+      ]
+    }
+  ]
 }
