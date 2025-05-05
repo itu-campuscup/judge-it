@@ -34,24 +34,25 @@ function Judge() {
 
   /**
    * Handle button click to start/stop the timers to send a row to the db
+   * 
    */
-  const handleTimeTypeClick = async (timeTypeId) => {
-    if (timeTypeId === -1) {
-      timeTypeId = timeTypes.find((e) => e.time_eng === 'Sail').id;
-    }
-    const { data, error } = await supabase
-      .from('time_logs')
-      .insert([{ team_id: selectedTeamId, player_id: selectedPlayer, time_type_id: timeTypeId, is_start_time: true }]);
-    if (error) {
-      console.error('Error inserting time log:', error.message);
-    } else {
-      console.log('Inserted time log:', data);
-    }
-  }
+  // const handleTimeTypeClick = async (timeTypeId) => {
+  //   if (timeTypeId === -1) {
+  //     timeTypeId = timeTypes.find((e) => e.time_eng === 'Sail').id;
+  //   }
+  //   const { data, error } = await supabase
+  //     .from('time_logs')
+  //     .insert([{ team_id: selectedTeamId, player_id: selectedPlayer, time_type_id: timeTypeId, is_start_time: true }]);
+  //   if (error) {
+  //     console.error('Error inserting time log:', error.message);
+  //   } else {
+  //     console.log('Inserted time log:', data);
+  //   }
+  // }
 
-  if (!user) {
-    return <NotLoggedIn />;
-  }
+  // if (!user) {
+  //   return <NotLoggedIn />;
+  // }
 
   return (
     <Container>
@@ -107,6 +108,8 @@ function Judge() {
                                     user={user}
                                     parentTeam={selectedTeamId}
                                     parentPlayer={selectedPlayer}
+                                    teams={teams}
+                                    players={players}
                                     time_types={timeTypes}
                                     alert={alert}
                                   />}
@@ -116,9 +119,11 @@ function Judge() {
                                             timeTypes={timeTypes}
                                           />}
         {judgeType === 'beer' && <BeerJudge
+                                    players={players}
                                     selectedTeam={selectedTeamId}
                                     selectedPlayer={selectedPlayer}
                                     timeTypes={timeTypes}
+                                    alert={alert}
                                   />}
       </Box>
       <AlertComponent

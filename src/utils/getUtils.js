@@ -68,7 +68,6 @@ export const getPlayerGivenId = (id, players) => {
  * @returns {Array} The list of players.
  */
 export const getPlayerIdsGivenTeamId = (id, teams) => {
-  console.log('teams', teams);
   const team = teams.filter(t => t.id === id)[0];
   return [team.player_1_id, team.player_2_id, team.player_3_id, team.player_4_id].filter(id => id !== null && id !== undefined);
 };
@@ -84,6 +83,7 @@ export const getCurrentHeatGivenCtx = async (supabase, alert) => {
     .from('heats')
     .select('*')
     .eq('is_current', true);
+    
   if (error) {
     const err = 'Error fetching current heat: ' + error.message;
     alert.setOpen(true);

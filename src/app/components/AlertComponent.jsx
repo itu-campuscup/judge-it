@@ -18,7 +18,7 @@ const AlertComponent = ({ severity, text, open, setOpen }) => {
         audio.play();
       }
 
-      playSound();
+      // playSound();
 
       const timer = setTimeout(() => {
         setOpen(false);

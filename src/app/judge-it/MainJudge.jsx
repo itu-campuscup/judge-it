@@ -5,36 +5,19 @@ import { Button } from '@mui/material';
 import { supabase } from '@/SupabaseClient';
 import AlertComponent from '../components/AlertComponent';
 import SetHeat from './SetHeat';
+import { getPlayerIdsGivenTeamId, getPlayerGivenId, getActiveTeams } from '@/utils/getUtils';
 
-const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
-  const [teams, setTeams] = useState([]);
-  const [players, setTeamPlayers] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState('');
+const MainJudge = ({ user, parentTeam, parentPlayer, teams, players, time_types, alert }) => {
+  const [teamPlayers, setTeamPlayers] = useState([]);
+  const [selectedTeamId, setSelectedTeamId] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectPlayerString, setSelectPlayerString] = useState('Select Player');
 
-  useEffect(() => {
-    const fetchTeams = async () => {
-      const { data, error } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('is_out', false);
-      if (error) {
-        const err = 'Error fetching teams: ' + error.message;
-        alert.setOpen(true);
-        alert.setSeverity('error');
-        alert.setText(err);
-        console.error(err);
-      } else {
-        setTeams(data);
-      }
-    };
-
-    fetchTeams();
-  }, [alert]);
 
   /**
    * Get current heat
+   * @returns {Promise<Object>} The current heat object
+   * @throws {Error} If there is an error fetching the heat
    */
   const getHeat = async () => {
     const { data, error } = await supabase
@@ -49,10 +32,12 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
       console.error(err);
     }
     return data[0];
-  }
+  };
 
   /**
    * Handle global start timer
+   * @returns {Promise<void>}
+   * @throws {Error} If there is an error starting the timer
    */
   const handleGlobalStart = async () => {
     if (!checkInputs()) return;
@@ -75,7 +60,7 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
       alert.setSeverity('success');
       alert.setText('Global timer started');
     }
-  }
+  };
 
   /**
    * Check all inputs are present
@@ -92,7 +77,7 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
       alert.setSeverity('error');
       alert.setText('Missing player in the top');
       return false;
-    } else if (!selectedTeam) {
+    } else if (!selectedTeamId) {
       alert.setOpen(true);
       alert.setSeverity('error');
       alert.setText('Missing selected team in the bottom');
@@ -104,7 +89,7 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
       return false;
     }
     return true;
-  }
+  };
 
   return (
     <>
@@ -122,7 +107,7 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
       <TeamSelect
         user={user}
         selectedTeamId={selectedTeamId}
-        setSelectedTeam={setSelectedTeam}
+        setSelectedTeam={setSelectedTeamId}
         teams={teams}
         alert={alert}
       />
@@ -143,14 +128,14 @@ const MainJudge = ({ user, parentTeam, parentPlayer, time_types, alert }) => {
         alert={alert}
       />
       <Button
-        variant='contained'
-        color='primary'
+        variant="contained"
+        color="primary"
         onClick={() => handleGlobalStart()}
       >
         Global start
       </Button>
     </>
-  )
-}
+  );
+};
 
 export default MainJudge;

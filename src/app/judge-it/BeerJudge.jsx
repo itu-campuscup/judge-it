@@ -12,7 +12,7 @@ const BeerJudge = ({ players, selectedTeam, selectedPlayer, timeTypes = [], aler
   const [isTiming, setIsTiming] = useState(false);
   const [participantApproaching, setParticipantApproaching] = useState(false);
 
-  const playerName = getPlayerNameGivenId(players, selectedPlayer.id);
+  const playerName = getPlayerNameGivenId(selectedPlayer, players);
 
   /**
    * Create buttons for each time type
@@ -48,32 +48,55 @@ const BeerJudge = ({ players, selectedTeam, selectedPlayer, timeTypes = [], aler
     )
   }, [timeTypes, playerName, participantApproaching]);
 
-  const currentHeat = getCurrentHeatGivenCtx(supabase, alert);
-
   /**
    * Handle button click to start/stop the timers to send a row to the db
    */
   const handleTimeTypeClick = async (timeTypeId) => {
+    const currentHeat = await getCurrentHeatGivenCtx(supabase, alert);
+
+    var isValid = validateInputs();
+    if (!isValid) return;
+
     const { data, error } = await supabase
       .from('time_logs')
-      .insert([{ team_id: selectedTeam, player_id: selectedPlayer, time_type_id: timeTypeId, heat_id: (await currentHeat()).id }]);
+      .insert([{
+        team_id: selectedTeam,
+        player_id: selectedPlayer,
+        time_type_id: timeTypeId,
+        heat_id: currentHeat.id
+      }]);
     if (error) {
       const err = 'Error inserting time log: ' + error.message;
       alert.setOpen(true);
       alert.setSeverity('error');
       alert.setText(err);
-      // setAlertOpen(true);
-      // setAlertSeverity('error');
-      // setAlertText(err);
       console.error(err);
       return;
     }
     alert.setOpen(true);
     alert.setSeverity('success');
     alert.setText('Inserted log of type: ' + timeTypes.find((e) => e.id === timeTypeId).time_eng);
-    // setAlertOpen(true);
-    // setAlertSeverity('success');
     setAlertText('Inserted log of type: ' + timeTypes.find((e) => e.id === timeTypeId).time_eng);
+  }
+
+  /**
+   * Validate inputs before sending to the database
+   * * @returns {boolean} True if inputs are valid, false otherwise
+   */
+  const validateInputs = () => {
+    var errorTxt;
+    
+    if (!selectedTeam) {
+      errorTxt = 'Team has not been selected';
+    } else if (!selectedPlayer) {
+      errorTxt = 'Player has not been selected';
+    } else if (!timeTypes.length) {
+      errorTxt = 'No time types available';
+    }
+    
+    return errorTxt
+      ? (alert.setOpen(true), alert.setSeverity('error'), alert.setText(errorTxt), console.error(errorTxt), false)
+      : true;
   }
 
 
