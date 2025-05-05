@@ -31,7 +31,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 This project and everyone participating in it is governed by the
 [judge-it Code of Conduct](https://github.com/itu-campuscup/judge-it/blob/main/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior
-to the [CampusCup email](mailto:contact@campuscup.dk).
+to the [CampusCup email](mailto:contact@campuscup.dk) or contact the board directly.
 
 ## I Have a Question
 
@@ -148,7 +148,7 @@ If you are part of the CampusCup team please follow the steps below to get start
 
 First you have to get access to the CampusCup Supabase organization.
 You can check this by going to [this link](https://supabase.com/dashboard/org/ldsfnijfktroqlndyxwm/).
-If you don't have access, please contact the CampusCup team.
+If you don't have access, please reach out the CampusCup team via [Email](mailto:contact@campuscup.dk) or to the CampusCup board directly.
 
 Once you have access do the following in the Supabase dashboard:
 
