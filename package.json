@@ -14,7 +14,7 @@
     "@hcaptcha/react-hcaptcha": "^1.12.0",
     "@heroui/button": "^2.2.13",
     "@heroui/react": "^2.7.2",
-    "@heroui/system": "^2.4.10",
+    "@heroui/system": "^2.4.15",
     "@heroui/theme": "^2.4.9",
     "@mui/material": "^6.4.5",
     "@shadcn/ui": "^0.0.4",
