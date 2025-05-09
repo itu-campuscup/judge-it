@@ -54,6 +54,8 @@ const BeerChugger = ({ timeLogs = [], players = [], timeTypes = [], teams = [], 
   }, [processedRankingData]);
 
   useEffect(() => {
+    // Intentional animation cycle: This effect triggers a re-render to animate the ranking data.
+    // The cycle is controlled by `animationCycleKey` and stops when `maxChugTime` or `processedRankingData` changes.
     if (maxChugTime > 0 && processedRankingData.length > 0) {
       const timer = setTimeout(() => {
         setAnimationCycleKey(prevKey => prevKey + 1);

@@ -51,6 +51,8 @@ const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
   }, [processedRankingData]);
 
   useEffect(() => {
+    // Intentional animation cycle: This effect triggers a re-render to animate the ranking data.
+    // The cycle is controlled by `animationCycleKey` and stops when `maxSailTime` or `processedRankingData` changes.
     if (maxSailTime > 0 && processedRankingData.length > 0) {
       const timer = setTimeout(() => {
         setAnimationCycleKey(prevKey => prevKey + 1);

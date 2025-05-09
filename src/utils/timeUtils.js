@@ -1,5 +1,3 @@
-import { act } from "react";
-
 /**
  * Converts a time string to milliseconds.
  * @param {string} time - The time string in the format "HH:MM:SS.mmm".
