@@ -11,6 +11,13 @@ export const timeToMilli = (time) => {
 };
 
 /**
+ * Converts a time in milliseconds to seconds and rounds it down to the nearest integer.
+ * @param {number} time - The time in milliseconds.
+ * @returns {number} The time in seconds.
+ */
+export const milliToSecs = (time) => { return Math.floor(time / 1000); };
+
+/**
  * Formats a time in milliseconds to a string in the format "MM:SS.mmm".
  * @param {number} time - The time in milliseconds.
  * @returns {string} The formatted time string.

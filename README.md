@@ -3,11 +3,11 @@
 [![All Contributors](https://img.shields.io/github/all-contributors/itu-campuscup/judge-it?color=ee8449&style=flat-square)](#contributors)
 [![License](https://img.shields.io/github/license/itu-campuscup/judge-it?color=ee8449&style=flat-square)](./LICENSE)
 
-![CampusCup Logo](https://campuscup.dk/wp-content/uploads/2023/03/Image.png)
+![CampusCup Logo](https://github.com/itu-campuscup/.github/blob/50aaa28abe375ead7588372c5afa0daae36014cf/campus.png?raw=true)
 
 Welcome to **Judge IT**!
 This project was created by the **CampusCup 2024-2025 board** for the 2025 CampusCup event at the IT University of Copenhagen.
-The board will be responsible for the project, while the volunteers are welcome to contribute to the project.
+The board will be responsible for the project, while the volunteers are welcome to contribute.
 
 ## Why create Judge IT?
 

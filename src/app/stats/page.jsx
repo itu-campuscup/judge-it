@@ -5,6 +5,7 @@ import { Container, Box, Typography, AppBar, Toolbar, IconButton, Menu, MenuItem
 import Header from '../components/Header';
 import BeerChugger from './BeerChugger';
 import Sailing from './Sailing';
+import Spinner from './Spinner';
 import { useAuth } from '../../AuthContext';
 import NotLoggedIn from '../components/NotLoggedIn';
 import AlertComponent from '../components/AlertComponent';
@@ -56,6 +57,7 @@ function Stats() {
           >
             <MenuItem onClick={() => handleMenuItemClick('BeerChugger')}>Beer Chugger</MenuItem>
             <MenuItem onClick={() => handleMenuItemClick('Sailing')}>Sailing</MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick('Spinner')}>Spinner</MenuItem>
           </Menu>
           <Typography variant="h6">
             Stats
@@ -72,6 +74,14 @@ function Stats() {
                                               alert={alert}
                                             />}
         {selectedStat === 'Sailing' && <Sailing
+                                          timeLogs={timeLogs}
+                                          players={players}
+                                          timeTypes={timeTypes}
+                                          teams={teams}
+                                          heats={heats}
+                                          alert={alert}
+                                        />}
+        {selectedStat === 'Spinner' && <Spinner
                                           timeLogs={timeLogs}
                                           players={players}
                                           timeTypes={timeTypes}

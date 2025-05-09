@@ -22,10 +22,9 @@ export const filterAndSortTimeLogs = (timeLogs, heats, selectedYear, timeTypeId)
 /**
  * Calculates the chug or sail times for the given logs.
  * @param {Array} logsForHeatsSortByTime - The sorted time logs.
- * @param {Function} getEndTime - The function to get the end time for a log.
  * @returns {Array} The calculated times.
  */
-export const calculateTimes = (logsForHeatsSortByTime, getEndTime) => {
+export const calculateTimes = (logsForHeatsSortByTime) => {
   const times = [];
   const endTimeIds = new Set();
   for (let i = 0; i < logsForHeatsSortByTime.length; i++) {
@@ -45,6 +44,26 @@ export const calculateTimes = (logsForHeatsSortByTime, getEndTime) => {
 };
 
 /**
+ * Get end time of a players activity in a heat.
+ * @param {number} playerId - The player ID.
+ * @param {number} heatId - The heat ID.
+ * @param {number} startIdx - The start index of the given activity.
+ * @param {Array} logsForHeatsSortByTime - The sorted time logs.
+ * @param {Set} endTimeIds - The set of end time IDs.
+ * @returns {string|null} The end time id or null if not found.
+*/
+export const getEndTime = (playerId, heatId, startIdx, logsForHeatsSortByTime, endTimeIds) => {
+  for (let i = startIdx + 1; i < logsForHeatsSortByTime.length; i++) {
+    const curLog = logsForHeatsSortByTime[i];
+    if (curLog.player_id === playerId && curLog.heat_id === heatId && !endTimeIds.has(i)) {
+      endTimeIds.add(i);
+      return curLog.time;
+    }
+  }
+  return null;
+};
+
+/**
  * Generates the bar chart data for the top times.
  * @param {Array} topTimes - The top times.
  * @param {Array} players - The list of players.
@@ -61,3 +80,11 @@ export const generateBarChartData = (topTimes, players, teams, heats) => {
     heatNumber: getHeatNumberGivenId(time.heatId, heats),
   }));
 };
+
+// /**
+//  * Generates n amount of pie chart data for the top times.
+//  * 
+//  */
+// export const generatePieChartData = (topTimes, players, teams, heats) => {
+
+// }
