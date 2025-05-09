@@ -1,72 +1,77 @@
-import { Typography } from '@mui/material';
-import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList } from 'recharts';
+import { Typography, Box, Avatar, Paper, Divider } from '@mui/material';
+import { useState, Fragment, useEffect, useMemo } from 'react'; // Added useEffect, useMemo
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { formatTime, getUniqueYearsGivenHeats } from '../../utils/timeUtils';
-import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
+import { formatTime, getUniqueYearsGivenHeats, milliToSecs } from '../../utils/timeUtils';
+import { filterAndSortTimeLogs, calculateTimes, generateChartableData } from '../../utils/visualizationUtils';
+
+const MEDAL_EMOJIS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
 
 const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heats = [] }) => {
   const [selectedYear, setSelectedYear] = useState('');
+  const [animationCycleKey, setAnimationCycleKey] = useState(0);
 
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
+    setAnimationCycleKey(prev => prev + 1);
   }
 
   const sailingType = timeTypes.find(e => e.time_eng === 'Sail');
   const sailingTypeId = sailingType ? sailingType.id : null;
-
   const uniqueYears = getUniqueYearsGivenHeats(heats);
-
   const logsForHeatsSortByTime = filterAndSortTimeLogs(timeLogs, heats, selectedYear, sailingTypeId);
-
-  const getEndTime = (playerId, heatId, startIdx, logsForHeatsSortByTime, endTimeIds) => {
-    for (let i = startIdx + 1; i < logsForHeatsSortByTime.length; i++) {
-      const curLog = logsForHeatsSortByTime[i];
-      if (curLog.player_id === playerId && curLog.heat_id === heatId && !endTimeIds.has(i)) {
-        endTimeIds.add(i);
-        return curLog.time;
-      }
-    }
-    return null;
-  }
-
-  const sailTimes = calculateTimes(logsForHeatsSortByTime, getEndTime);
-
+  const sailTimes = calculateTimes(logsForHeatsSortByTime);
   const topTimes = sailTimes.slice(0, 5);
+  const sailData = generateChartableData(topTimes, players, teams, heats);
 
-  const barChart = generateBarChartData(topTimes, players, teams, heats);
+  let processedRankingData = [];
+  if (sailData.length > 0) {
+    const bestTime = sailData[0].time;
 
-  const renderCustomLabel = (props) => {
-    const { x, y, width, value, index } = props;
-    const barData = barChart[index];
-    const offset = -10;
-    return (
-      <g transform={`translate(${x + width / 2},${y - 10})`}>
-        <image href={barData.imageUrl} x={-45} y={offset - 100} height='6em' width='6em' />
-        <text x={0} y={offset + 0} textAnchor='middle' dominantBaseline='middle'>{barData.playerName}</text>
-        <text x={0} y={offset + 15} textAnchor='middle' dominantBaseline='middle'>{barData.teamName}</text>
-        <text x={0} y={offset + 35} textAnchor='middle' dominantBaseline='middle'>{barData.heatNumber}</text>
-      </g>
-    )
-  };
+    processedRankingData = sailData.map((item, index) => {
+      const actualTime = item.time;
+      let displayLabel;
 
-  const formatYAxisTick = (tick) => {
-    return formatTime(tick);
+      if (index === 0) {
+        displayLabel = formatTime(actualTime);
+      } else {
+        const timeDifferenceMs = actualTime - bestTime;
+        displayLabel = `+${milliToSecs(timeDifferenceMs, 3)}s`;
+      }
+      return {
+        ...item,
+        actualTime,
+        displayLabel,
+      };
+    });
   }
 
-  const formatTooltip = (value, name, _) => {
-    return [formatTime(value), name];
-  }
+  const maxSailTime = useMemo(() => {
+    if (processedRankingData.length === 0) return 0;
+    return Math.max(...processedRankingData.map(p => p.actualTime || 0));
+  }, [processedRankingData]);
+
+  useEffect(() => {
+    // Intentional animation cycle: This effect triggers a re-render to animate the ranking data.
+    // The cycle is controlled by `animationCycleKey` and stops when `maxSailTime` or `processedRankingData` changes.
+    if (maxSailTime > 0 && processedRankingData.length > 0) {
+      const timer = setTimeout(() => {
+        setAnimationCycleKey(prevKey => prevKey + 1);
+      }, maxSailTime);
+
+      return () => clearTimeout(timer);
+    }
+  }, [maxSailTime, animationCycleKey, processedRankingData.length]);
 
   return (
     <>
-      <Typography variant='h4'>Sailing</Typography>
-      <FormControl fullWidth margin='normal' variant='filled'>
-        <InputLabel id='year-select-label'>Year</InputLabel>
+      <Typography variant='h4' gutterBottom>Sailing Rankings</Typography>
+      <FormControl fullWidth margin='normal' variant='filled' sx={{ mb: 2 }}>
+        <InputLabel id='year-select-sailing-label'>Select Year</InputLabel>
         <Select
-          labelId='year-select-label'
-          id='year-select'
+          labelId='year-select-sailing-label'
+          id='year-select-sailing'
           value={selectedYear}
+          label='Select Year'
           onChange={handleYearChange}
         >
           {uniqueYears.map((year) => (
@@ -74,21 +79,92 @@ const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
           ))}
         </Select>
       </FormControl>
-      <BarChart width={900} height={500} data={barChart}>
-        <CartesianGrid strokeDasharray='3 3' />
-        <XAxis dataKey='name' />
-        <YAxis
-          tickFormatter={formatYAxisTick}
-          reversed={true}
-        />
-        <Tooltip formatter={formatTooltip} />
-        <Legend />
-        <Bar dataKey='time' fill='#8884d8'>
-          <LabelList dataKey='name' content={renderCustomLabel} />
-        </Bar>
-      </BarChart>
+
+      {processedRankingData.length > 0 ? (
+        <Paper elevation={2} sx={{ p: 2 }}>
+          {processedRankingData.map((playerData, index) => (
+            <Fragment key={`${playerData.name || playerData.playerName || index}-${animationCycleKey}`}>
+              <Box sx={{ display: 'flex', alignItems: 'center', p: 2, my: 1 }}>
+                <Typography variant='h6' sx={{ minWidth: '30px', textAlign: 'center', mr: 2 }}>
+                  {MEDAL_EMOJIS[index]}
+                </Typography>
+                {playerData.imageUrl ? (
+                  <Avatar src={playerData.imageUrl} alt={playerData.playerName} sx={{ width: 100, height: 100, mr: 2 }} />
+                ) : (
+                  <Box sx={{ width: 100, height: 100, mr: 2 }} />
+                )}
+                <Box sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>
+                  <Typography variant='h5' component='div' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {playerData.playerName}
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    Team: {playerData.teamName}
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    Heat: {playerData.heatNumber}
+                  </Typography>
+                </Box>
+
+                <Box sx={{
+                  width: '150px',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  flexShrink: 0
+                }}>
+                  {playerData.actualTime > 0 && (
+                    <Box
+                      key={`sail-anim-${playerData.playerName}-${animationCycleKey}`}
+                      aria-label="sailing boat animation"
+                      sx={{
+                        width: '40px',
+                        height: '30px',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        marginRight: 1.5,
+                        '&::after': {
+                          content: '"⛵️"',
+                          fontSize: '1.5rem',
+                          position: 'absolute',
+                          left: 0,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          '@keyframes sailAnimation': {
+                            '0%': { transform: 'translateY(-50%) translateX(-100%)' },
+                            '100%': { transform: 'translateY(-50%) translateX(150%)' },
+                          },
+                          animationName: 'sailAnimation',
+                          animationDuration: `${playerData.actualTime / 1000}s`,
+                          animationTimingFunction: 'linear',
+                          animationIterationCount: 1,
+                          animationFillMode: 'forwards',
+                        },
+                      }}
+                    />
+                  )}
+                  {(playerData.actualTime === 0 || !playerData.actualTime) && (
+                    <Box sx={{ width: '40px', height: '30px', marginRight: 1.5 }} />
+                  )}
+                  <Box sx={{ flexGrow: 1, textAlign: 'right' }}>
+                    <Typography variant='h5' component='div' color={index === 0 ? 'primary' : 'text.primary'}>
+                      {playerData.displayLabel}
+                    </Typography>
+                    {index > 0 && (
+                       <Typography variant='caption' display='block' color='text.secondary'>
+                         ({formatTime(playerData.actualTime)})
+                       </Typography>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+              {index < processedRankingData.length - 1 && <Divider />}
+            </Fragment>
+          ))}
+        </Paper>
+      ) : (
+        <Typography sx={{ mt: 2, textAlign: 'center' }}>No sailing data available for the selected year.</Typography>
+      )}
     </>
-  )
+  );
 };
 
 export default Sailing;
