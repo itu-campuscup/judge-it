@@ -1,4 +1,4 @@
-import { timeToMilli, formatTime, calcTimeDifference } from './timeUtils';
+import { timeToMilli, formatTime, calcTimeDifference, calcRPM } from './timeUtils';
 import { getPlayerNameGivenId, getHeatNumberGivenId, getTeamNameGivenId, getPlayerImageGivenPlayerId } from './getUtils';
 
 /**
@@ -64,14 +64,14 @@ export const getEndTime = (playerId, heatId, startIdx, logsForHeatsSortByTime, e
 };
 
 /**
- * Generates the bar chart data for the top times.
+ * Generates the chart data for the top times.
  * @param {Array} topTimes - The top times.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
  * @param {Array} heats - The list of heats.
  * @returns {Array} The bar chart data.
  */
-export const generateBarChartData = (topTimes, players, teams, heats) => {
+export const generateChartableData = (topTimes, players, teams, heats) => {
   return topTimes.map(time => ({
     time: time.duration,
     imageUrl: getPlayerImageGivenPlayerId(time.playerId, players),
@@ -80,3 +80,23 @@ export const generateBarChartData = (topTimes, players, teams, heats) => {
     heatNumber: getHeatNumberGivenId(time.heatId, heats),
   }));
 };
+
+/**
+ * Generates the chart and RPM data for the top times.
+ * @param {Array} topTimes - The top times.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @param {Array} heats - The list of heats.
+ * @param {number} revolutions - The number of revolutions.
+ * @returns {Array} The chart data with RPM.
+ */
+export const generateRPMData = (topTimes, players, teams, heats, revolutions) => {
+  const chartData = generateChartableData(topTimes, players, teams, heats);
+  return chartData.map(data => {
+    const rpm = calcRPM(revolutions, data.time);
+    return {
+      ...data,
+      rpm: rpm,
+    };
+  });
+}

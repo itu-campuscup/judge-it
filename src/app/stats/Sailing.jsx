@@ -1,66 +1,75 @@
-import { Typography, Box, Avatar, Paper, Divider } from '@mui/material'; // Updated imports
-import { useState, Fragment } from 'react'; // Added Fragment
+import { Typography, Box, Avatar, Paper, Divider } from '@mui/material';
+import { useState, Fragment, useEffect, useMemo } from 'react'; // Added useEffect, useMemo
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { formatTime, getUniqueYearsGivenHeats } from '../../utils/timeUtils';
-import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
+import { formatTime, getUniqueYearsGivenHeats, milliToSecs } from '../../utils/timeUtils';
+import { filterAndSortTimeLogs, calculateTimes, generateChartableData } from '../../utils/visualizationUtils';
 
-const MEDAL_EMOJIS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣']; // Added medal emojis
+const MEDAL_EMOJIS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
 
 const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heats = [] }) => {
   const [selectedYear, setSelectedYear] = useState('');
+  const [animationCycleKey, setAnimationCycleKey] = useState(0);
 
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
+    setAnimationCycleKey(prev => prev + 1);
   }
 
   const sailingType = timeTypes.find(e => e.time_eng === 'Sail');
   const sailingTypeId = sailingType ? sailingType.id : null;
-
   const uniqueYears = getUniqueYearsGivenHeats(heats);
-
   const logsForHeatsSortByTime = filterAndSortTimeLogs(timeLogs, heats, selectedYear, sailingTypeId);
   const sailTimes = calculateTimes(logsForHeatsSortByTime);
   const topTimes = sailTimes.slice(0, 5);
+  const sailData = generateChartableData(topTimes, players, teams, heats);
 
-  // Generate initial data, similar to BeerChugger
-  const initialData = generateBarChartData(topTimes, players, teams, heats);
-
-  // Process data for display, similar to BeerChugger
   let processedRankingData = [];
-  if (initialData.length > 0) {
-    const bestTime = initialData[0].time; // Assuming initialData is sorted
+  if (sailData.length > 0) {
+    const bestTime = sailData[0].time;
 
-    processedRankingData = initialData.map((item, index) => {
+    processedRankingData = sailData.map((item, index) => {
       const actualTime = item.time;
-      let displayValue; // This might not be strictly needed for list view but kept for consistency
       let displayLabel;
 
-      if (index === 0) { // Best player
-        displayValue = 0;
-        displayLabel = formatTime(actualTime); // Show their actual time
+      if (index === 0) {
+        displayLabel = formatTime(actualTime);
       } else {
         const timeDifferenceMs = actualTime - bestTime;
-        displayValue = timeDifferenceMs / 1000; // Difference in seconds
-        displayLabel = `+${(timeDifferenceMs / 1000).toFixed(3)}s`;
+        displayLabel = `+${milliToSecs(timeDifferenceMs, 3)}s`;
       }
       return {
-        ...item, // original data like name, playerName, teamName, imageUrl, etc.
+        ...item,
         actualTime,
-        displayValue,
         displayLabel,
       };
     });
   }
 
+  const maxSailTime = useMemo(() => {
+    if (processedRankingData.length === 0) return 0;
+    return Math.max(...processedRankingData.map(p => p.actualTime || 0));
+  }, [processedRankingData]);
+
+  useEffect(() => {
+    if (maxSailTime > 0 && processedRankingData.length > 0) {
+      const timer = setTimeout(() => {
+        setAnimationCycleKey(prevKey => prevKey + 1);
+      }, maxSailTime);
+
+      return () => clearTimeout(timer);
+    }
+  }, [maxSailTime, animationCycleKey, processedRankingData.length]);
+
   return (
     <>
-      <Typography variant='h4'>Sailing Rankings</Typography>
-      <FormControl fullWidth margin='normal' variant='filled'>
-        <InputLabel id='year-select-label'>Year</InputLabel>
+      <Typography variant='h4' gutterBottom>Sailing Rankings</Typography>
+      <FormControl fullWidth margin='normal' variant='filled' sx={{ mb: 2 }}>
+        <InputLabel id='year-select-sailing-label'>Select Year</InputLabel>
         <Select
-          labelId='year-select-label'
-          id='year-select'
+          labelId='year-select-sailing-label'
+          id='year-select-sailing'
           value={selectedYear}
+          label='Select Year'
           onChange={handleYearChange}
         >
           {uniqueYears.map((year) => (
@@ -72,34 +81,77 @@ const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
       {processedRankingData.length > 0 ? (
         <Paper elevation={2} sx={{ p: 2 }}>
           {processedRankingData.map((playerData, index) => (
-            <Fragment key={playerData.name || index}> {/* Use a unique key */}
+            <Fragment key={`${playerData.name || playerData.playerName || index}-${animationCycleKey}`}>
               <Box sx={{ display: 'flex', alignItems: 'center', p: 2, my: 1 }}>
                 <Typography variant='h6' sx={{ minWidth: '30px', textAlign: 'center', mr: 2 }}>
                   {MEDAL_EMOJIS[index]}
                 </Typography>
-                {playerData.imageUrl && (
+                {playerData.imageUrl ? (
                   <Avatar src={playerData.imageUrl} alt={playerData.playerName} sx={{ width: 100, height: 100, mr: 2 }} />
+                ) : (
+                  <Box sx={{ width: 100, height: 100, mr: 2 }} />
                 )}
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant='h6' component='div'>
+                <Box sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>
+                  <Typography variant='h5' component='div' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {playerData.playerName}
                   </Typography>
-                  <Typography variant='body2' color='text.secondary'>
+                  <Typography variant='body2' color='text.secondary' noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     Team: {playerData.teamName}
                   </Typography>
                   <Typography variant='body2' color='text.secondary'>
                     Heat: {playerData.heatNumber}
                   </Typography>
                 </Box>
-                <Box sx={{ textAlign: 'right' }}>
-                  <Typography variant='h6' component='div' color={index === 0 ? 'primary' : 'text.primary'}>
-                    {playerData.displayLabel}
-                  </Typography>
-                  {index > 0 && (
-                     <Typography variant='caption' display='block' color='text.secondary'>
-                       ({formatTime(playerData.actualTime)})
-                     </Typography>
+
+                <Box sx={{
+                  width: '150px',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  flexShrink: 0
+                }}>
+                  {playerData.actualTime > 0 && (
+                    <Box
+                      key={`sail-anim-${playerData.playerName}-${animationCycleKey}`}
+                      aria-label="sailing boat animation"
+                      sx={{
+                        width: '40px',
+                        height: '30px',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        marginRight: 1.5,
+                        '&::after': {
+                          content: '"⛵️"',
+                          fontSize: '1.5rem',
+                          position: 'absolute',
+                          left: 0,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          '@keyframes sailAnimation': {
+                            '0%': { transform: 'translateY(-50%) translateX(-100%)' },
+                            '100%': { transform: 'translateY(-50%) translateX(150%)' },
+                          },
+                          animationName: 'sailAnimation',
+                          animationDuration: `${playerData.actualTime / 1000}s`,
+                          animationTimingFunction: 'linear',
+                          animationIterationCount: 1,
+                          animationFillMode: 'forwards',
+                        },
+                      }}
+                    />
                   )}
+                  {(playerData.actualTime === 0 || !playerData.actualTime) && (
+                    <Box sx={{ width: '40px', height: '30px', marginRight: 1.5 }} />
+                  )}
+                  <Box sx={{ flexGrow: 1, textAlign: 'right' }}>
+                    <Typography variant='h5' component='div' color={index === 0 ? 'primary' : 'text.primary'}>
+                      {playerData.displayLabel}
+                    </Typography>
+                    {index > 0 && (
+                       <Typography variant='caption' display='block' color='text.secondary'>
+                         ({formatTime(playerData.actualTime)})
+                       </Typography>
+                    )}
+                  </Box>
                 </Box>
               </Box>
               {index < processedRankingData.length - 1 && <Divider />}

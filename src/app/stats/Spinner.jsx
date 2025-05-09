@@ -1,7 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import { Typography, FormControl, InputLabel, Select, MenuItem, Box, Avatar, Paper, Divider } from '@mui/material';
-import { filterAndSortTimeLogs, calculateTimes, generateBarChartData } from '../../utils/chartUtils';
-import { milliToSecs, getUniqueYearsGivenHeats } from '../../utils/timeUtils';
+import { filterAndSortTimeLogs, calculateTimes, generateChartableData, generateRPMData } from '../../utils/visualizationUtils';
+import { milliToSecs, getUniqueYearsGivenHeats, calcRPM } from '../../utils/timeUtils';
 
 const REVOLUTIONS = 10;
 const MEDAL_EMOJIS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
@@ -15,34 +15,24 @@ const Spinner = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
 
   const spinnerType = timeTypes.find(timeType => timeType.time_eng === 'Spin');
   const spinnerTypeId = spinnerType ? spinnerType.id : null;
-
   const uniqueYears = getUniqueYearsGivenHeats(heats);
   const logsForHeatsSortByTime = filterAndSortTimeLogs(timeLogs, heats, selectedYear, spinnerTypeId);
   const spinTimes = calculateTimes(logsForHeatsSortByTime);
   const topSpinTimes = spinTimes.slice(0, 5);
-
-  const chartData = generateBarChartData(topSpinTimes, players, teams, heats);
-
-  const rpmData = chartData.map(data => {
-    const rpm = data.time > 0 ? (REVOLUTIONS / milliToSecs(data.time)) * 60 : 0;
-    return {
-      ...data,
-      actualRpm: rpm,
-    };
-  });
+  const rpmData = generateRPMData(topSpinTimes, players, teams, heats, REVOLUTIONS);
 
   let processedRankingData = [];
   if (rpmData.length > 0) {
-    const sortedRpmData = [...rpmData].sort((a, b) => b.actualRpm - a.actualRpm);
-    const bestRpm = sortedRpmData[0].actualRpm;
+    const sortedRpmData = [...rpmData].sort((a, b) => b.rpm - a.rpm);
+    const bestRpm = sortedRpmData[0].rpm;
 
     processedRankingData = sortedRpmData.map((spinnerData, index) => {
       let displayRpmLabel;
 
       if (index === 0) {
-        displayRpmLabel = `${Math.round(spinnerData.actualRpm)} RPM`;
+        displayRpmLabel = `${Math.round(spinnerData.rpm)} RPM`;
       } else {
-        const difference = bestRpm - spinnerData.actualRpm;
+        const difference = bestRpm - spinnerData.rpm;
         displayRpmLabel = `-${Math.round(difference)} RPM`;
       }
       return {
@@ -85,10 +75,10 @@ const Spinner = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
                   {MEDAL_EMOJIS[index]}
                 </Typography>
                 {playerData.imageUrl && (
-                  <Avatar src={playerData.imageUrl} alt={playerData.playerName} sx={{ width: 100, height: 100, mr: 2 }} />
+                  <Avatar src={playerData.imageUrl} alt={playerData.playerName} sx={{ width: 56, height: 56, mr: 2 }} />
                 )}
                 <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant='h6' component='div'>
+                  <Typography variant='h5' component='div'>
                     {playerData.playerName}
                   </Typography>
                   <Typography variant='body2' color='text.secondary'>
@@ -98,15 +88,38 @@ const Spinner = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
                     Heat: {playerData.heatNumber}
                   </Typography>
                 </Box>
-                <Box sx={{ textAlign: 'right' }}>
-                  <Typography variant='h6' component='div' color={index === 0 ? 'primary' : 'text.primary'}>
-                    {playerData.displayRpmLabel}
-                  </Typography>
-                  {index > 0 && (
-                     <Typography variant='caption' display='block' color='text.secondary'>
-                       ({Math.round(playerData.actualRpm)} RPM)
-                     </Typography>
+                <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
+                  {playerData.rpm > 0 && (
+                    <Typography
+                      component="span"
+                      aria-label="spinning gear icon"
+                      sx={{
+                        fontSize: '2.5rem',
+                        marginRight: 3,
+                        display: 'inline-block',
+                        '@keyframes spinAnimation': {
+                          '0%': { transform: 'rotate(0deg)' },
+                          '100%': { transform: 'rotate(-360deg)' },
+                        },
+                        animation: `spinAnimation ${60 / playerData.rpm}s linear infinite`,
+                      }}
+                    >
+                      🌀
+                    </Typography>
                   )}
+                  {(playerData.rpm === 0 || !playerData.rpm) && (
+                     <Box sx={{ width: '2.5rem', height: '2.5rem', marginRight: 1.5, display: 'inline-block' }} />
+                  )}
+                  <Box>
+                    <Typography variant='h5' component='div' color={index === 0 ? 'primary' : 'text.primary'}>
+                      {playerData.displayRpmLabel}
+                    </Typography>
+                    {index > 0 && (
+                       <Typography variant='caption' display='block' color='text.secondary'>
+                         ({Math.round(playerData.rpm)} RPM)
+                       </Typography>
+                    )}
+                  </Box>
                 </Box>
               </Box>
               {index < processedRankingData.length - 1 && <Divider />}

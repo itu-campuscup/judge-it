@@ -1,3 +1,5 @@
+import { act } from "react";
+
 /**
  * Converts a time string to milliseconds.
  * @param {string} time - The time string in the format "HH:MM:SS.mmm".
@@ -13,9 +15,31 @@ export const timeToMilli = (time) => {
 /**
  * Converts a time in milliseconds to seconds and rounds it down to the nearest integer.
  * @param {number} time - The time in milliseconds.
+ * @param {number} fixed - The number of decimal places to round to. If -1 or undefined, returns the actual time.
  * @returns {number} The time in seconds.
  */
-export const milliToSecs = (time) => { return Math.floor(time / 1000); };
+export const milliToSecs = (time, fixed) => {
+  const actualTime = time / 1000;
+  if (fixed === -1 || fixed === undefined) {
+    return actualTime;
+  }
+  return fixed < 0 ? Math.floor(actualTime) : actualTime.toFixed(fixed);
+};
+
+/**
+ * Converts revolutions and time in milliseconds to RPM.
+ * @param {number} revolutions - The number of revolutions.
+ * @param {number} time - The time in milliseconds.
+ * @param {number} fixed - The number of decimal places to round to. If -1 or undefined, returns the actual RPM.
+ * @returns {number} The RPM.
+ */
+export const calcRPM = (revolutions, time, fixed) => {
+  const actualRPM = revolutions / milliToSecs(time, -1) * 60;
+  if (fixed === -1 || fixed === undefined) {
+    return actualRPM;
+  }
+  return fixed < 0 ? Math.floor(actualRPM) : actualRPM.toFixed(fixed);
+};
 
 /**
  * Formats a time in milliseconds to a string in the format "MM:SS.mmm".
