@@ -107,7 +107,7 @@ const Sailing = ({ timeLogs = [], players = [], timeTypes = [], teams = [], heat
           ))}
         </Paper>
       ) : (
-        <Typography sx={{ mt: 2, textAlign: 'center' }}>No beer chugging data available for the selected year.</Typography>
+        <Typography sx={{ mt: 2, textAlign: 'center' }}>No sailing data available for the selected year.</Typography>
       )}
     </>
   );

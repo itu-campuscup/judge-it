@@ -80,11 +80,3 @@ export const generateBarChartData = (topTimes, players, teams, heats) => {
     heatNumber: getHeatNumberGivenId(time.heatId, heats),
   }));
 };
-
-// /**
-//  * Generates n amount of pie chart data for the top times.
-//  * 
-//  */
-// export const generatePieChartData = (topTimes, players, teams, heats) => {
-
-// }
