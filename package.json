@@ -20,7 +20,7 @@
     "@shadcn/ui": "^0.0.4",
     "@supabase/supabase-js": "^2.48.1",
     "framer-motion": "^12.4.7",
-    "next": "15.1.7",
+    "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hcaptcha": "^0.1.1",
