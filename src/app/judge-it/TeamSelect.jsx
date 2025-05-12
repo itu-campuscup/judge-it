@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import { getActiveTeams } from "@/utils/getUtils";
+import { getActiveTeams } from '@/utils/getUtils';
 
 /**
  * Show a dropdown to select an available team
