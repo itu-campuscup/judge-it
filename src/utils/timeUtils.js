@@ -1,3 +1,5 @@
+import { REVOLUTIONS } from './constants';
+
 /**
  * Converts a time string to milliseconds.
  * @param {string} time - The time string in the format "HH:MM:SS.mmm".
@@ -25,14 +27,13 @@ export const milliToSecs = (time, fixed) => {
 };
 
 /**
- * Converts revolutions and time in milliseconds to RPM.
- * @param {number} revolutions - The number of revolutions.
+ * Converts time in milliseconds to RPM.
  * @param {number} time - The time in milliseconds.
  * @param {number} fixed - The number of decimal places to round to. If -1 or undefined, returns the actual RPM.
  * @returns {number} The RPM.
  */
-export const calcRPM = (revolutions, time, fixed) => {
-  const actualRPM = revolutions / milliToSecs(time, -1) * 60;
+export const calcRPM = (time, fixed) => {
+  const actualRPM = REVOLUTIONS / milliToSecs(time, -1) * 60;
   if (fixed === -1 || fixed === undefined) {
     return actualRPM;
   }

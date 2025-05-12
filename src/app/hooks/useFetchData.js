@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../../SupabaseClient';
+import { useEffect, useState } from "react";
+import { supabase } from "../../SupabaseClient";
 
 /**
  * Hook to fetch data from db and listen for changes
@@ -12,87 +12,77 @@ const useFetchData = () => {
   const [timeTypes, setTimeTypes] = useState([]);
   const [timeLogs, setTimeLogs] = useState([]);
   const [alertOpen, setAlertOpen] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState('error');
-  const [alertText, setAlertText] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState("error");
+  const [alertText, setAlertText] = useState("");
 
   useEffect(() => {
     const fetchTimeLogs = async () => {
-      let { data, error } = await supabase
-        .from('time_logs')
-        .select('*');
+      let { data, error } = await supabase.from("time_logs").select("*");
       if (error) {
-        const err = 'Error fetching time logs: ' + error.message;
+        const err = "Error fetching time logs: " + error.message;
         setAlertOpen(true);
-        setAlertSeverity('error');
+        setAlertSeverity("error");
         setAlertText(err);
         console.error(err);
       } else {
         setTimeLogs(data);
-        console.log('time logs ', data);
+        console.log("time logs ", data);
       }
     };
 
     const fetchPlayers = async () => {
-      let { data, error } = await supabase
-        .from('players')
-        .select('*');
+      let { data, error } = await supabase.from("players").select("*");
       if (error) {
-        const err = 'Error fetching players: ' + error.message;
+        const err = "Error fetching players: " + error.message;
         setAlertOpen(true);
-        setAlertSeverity('error');
+        setAlertSeverity("error");
         setAlertText(err);
         console.error(err);
       } else {
         setPlayers(data);
-        console.log('players ', data);
+        console.log("players ", data);
       }
     };
 
     const fetchHeats = async () => {
-      let { data, error } = await supabase
-        .from('heats')
-        .select('*');
+      let { data, error } = await supabase.from("heats").select("*");
       if (error) {
-        const err = 'Error fetching heats: ' + error.message;
+        const err = "Error fetching heats: " + error.message;
         setAlertOpen(true);
-        setAlertSeverity('error');
+        setAlertSeverity("error");
         setAlertText(err);
         console.error(err);
       } else {
         setHeats(data);
-        console.log('heats ', data);
+        console.log("heats ", data);
       }
     };
 
     const fetchTeams = async () => {
-      let { data, error } = await supabase
-        .from('teams')
-        .select('*');
+      let { data, error } = await supabase.from("teams").select("*");
       if (error) {
-        const err = 'Error fetching teams: ' + error.message;
+        const err = "Error fetching teams: " + error.message;
         setAlertOpen(true);
-        setAlertSeverity('error');
+        setAlertSeverity("error");
         setAlertText(err);
         console.error(err);
       } else {
         setTeams(data);
-        console.log('teams ', data);
+        console.log("teams ", data);
       }
     };
 
     const fetchTimeTypes = async () => {
-      let { data, error } = await supabase
-        .from('time_types')
-        .select('*');
+      let { data, error } = await supabase.from("time_types").select("*");
       if (error) {
-        const err = 'Error fetching time types: ' + error.message;
+        const err = "Error fetching time types: " + error.message;
         setAlertOpen(true);
-        setAlertSeverity('error');
+        setAlertSeverity("error");
         setAlertText(err);
         console.error(err);
       } else {
         setTimeTypes(data);
-        console.log('time types', data);
+        console.log("time types", data);
       }
     };
 
@@ -104,28 +94,48 @@ const useFetchData = () => {
 
     // Realtime listeners
     const playersListener = supabase
-      .channel('public:players')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, fetchPlayers)
+      .channel("public:players")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "players" },
+        fetchPlayers
+      )
       .subscribe();
 
     const heatsListener = supabase
-      .channel('public:heats')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'heats' }, fetchHeats)
+      .channel("public:heats")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "heats" },
+        fetchHeats
+      )
       .subscribe();
 
     const teamsListener = supabase
-      .channel('public:teams')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, fetchTeams)
+      .channel("public:teams")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "teams" },
+        fetchTeams
+      )
       .subscribe();
 
     const timeTypesListener = supabase
-      .channel('public:time_types')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_types' }, fetchTimeTypes)
+      .channel("public:time_types")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "time_types" },
+        fetchTimeTypes
+      )
       .subscribe();
 
     const timeLogsListener = supabase
-      .channel('public:time_logs')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_logs' }, fetchTimeLogs)
+      .channel("public:time_logs")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "time_logs" },
+        fetchTimeLogs
+      )
       .subscribe();
 
     return () => {
@@ -144,7 +154,7 @@ const useFetchData = () => {
     setOpen: setAlertOpen,
     setSeverity: setAlertSeverity,
     setText: setAlertText,
-  }
+  };
 
   return {
     players,
