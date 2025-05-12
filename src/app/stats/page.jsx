@@ -1,21 +1,31 @@
-'use client';
+"use client";
 
-import { useState } from 'react';;
-import { Container, Box, Typography, AppBar, Toolbar, IconButton, Menu, MenuItem, Paper } from '@mui/material'; // Added Paper
-import MenuIcon from '@mui/icons-material/Menu';
-import Header from '../components/Header';
-import BeerChugger from './BeerChugger';
-import Sailing from './Sailing';
-import Spinner from './Spinner';
-import { useAuth } from '../../AuthContext';
-import NotLoggedIn from '../components/NotLoggedIn';
-import AlertComponent from '../components/AlertComponent';
-import useFetchData from '../hooks/useFetchData';
+import { useState } from "react";
+import {
+  Container,
+  Box,
+  Typography,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Paper,
+} from "@mui/material"; // Added Paper
+import MenuIcon from "@mui/icons-material/Menu";
+import Header from "../components/Header";
+import BeerChugger from "./BeerChugger";
+import Sailing from "./Sailing";
+import Spinner from "./Spinner";
+import { useAuth } from "../../AuthContext";
+import NotLoggedIn from "../components/NotLoggedIn";
+import AlertComponent from "../components/AlertComponent";
+import useFetchData from "../hooks/useFetchData";
 
 function Stats() {
   const { user } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedStat, setSelectedStat] = useState('BeerChugger');
+  const [selectedStat, setSelectedStat] = useState("BeerChugger");
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -30,14 +40,7 @@ function Stats() {
     handleMenuClose();
   };
 
-  const {
-    players,
-    heats,
-    teams,
-    timeTypes,
-    timeLogs,
-    alert,
-  } = useFetchData();
+  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
 
   if (!user) {
     return <NotLoggedIn />;
@@ -52,11 +55,11 @@ function Stats() {
       heats,
     };
     switch (selectedStat) {
-      case 'BeerChugger':
+      case "BeerChugger":
         return <BeerChugger {...commonProps} />;
-      case 'Sailing':
+      case "Sailing":
         return <Sailing {...commonProps} />;
-      case 'Spinner':
+      case "Spinner":
         return <Spinner {...commonProps} />;
       default:
         return null;
@@ -66,7 +69,9 @@ function Stats() {
   return (
     <Container maxWidth="maxWidth">
       <Header user={user} />
-      <AppBar position="static" sx={{ mb: 3, backgroundColor: 'primary.main' }}> {/* Added margin-bottom and a distinct background */}
+      <AppBar position="static" sx={{ mb: 3, backgroundColor: "primary.main" }}>
+        {" "}
+        {/* Added margin-bottom and a distinct background */}
         <Toolbar>
           <IconButton
             edge="start"
@@ -86,26 +91,45 @@ function Stats() {
             onClose={handleMenuClose}
             keepMounted
             anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
+              vertical: "bottom",
+              horizontal: "left",
             }}
             transformOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
+              vertical: "top",
+              horizontal: "left",
             }}
           >
-            <MenuItem onClick={() => handleMenuItemClick('BeerChugger')} selected={selectedStat === 'BeerChugger'}>Beer Chugger</MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick('Sailing')} selected={selectedStat === 'Sailing'}>Sailing</MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick('Spinner')} selected={selectedStat === 'Spinner'}>Spinner</MenuItem>
+            <MenuItem
+              onClick={() => handleMenuItemClick("BeerChugger")}
+              selected={selectedStat === "BeerChugger"}
+            >
+              Beer Chugger
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleMenuItemClick("Sailing")}
+              selected={selectedStat === "Sailing"}
+            >
+              Sailing
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleMenuItemClick("Spinner")}
+              selected={selectedStat === "Spinner"}
+            >
+              Spinner
+            </MenuItem>
           </Menu>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}> {/* Added component="div" and flexGrow */}
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            {" "}
+            {/* Added component="div" and flexGrow */}
             {selectedStat} Stats {/* Display the name of the selected stat */}
           </Typography>
         </Toolbar>
       </AppBar>
 
       {/* Main content area for stats */}
-      <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: 2, mb: 2 }}> {/* Added Paper for better visual grouping and padding */}
+      <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: 2, mb: 2 }}>
+        {" "}
+        {/* Added Paper for better visual grouping and padding */}
         {renderSelectedStat()}
       </Paper>
 

@@ -1,4 +1,4 @@
-import { REVOLUTIONS } from './constants';
+import { REVOLUTIONS } from "./constants";
 
 /**
  * Converts a time string to milliseconds.
@@ -6,10 +6,15 @@ import { REVOLUTIONS } from './constants';
  * @returns {number} The time in milliseconds.
  */
 export const timeToMilli = (time) => {
-  const [hours, minutes, seconds] = time.split(':');
-  const [secs, millis] = seconds.split('.');
-  const millisValue = parseInt(millis ? millis.substring(0, 3) : '0');
-  return (parseInt(hours) * 60 * 60 * 1000) + (parseInt(minutes) * 60 * 1000) + (parseInt(secs) * 1000) + millisValue;
+  const [hours, minutes, seconds] = time.split(":");
+  const [secs, millis] = seconds.split(".");
+  const millisValue = parseInt(millis ? millis.substring(0, 3) : "0");
+  return (
+    parseInt(hours) * 60 * 60 * 1000 +
+    parseInt(minutes) * 60 * 1000 +
+    parseInt(secs) * 1000 +
+    millisValue
+  );
 };
 
 /**
@@ -33,7 +38,7 @@ export const milliToSecs = (time, fixed) => {
  * @returns {number} The RPM.
  */
 export const calcRPM = (time, fixed) => {
-  const actualRPM = REVOLUTIONS / milliToSecs(time, -1) * 60;
+  const actualRPM = (REVOLUTIONS / milliToSecs(time, -1)) * 60;
   if (fixed === -1 || fixed === undefined) {
     return actualRPM;
   }
@@ -50,7 +55,10 @@ export const formatTime = (time) => {
   const minutes = Math.floor(ct / 60);
   const seconds = Math.floor(ct % 60);
   const milliseconds = Math.floor((ct % 1) * 1000);
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}:${String(milliseconds).padStart(3, "0")}`;
 };
 
 /**
@@ -72,5 +80,5 @@ export const calcTimeDifference = (startTime, endTime) => {
  */
 export const getUniqueYearsGivenHeats = (heats) => {
   // return [...new Set(heats.map(heat => new Date(heats.date).getFullYear()))];
-  return [...new Set(heats.map(heat => new Date(heat.date).getFullYear()))];
+  return [...new Set(heats.map((heat) => new Date(heat.date).getFullYear()))];
 };

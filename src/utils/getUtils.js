@@ -5,8 +5,8 @@
  * @returns {string} The player name.
  */
 export const getPlayerNameGivenId = (id, players) => {
-  const player = players.find(p => p.id === id);
-  return player ? player.name : '';
+  const player = players.find((p) => p.id === id);
+  return player ? player.name : "";
 };
 
 /**
@@ -16,8 +16,8 @@ export const getPlayerNameGivenId = (id, players) => {
  * @returns {string} The heat number.
  */
 export const getHeatNumberGivenId = (id, heats) => {
-  const heat = heats.find(h => h.id === id);
-  return heat ? heat.heat : '';
+  const heat = heats.find((h) => h.id === id);
+  return heat ? heat.heat : "";
 };
 
 /**
@@ -27,8 +27,8 @@ export const getHeatNumberGivenId = (id, heats) => {
  * @returns {string} The team name.
  */
 export const getTeamNameGivenId = (id, teams) => {
-  const team = teams.find(t => t.id === id);
-  return team ? team.name : '';
+  const team = teams.find((t) => t.id === id);
+  return team ? team.name : "";
 };
 
 /**
@@ -38,8 +38,8 @@ export const getTeamNameGivenId = (id, teams) => {
  * @returns {string} The player image URL.
  */
 export const getPlayerImageGivenPlayerId = (id, players) => {
-  const player = players.find(p => p.id === id);
-  return player ? player.image_url : '';
+  const player = players.find((p) => p.id === id);
+  return player ? player.image_url : "";
 };
 
 /**
@@ -48,7 +48,7 @@ export const getPlayerImageGivenPlayerId = (id, players) => {
  * @returns {Array} The list of active teams.
  */
 export const getActiveTeams = (teams) => {
-  return teams.filter(t => t.is_out === false);
+  return teams.filter((t) => t.is_out === false);
 };
 
 /**
@@ -58,7 +58,7 @@ export const getActiveTeams = (teams) => {
  * @returns {Object} The player.
  */
 export const getPlayerGivenId = (id, players) => {
-  return players.find(p => p.id === id);
+  return players.find((p) => p.id === id);
 };
 
 /**
@@ -68,8 +68,13 @@ export const getPlayerGivenId = (id, players) => {
  * @returns {Array} The list of players.
  */
 export const getPlayerIdsGivenTeamId = (id, teams) => {
-  const team = teams.filter(t => t.id === id)[0];
-  return [team.player_1_id, team.player_2_id, team.player_3_id, team.player_4_id].filter(id => id !== null && id !== undefined);
+  const team = teams.filter((t) => t.id === id)[0];
+  return [
+    team.player_1_id,
+    team.player_2_id,
+    team.player_3_id,
+    team.player_4_id,
+  ].filter((id) => id !== null && id !== undefined);
 };
 
 /**
@@ -80,14 +85,14 @@ export const getPlayerIdsGivenTeamId = (id, teams) => {
  */
 export const getCurrentHeatGivenCtx = async (supabase, alert) => {
   const { data, error } = await supabase
-    .from('heats')
-    .select('*')
-    .eq('is_current', true);
-    
+    .from("heats")
+    .select("*")
+    .eq("is_current", true);
+
   if (error) {
-    const err = 'Error fetching current heat: ' + error.message;
+    const err = "Error fetching current heat: " + error.message;
     alert.setOpen(true);
-    alert.setSeverity('error');
+    alert.setSeverity("error");
     alert.setText(err);
     console.error(err);
   }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../SupabaseClient";
 import {
   Container,
   Box,
@@ -32,24 +31,6 @@ function Judge() {
   const [teamPlayers, setTeamPlayers] = useState([]);
 
   const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
-
-  /**
-   * Handle button click to start/stop the timers to send a row to the db
-   *
-   */
-  // const handleTimeTypeClick = async (timeTypeId) => {
-  //   if (timeTypeId === -1) {
-  //     timeTypeId = timeTypes.find((e) => e.time_eng === 'Sail').id;
-  //   }
-  //   const { data, error } = await supabase
-  //     .from('time_logs')
-  //     .insert([{ team_id: selectedTeamId, player_id: selectedPlayer, time_type_id: timeTypeId, is_start_time: true }]);
-  //   if (error) {
-  //     console.error('Error inserting time log:', error.message);
-  //   } else {
-  //     console.log('Inserted time log:', data);
-  //   }
-  // }
 
   if (!user) {
     return <NotLoggedIn />;
