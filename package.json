@@ -16,7 +16,7 @@
     "@heroui/react": "^2.7.2",
     "@heroui/system": "^2.4.15",
     "@heroui/theme": "^2.4.9",
-    "@mui/material": "^6.4.5",
+    "@mui/material": "^7.1.0",
     "@shadcn/ui": "^0.0.4",
     "@supabase/supabase-js": "^2.49.4",
     "framer-motion": "^12.4.7",
