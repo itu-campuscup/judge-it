@@ -7,34 +7,21 @@ import { supabase } from '../SupabaseClient';
 import { useAuth } from '../AuthContext';
 import { Button, TextField, Box, Typography, Card, CardContent, Container } from '@mui/material';
 import Header from './components/Header';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
 import AlertComponent from './components/AlertComponent';
 
 function Home() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [hcaptchaToken, setHcaptchaToken] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState('error');
   const [alertText, setAlertText] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (process.env.NODE_ENV !== 'development' && !hcaptchaToken) {
-      const err = 'Please complete the captcha';
-      setAlertOpen(true);
-      setAlertSeverity('error');
-      setAlertText(err);
-      console.error('Please complete the captcha');
-      return;
-    }
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password,
-      options: {
-        captchaToken: process.env.NODE_ENV === 'development' ? 'dummy-token' : hcaptchaToken,
-      },
+      password
     });
     if (error) {
       const err = 'Error logging in: ' + error.message;
@@ -45,10 +32,13 @@ function Home() {
     }
   };
 
-  const handleHcaptchaVerify = (token) => {
-    console.log('hCaptcha token:', token);
-    setHcaptchaToken(token);
-  };
+  if (loading) {
+    return (
+      <Container>
+        <Typography variant='h5'>Loading...</Typography>
+      </Container>
+    );
+  }
 
   if (user) {
     return (
@@ -105,12 +95,6 @@ function Home() {
                 fullWidth
                 margin='normal'
               />
-              {process.env.NODE_ENV !== 'development' && (
-                <HCaptcha
-                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
-                  onVerify={handleHcaptchaVerify}
-                />
-              )}
               <Button type='submit' variant='contained' color='primary'>Login</Button>
             </form>
           </CardContent>

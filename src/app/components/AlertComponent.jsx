@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Alert, Snackbar } from '@mui/material';
+import { useEffect } from "react";
+import { Alert, Snackbar } from "@mui/material";
 
 const AlertComponent = ({ severity, text, open, setOpen }) => {
   useEffect(() => {
@@ -7,16 +7,16 @@ const AlertComponent = ({ severity, text, open, setOpen }) => {
       const playSound = () => {
         let audio;
         switch (severity) {
-          case 'success':
-            audio = new Audio('/sounds/confirmation.mp3');
+          case "success":
+            audio = new Audio("/sounds/confirmation.mp3");
             break;
-          case 'error':
-          case 'warning':
-            audio = new Audio('/sounds/error.mp3');
+          case "error":
+          case "warning":
+            audio = new Audio("/sounds/error.mp3");
             break;
         }
         audio.play();
-      }
+      };
 
       // playSound();
 
@@ -30,10 +30,15 @@ const AlertComponent = ({ severity, text, open, setOpen }) => {
   return (
     <Snackbar
       open={open}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
       onClose={() => setOpen(false)}
     >
-      <Alert onClose={() => setOpen(false)} variant='filled' severity={severity} sx={{ width: '100%' }}>
+      <Alert
+        onClose={() => setOpen(false)}
+        variant="filled"
+        severity={severity}
+        sx={{ width: "100%" }}
+      >
         {text}
       </Alert>
     </Snackbar>
