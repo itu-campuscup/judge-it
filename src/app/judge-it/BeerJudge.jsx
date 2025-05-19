@@ -4,6 +4,7 @@ import AlertComponent from "../components/AlertComponent";
 import { Button, Box } from "@mui/material";
 import styles from "@/app/page.module.css";
 import { getPlayerNameGivenId, getCurrentHeatGivenCtx } from "@/utils/getUtils";
+import { TIME_LOGS_TABLE, TIME_TYPE_SAIL, TIME_TYPE_BEER, TIME_TYPE_SPIN } from "@/utils/constants";
 
 const BeerJudge = ({
   players,
@@ -12,9 +13,7 @@ const BeerJudge = ({
   timeTypes = [],
   alert,
 }) => {
-  // const [alertOpen, setAlertOpen] = useState(false);
-  // const [alertSeverity, setAlertSeverity] = useState('error');
-  // const [alertText, setAlertText] = useState('');
+
   const [isTiming, setIsTiming] = useState(false);
   const [participantApproaching, setParticipantApproaching] = useState(false);
 
@@ -38,9 +37,9 @@ const BeerJudge = ({
       }${playerName} ${timeType.time_eng}`;
 
       const text = (name) => {
-        if (name === "Sail") return sailingText;
-        if (name === "Beer") return beerText;
-        if (name === "Spin") return spinText;
+        if (name === TIME_TYPE_SAIL) return sailingText;
+        if (name === TIME_TYPE_BEER) return beerText;
+        if (name === TIME_TYPE_SPIN) return spinText;
         setAlertOpen(true);
         setAlertSeverity("error");
         setAlertText("Unknown time type");
@@ -72,7 +71,7 @@ const BeerJudge = ({
     var isValid = validateInputs();
     if (!isValid) return;
 
-    const { data, error } = await supabase.from("time_logs").insert([
+    const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: selectedTeam,
         player_id: selectedPlayer,

@@ -10,7 +10,7 @@ import {
   RadioGroup,
   FormControlLabel,
 } from "@mui/material";
-import { useAuth } from "../../AuthContext";
+import { useAuth } from "@/AuthContext";
 import styles from "../page.module.css";
 import TeamSelect from "./TeamSelect";
 import PlayerSelect from "./PlayerSelect";
@@ -21,6 +21,7 @@ import BeerJudge from "./BeerJudge";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchData from "../hooks/useFetchData";
+import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 
 function Judge() {
   const { user } = useAuth();
@@ -45,17 +46,17 @@ function Judge() {
           <Typography>Judge type</Typography>
           <RadioGroup row onChange={(e) => setJudgeType(e.target.value)}>
             <FormControlLabel
-              value="main"
+              value={MAIN_JUDGE}
               control={<Radio />}
               label="Participants main"
             />
             <FormControlLabel
-              value="participants"
+              value={PARTICIPANTS_JUDGE}
               control={<Radio />}
               label="Participants side"
             />
             <FormControlLabel
-              value="beer"
+              value={BEER_JUDGE}
               control={<Radio />}
               label="Beer side"
             />
@@ -95,7 +96,7 @@ function Judge() {
          * Loads participants.jsx if judgeType is participants side
          * Loads beer.jsx if judgeType is beer side
          */}
-        {judgeType === "main" && (
+        {judgeType === MAIN_JUDGE && (
           <MainJudge
             user={user}
             parentTeam={selectedTeamId}
@@ -106,14 +107,15 @@ function Judge() {
             alert={alert}
           />
         )}
-        {judgeType === "participants" && (
+        {judgeType === PARTICIPANTS_JUDGE && (
           <ParticipantsJudge
             selectedTeam={selectedTeamId}
             selectedPlayer={selectedPlayer}
             timeTypes={timeTypes}
+            players={players}
           />
         )}
-        {judgeType === "beer" && (
+        {judgeType === BEER_JUDGE && (
           <BeerJudge
             players={players}
             selectedTeam={selectedTeamId}

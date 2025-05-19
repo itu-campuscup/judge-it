@@ -5,6 +5,8 @@ import { Button } from "@mui/material";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import SetHeat from "./SetHeat";
+import { getCurrentHeatGivenCtx } from "@/utils/getUtils";
+import { TIME_TYPE_SAIL, TIME_LOGS_TABLE } from "@/utils/constants";
 
 const MainJudge = ({
   user,
@@ -20,25 +22,7 @@ const MainJudge = ({
   const [selectedPlayer, setSelectedPlayer] = useState("");
   const [selectPlayerString, setSelectPlayerString] = useState("Select Player");
 
-  /**
-   * Get current heat
-   * @returns {Promise<Object>} The current heat object
-   * @throws {Error} If there is an error fetching the heat
-   */
-  const getHeat = async () => {
-    const { data, error } = await supabase
-      .from("heats")
-      .select("*")
-      .eq("is_current", true);
-    if (error) {
-      const err = "Error fetching current heat: " + error.message;
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText(err);
-      console.error(err);
-    }
-    return data[0];
-  };
+  const currentHeat = getCurrentHeatGivenCtx(supabase, alert);
 
   /**
    * Handle global start timer
@@ -47,9 +31,9 @@ const MainJudge = ({
    */
   const handleGlobalStart = async () => {
     if (!checkInputs()) return;
-    const time_type_id = time_types.find((e) => e.time_eng === "Sail").id;
-    const heatId = (await getHeat()).id;
-    const { data, error } = await supabase.from("time_logs").insert([
+    const time_type_id = time_types.find((e) => e.time_eng === TIME_TYPE_SAIL).id;
+    const heatId = currentHeat.id;
+    const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: parentTeam,
         player_id: parentPlayer,

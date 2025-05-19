@@ -3,39 +3,20 @@ import { supabase } from "@/SupabaseClient";
 import { Button, Box } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import styles from "@/app/page.module.css";
+import { getPlayerGivenId } from "@/utils/getUtils";
+import { HEATS_TABLE, TIME_LOGS_TABLE, TIME_TYPE_SAIL } from "@/utils/constants";
 
 const ParticipantsJudge = ({
   selectedTeam,
   selectedPlayer,
   timeTypes = [],
+  players = [],
 }) => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("error");
   const [alertText, setAlertText] = useState("");
-  const [playerName, setPlayerName] = useState("Unknown");
 
-  /**
-   * Get player name from the db
-   */
-  useEffect(() => {
-    const fetchPlayerName = async () => {
-      const { data, error } = await supabase
-        .from("players")
-        .select("name")
-        .eq("id", selectedPlayer);
-      if (error) {
-        const err = "Error fetching player name: " + error.message;
-        setAlertOpen(true);
-        setAlertSeverity("error");
-        setAlertText(err);
-        console.error(err);
-        setPlayerName("Unknown");
-      }
-      setPlayerName(data[0].name);
-    };
-
-    fetchPlayerName();
-  }, [selectedPlayer]);
+  const playerName = getPlayerGivenId(selectedPlayer, players);
 
   /**
    * Create buttons for each time type
@@ -66,7 +47,7 @@ const ParticipantsJudge = ({
    */
   const getHeat = async () => {
     const { data, error } = await supabase
-      .from("heats")
+      .from(HEATS_TABLE)
       .select("*")
       .eq("is_current", true);
     if (error) {
@@ -84,10 +65,10 @@ const ParticipantsJudge = ({
    */
   const handleTimeTypeClick = async (timeTypeId) => {
     if (timeTypeId === -1) {
-      timeTypeId = timeTypes.find((e) => e.time_eng === "Sail").id;
+      timeTypeId = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL).id;
     }
     const { data, error } = await supabase
-      .from("time_logs")
+      .from(TIME_LOGS_TABLE)
       .insert([
         {
           team_id: selectedTeam,

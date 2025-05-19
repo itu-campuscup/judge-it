@@ -16,7 +16,6 @@ const TeamSelect = ({ selectedTeamId, setSelectedTeam, teams, alert }) => {
       alert.setSeverity("error");
       alert.setText("No active teams found");
     }
-    console.log("Team given: ", teams);
   }, [teams, activeTeams, alert]);
 
   return (

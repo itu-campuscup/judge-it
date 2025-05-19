@@ -1,3 +1,5 @@
+import { HEATS_TABLE } from "./constants";
+
 /**
  * Gets the player name given the player ID.
  * @param {number} id - The player ID.
@@ -85,7 +87,7 @@ export const getPlayerIdsGivenTeamId = (id, teams) => {
  */
 export const getCurrentHeatGivenCtx = async (supabase, alert) => {
   const { data, error } = await supabase
-    .from("heats")
+    .from(HEATS_TABLE)
     .select("*")
     .eq("is_current", true);
 

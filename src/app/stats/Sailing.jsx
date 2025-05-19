@@ -10,12 +10,9 @@ import {
   filterAndSortTimeLogs,
   calculateTimes,
   generateChartableData,
+  removeDuplicateTimeEntries,
 } from "@/utils/visualizationUtils";
-import {
-  MEDAL_EMOJIS,
-  TIME_TYPE_SAIL,
-  CAMPUSCUP_LIGHT_BLUE,
-} from "@/utils/constants";
+import { MEDAL_EMOJIS, TIME_TYPE_SAIL } from "@/utils/constants";
 import SailingAnimation from "./animations/SailingAnimation";
 
 const Sailing = ({
@@ -43,7 +40,8 @@ const Sailing = ({
     sailingTypeId
   );
   const sailTimes = calculateTimes(logsForHeatsSortByTime);
-  const topTimes = sailTimes.slice(0, 5);
+  const topTimes = removeDuplicateTimeEntries(sailTimes);
+
   const sailData = generateChartableData(topTimes, players, teams, heats);
 
   let processedRankingData = useMemo(() => [], []);

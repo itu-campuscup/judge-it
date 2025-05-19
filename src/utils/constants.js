@@ -33,4 +33,65 @@ export const TIME_TYPE_SPIN = "Spin";
  */
 export const REVOLUTIONS = 10;
 
+/**
+ * @constant {string} TIME_LOGS_TABLE
+ * @description Constant representing the name of the time logs table in the database.
+ * This is used for querying and inserting time logs related to participants' activities.
+ */
+export const TIME_LOGS_TABLE = "time_logs";
+
+/**
+ * @constant {string} TIME_TYPES_TABLE
+ * @description Constant representing the name of the time types table in the database.
+ * This is used for querying and managing different types of time logs.
+ */
+export const TIME_TYPES_TABLE = "time_types";
+
+/**
+ * @constant {string} TEAMS_TABLE
+ * @description Constant representing the name of the teams table in the database.
+ * This is used for querying and managing teams participating in the event.
+ */
+export const TEAMS_TABLE = "teams";
+
+/**
+ * @constant {string} PLAYERS_TABLE
+ * @description Constant representing the name of the players table in the database.
+ * This is used for querying and managing players participating in the event.
+ */
+export const PLAYERS_TABLE = "players";
+
+/**
+ * @constant {string} HEATS_TABLE
+ * @description Constant representing the name of the heats table in the database.
+ * This is used for querying and managing heats in the event.
+ */
+export const HEATS_TABLE = "heats";
+
+/**
+ * @constant {string} MAIN_JUDGE
+ * @description Constant representing the main judge type.
+ * This is used to identify the main judge in the event during heat start.
+ */
+export const MAIN_JUDGE = "main";
+
+/**
+ * @constant {string} PARTICIPANTS_JUDGE
+ * @description Constant representing the participants judge type.
+ * This is used to identify the judge placed on the participants' side.
+ */
+export const PARTICIPANTS_JUDGE = "participants";
+
+/**
+ * @constant {string} BEER_JUDGE
+ * @description Constant representing the beer judge type.
+ * This is used to identify the judge placed on the beer side.
+ */
+export const BEER_JUDGE = "beer";
+
+/**
+ * @constant {string} CAMPUSCUP_LIGHT_BLUE
+ * @description Constant representing the light blue color used in the Campus Cup theme.
+ * This is used for styling and branding purposes in the application.
+ */
 export const CAMPUSCUP_LIGHT_BLUE = "#093fbd";

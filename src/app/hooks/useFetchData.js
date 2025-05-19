@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../SupabaseClient";
+import { supabase } from "@/SupabaseClient";
+import { HEATS_TABLE, PLAYERS_TABLE, TEAMS_TABLE, TIME_LOGS_TABLE, TIME_TYPES_TABLE } from "@/utils/constants";
 
 /**
  * Hook to fetch data from db and listen for changes
@@ -17,7 +18,7 @@ const useFetchData = () => {
 
   useEffect(() => {
     const fetchTimeLogs = async () => {
-      let { data, error } = await supabase.from("time_logs").select("*");
+      let { data, error } = await supabase.from(TIME_LOGS_TABLE).select("*");
       if (error) {
         const err = "Error fetching time logs: " + error.message;
         setAlertOpen(true);
@@ -26,12 +27,11 @@ const useFetchData = () => {
         console.error(err);
       } else {
         setTimeLogs(data);
-        console.log("time logs ", data);
       }
     };
 
     const fetchPlayers = async () => {
-      let { data, error } = await supabase.from("players").select("*");
+      let { data, error } = await supabase.from(PLAYERS_TABLE).select("*");
       if (error) {
         const err = "Error fetching players: " + error.message;
         setAlertOpen(true);
@@ -40,12 +40,11 @@ const useFetchData = () => {
         console.error(err);
       } else {
         setPlayers(data);
-        console.log("players ", data);
       }
     };
 
     const fetchHeats = async () => {
-      let { data, error } = await supabase.from("heats").select("*");
+      let { data, error } = await supabase.from(HEATS_TABLE).select("*");
       if (error) {
         const err = "Error fetching heats: " + error.message;
         setAlertOpen(true);
@@ -54,12 +53,11 @@ const useFetchData = () => {
         console.error(err);
       } else {
         setHeats(data);
-        console.log("heats ", data);
       }
     };
 
     const fetchTeams = async () => {
-      let { data, error } = await supabase.from("teams").select("*");
+      let { data, error } = await supabase.from(TEAMS_TABLE).select("*");
       if (error) {
         const err = "Error fetching teams: " + error.message;
         setAlertOpen(true);
@@ -68,12 +66,11 @@ const useFetchData = () => {
         console.error(err);
       } else {
         setTeams(data);
-        console.log("teams ", data);
       }
     };
 
     const fetchTimeTypes = async () => {
-      let { data, error } = await supabase.from("time_types").select("*");
+      let { data, error } = await supabase.from(TIME_TYPES_TABLE).select("*");
       if (error) {
         const err = "Error fetching time types: " + error.message;
         setAlertOpen(true);
@@ -82,7 +79,6 @@ const useFetchData = () => {
         console.error(err);
       } else {
         setTimeTypes(data);
-        console.log("time types", data);
       }
     };
 
@@ -97,7 +93,7 @@ const useFetchData = () => {
       .channel("public:players")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "players" },
+        { event: "*", schema: "public", table: PLAYERS_TABLE },
         fetchPlayers
       )
       .subscribe();
@@ -106,7 +102,7 @@ const useFetchData = () => {
       .channel("public:heats")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "heats" },
+        { event: "*", schema: "public", table: HEATS_TABLE },
         fetchHeats
       )
       .subscribe();
@@ -115,7 +111,7 @@ const useFetchData = () => {
       .channel("public:teams")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "teams" },
+        { event: "*", schema: "public", table: TEAMS_TABLE },
         fetchTeams
       )
       .subscribe();
@@ -124,7 +120,7 @@ const useFetchData = () => {
       .channel("public:time_types")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "time_types" },
+        { event: "*", schema: "public", table: TIME_TYPES_TABLE },
         fetchTimeTypes
       )
       .subscribe();
@@ -133,7 +129,7 @@ const useFetchData = () => {
       .channel("public:time_logs")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "time_logs" },
+        { event: "*", schema: "public", table: TIME_LOGS_TABLE },
         fetchTimeLogs
       )
       .subscribe();

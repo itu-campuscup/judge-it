@@ -5,6 +5,7 @@ import {
   filterAndSortTimeLogs,
   calculateTimes,
   generateChartableData,
+  removeDuplicateTimeEntries,
 } from "@/utils/visualizationUtils";
 import {
   formatTime,
@@ -43,7 +44,7 @@ const BeerChugger = ({
     beerTypeId
   );
   const chugTimes = calculateTimes(logsForHeatsSortByTime);
-  const topChugTimes = chugTimes.slice(0, 5);
+  const topChugTimes = removeDuplicateTimeEntries(chugTimes);
 
   const initialBarData = generateChartableData(
     topChugTimes,

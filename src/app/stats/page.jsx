@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Container,
-  Box,
   Typography,
   AppBar,
   Toolbar,
@@ -11,13 +10,13 @@ import {
   Menu,
   MenuItem,
   Paper,
-} from "@mui/material"; // Added Paper
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Header from "../components/Header";
 import BeerChugger from "./BeerChugger";
 import Sailing from "./Sailing";
 import Spinner from "./Spinner";
-import { useAuth } from "../../AuthContext";
+import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchData from "../hooks/useFetchData";
@@ -26,6 +25,9 @@ function Stats() {
   const { user } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStat, setSelectedStat] = useState("BeerChugger");
+  const BEER_CHUGGER_STAT = "BeerChugger";
+  const SAILING_STAT = "Sailing";
+  const SPINNER_STAT = "Spinner";
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -55,11 +57,11 @@ function Stats() {
       heats,
     };
     switch (selectedStat) {
-      case "BeerChugger":
+      case BEER_CHUGGER_STAT:
         return <BeerChugger {...commonProps} />;
-      case "Sailing":
+      case SAILING_STAT:
         return <Sailing {...commonProps} />;
-      case "Spinner":
+      case SPINNER_STAT:
         return <Spinner {...commonProps} />;
       default:
         return null;
@@ -100,20 +102,20 @@ function Stats() {
             }}
           >
             <MenuItem
-              onClick={() => handleMenuItemClick("BeerChugger")}
-              selected={selectedStat === "BeerChugger"}
+              onClick={() => handleMenuItemClick(BEER_CHUGGER_STAT)}
+              selected={selectedStat === BEER_CHUGGER_STAT}
             >
               Beer Chugger
             </MenuItem>
             <MenuItem
-              onClick={() => handleMenuItemClick("Sailing")}
-              selected={selectedStat === "Sailing"}
+              onClick={() => handleMenuItemClick(SAILING_STAT)}
+              selected={selectedStat === SAILING_STAT}
             >
               Sailing
             </MenuItem>
             <MenuItem
-              onClick={() => handleMenuItemClick("Spinner")}
-              selected={selectedStat === "Spinner"}
+              onClick={() => handleMenuItemClick(SPINNER_STAT)}
+              selected={selectedStat === SPINNER_STAT}
             >
               Spinner
             </MenuItem>

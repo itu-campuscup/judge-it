@@ -1,25 +1,24 @@
-import { useState, useEffect } from 'react';
-import { FormControl, TextField, Button } from '@mui/material';
-import AlertComponent from '../components/AlertComponent';
-import { supabase } from '@/SupabaseClient';
+import { useState, useEffect } from "react";
+import { FormControl, TextField, Button } from "@mui/material";
+import AlertComponent from "../components/AlertComponent";
+import { supabase } from "@/SupabaseClient";
+import { HEATS_TABLE } from "@/utils/constants";
 
 const SetHeat = ({ user }) => {
   const [alertOpen, setAlertOpen] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState('error');
-  const [alertText, setAlertText] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState("error");
+  const [alertText, setAlertText] = useState("");
   const [heats, setHeats] = useState([]);
-  const [heatNumber, setHeatNumber] = useState('');
+  const [heatNumber, setHeatNumber] = useState("");
 
   useEffect(() => {
     if (user) {
       const fetchHeats = async () => {
-        const { data, error } = await supabase
-          .from('heats')
-          .select('*');
+        const { data, error } = await supabase.from(HEATS_TABLE).select("*");
         if (error) {
-          const err = 'Error fetching heats:' + error.message;
+          const err = "Error fetching heats:" + error.message;
           setAlertOpen(true);
-          setAlertSeverity('error');
+          setAlertSeverity("error");
           setAlertText(err);
           console.error(err);
         } else {
@@ -28,10 +27,14 @@ const SetHeat = ({ user }) => {
       };
 
       fetchHeats();
-      
+
       const heatsListener = supabase
-        .channel('public:heats')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'heats' }, fetchHeats)
+        .channel("public:heats")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: HEATS_TABLE },
+          fetchHeats
+        )
         .subscribe();
 
       return () => {
@@ -45,7 +48,9 @@ const SetHeat = ({ user }) => {
   };
 
   const getThisYearsHeats = () => {
-    return heats.filter((heat) => new Date(heat.date).getFullYear() === getCurYear());
+    return heats.filter(
+      (heat) => new Date(heat.date).getFullYear() === getCurYear()
+    );
   };
 
   const hasHeatBeenUsed = (heatNumber) => {
@@ -56,7 +61,9 @@ const SetHeat = ({ user }) => {
 
   const getNextNaturalHeat = () => {
     const thisYearsHeats = getThisYearsHeats();
-    if (thisYearsHeats.length === 0) { return 1; }
+    if (thisYearsHeats.length === 0) {
+      return 1;
+    }
 
     thisYearsHeats.sort((a, b) => a.heat - b.heat);
     return thisYearsHeats[thisYearsHeats.length - 1].heat + 1;
@@ -64,70 +71,79 @@ const SetHeat = ({ user }) => {
 
   const setNotCurrentHeat = async () => {
     const { error } = await supabase
-      .from('heats')
+      .from(HEATS_TABLE)
       .update({ is_current: false })
-      .eq('is_current', true);
+      .eq("is_current", true);
     if (error) {
-      const err = 'Error updating current heat: ' + error.message;
+      const err = "Error updating current heat: " + error.message;
       setAlertOpen(true);
-      setAlertSeverity('error');
+      setAlertSeverity("error");
       setAlertText(err);
       console.error(err);
-      return 'error';
+      return "error";
     }
   };
 
   const createHeat = async (heatNumber) => {
     const { error } = await supabase
-      .from('heats')
+      .from(HEATS_TABLE)
       .insert([{ heat: heatNumber, is_current: true }]);
     if (error) {
-      const err = 'Error creating heat: ' + error.message;
+      const err = "Error creating heat: " + error.message;
       setAlertOpen(true);
-      setAlertSeverity('error');
+      setAlertSeverity("error");
       setAlertText(err);
       console.error(err);
-      return 'error';
+      return "error";
     }
   };
 
   const updateHeat = async (heatNumber) => {
     const { error } = await supabase
-      .from('heats')
+      .from(HEATS_TABLE)
       .update({ is_current: true })
-      .eq('heat', heatNumber);
+      .eq("heat", heatNumber);
     if (error) {
-      const err = 'Error updating heat: ' + error.message;
+      const err = "Error updating heat: " + error.message;
       setAlertOpen(true);
-      setAlertSeverity('error');
+      setAlertSeverity("error");
       setAlertText(err);
       console.error(err);
-      return 'error';
+      return "error";
     }
   };
 
   const handleSetHeat = async (heatNumber) => {
     heatNumber = parseInt(heatNumber);
     if (hasHeatBeenUsed(heatNumber)) {
-      console.log('Heat has been used');
       const nextNaturalHeat = getNextNaturalHeat();
-      const confirmReuse = window.confirm(`Click OK if you sure you want to reuse heat ${heatNumber}.\nThe natural heat progression would be to use ${nextNaturalHeat} now.`);
+      const confirmReuse = window.confirm(
+        `Click OK if you sure you want to reuse heat ${heatNumber}.\nThe natural heat progression would be to use ${nextNaturalHeat} now.`
+      );
       if (!confirmReuse) {
         return;
       }
       const setNotCurrentHeatResult = await setNotCurrentHeat();
-      if (setNotCurrentHeatResult === 'error') { return; }
+      if (setNotCurrentHeatResult === "error") {
+        return;
+      }
       const updateHeatResult = await updateHeat(heatNumber);
-      if (updateHeatResult === 'error') { return; }
+      if (updateHeatResult === "error") {
+        return;
+      }
     } else {
       const setNotCurrentHeatResult = await setNotCurrentHeat();
-      if (setNotCurrentHeatResult === 'error') { return; }
+      if (setNotCurrentHeatResult === "error") {
+        return;
+      }
       const createHeatResult = await createHeat(heatNumber);
-      if (createHeatResult === 'error') { return; }
+      if (createHeatResult === "error") {
+        return;
+      }
     }
 
     setAlertOpen(true);
-    setAlertSeverity('success');
+    setAlertSeverity("success");
     setAlertText(`Heat ${heatNumber} set`);
   };
 
@@ -139,15 +155,21 @@ const SetHeat = ({ user }) => {
         open={alertOpen}
         setOpen={setAlertOpen}
       />
-      <FormControl fullWidth margin='normal' variant='filled'>
+      <FormControl fullWidth margin="normal" variant="filled">
         <TextField
-          id='heat-number'
-          type='number'
+          id="heat-number"
+          type="number"
           label={`Natural heat progression: ${getNextNaturalHeat()}`}
           value={heatNumber}
           onChange={(e) => setHeatNumber(e.target.value)}
         />
-        <Button variant='contained' color='primary' onClick={() => handleSetHeat(heatNumber)}>Set Heat</Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleSetHeat(heatNumber)}
+        >
+          Set Heat
+        </Button>
       </FormControl>
     </>
   );

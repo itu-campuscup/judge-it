@@ -14,6 +14,7 @@ import {
   filterAndSortTimeLogs,
   calculateTimes,
   generateRPMData,
+  removeDuplicateTimeEntries,
 } from "@/utils/visualizationUtils";
 import { getUniqueYearsGivenHeats } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_SPIN } from "@/utils/constants";
@@ -46,7 +47,8 @@ const Spinner = ({
     spinnerTypeId
   );
   const spinTimes = calculateTimes(logsForHeatsSortByTime);
-  const topSpinTimes = spinTimes.slice(0, 5);
+  const topSpinTimes = removeDuplicateTimeEntries(spinTimes);
+
   const rpmData = generateRPMData(topSpinTimes, players, teams, heats);
 
   let processedRankingData = useMemo(() => [], []);

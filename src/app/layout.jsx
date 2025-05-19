@@ -1,8 +1,6 @@
-"use client";
-
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { AuthProvider } from "../AuthContext";
+import { AuthProvider } from "@/AuthContext";
+import ThemeRegistry from "@/ThemeRegistry";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,15 +12,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const theme = createTheme();
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ThemeProvider theme={theme}>
+        <ThemeRegistry options={{ key: "mui" }}>
           <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );

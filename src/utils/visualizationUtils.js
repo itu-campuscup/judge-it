@@ -74,6 +74,29 @@ export const calculateTimes = (logsForHeatsSortByTime) => {
 };
 
 /**
+ * Remove time entries which have same player ID.
+ * @param {Array} timeEntries - The list of filtered time entries.
+ * @returns {Array} The list of time entries without duplicates.
+ * @description Maintains
+ */
+export const removeDuplicateTimeEntries = (timeEntries) => {
+  const playerIds = new Set();
+  const filteredEntries = [];
+  for (const entry of timeEntries) {
+    const playerId = entry.playerId;
+    if (playerIds.has(playerId)) {
+      continue;
+    }
+    if (filteredEntries.length >= 5) {
+      break;
+    }
+    playerIds.add(playerId);
+    filteredEntries.push(entry);
+  }
+  return filteredEntries;
+};
+
+/**
  * Get end time of a players activity in a heat.
  * @param {number} playerId - The player ID.
  * @param {number} heatId - The heat ID.

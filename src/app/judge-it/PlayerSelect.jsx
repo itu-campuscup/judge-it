@@ -21,7 +21,6 @@ const PlayerSelect = ({
 }) => {
   useEffect(() => {
     if (selectedTeamId) {
-      console.log("selectedTeam", selectedTeamId);
       const teamPlayerIds = getPlayerIdsGivenTeamId(selectedTeamId, teams);
       const teamPlayers = teamPlayerIds.map((id) =>
         getPlayerGivenId(id, players)

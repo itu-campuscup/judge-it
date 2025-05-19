@@ -76,9 +76,8 @@ export const calcTimeDifference = (startTime, endTime) => {
 /**
  * Gives the unique years given an array of heats.
  * @param {Array} heats - The array of heats.
- * @returns {Array} The unique years.
+ * @returns {Array} The unique years - sorted by year in descending order.
  */
 export const getUniqueYearsGivenHeats = (heats) => {
-  // return [...new Set(heats.map(heat => new Date(heats.date).getFullYear()))];
-  return [...new Set(heats.map((heat) => new Date(heat.date).getFullYear()))];
+  return [...new Set(heats.map((heat) => new Date(heat.date).getFullYear()))].sort((a, b) => b - a);
 };
