@@ -169,6 +169,16 @@ Once you have access do the following in the Supabase dashboard:
 
 You now have access to the Supabase database.
 
+<details>
+  <summary>
+    If you want to replicate the database locally, you can try and follow the visualization of the database schema, by toggling this <code>details</code>.
+  </summary>
+
+  <img src="./github-assets/supabase_schema.png"/>
+
+  This was last updated on 2025-05-19.
+</details>
+
 #### Making Changes
 
 1. Create a new branch for your feature or bug fix
