@@ -195,7 +195,7 @@ You now have access to the Supabase database.
 8. Wait for the CampusCup team to review your changes and merge them into the main branch
 
 > **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
-> Please add youself to the list by writing `@all-contributors please add @<username> for <contributions>` in your first pull request.
+> Please add youself to the list by writing `@all-contributors please add @<username> for code` in your first pull request.
 > This will add you to the list of contributors in the README file.
 
 ### Improving The Documentation
