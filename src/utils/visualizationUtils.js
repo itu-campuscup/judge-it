@@ -5,10 +5,10 @@ import {
   calcRPM,
 } from "./timeUtils";
 import {
-  getPlayerNameGivenId,
-  getHeatNumberGivenId,
-  getTeamNameGivenId,
-  getPlayerImageGivenPlayerId,
+  getPlayerName,
+  getHeatNumber,
+  getTeamName,
+  getPlayerImage,
 } from "./getUtils";
 import { REVOLUTIONS } from "./constants";
 
@@ -137,10 +137,10 @@ export const getEndTime = (
 export const generateChartableData = (topTimes, players, teams, heats) => {
   return topTimes.map((time) => ({
     time: time.duration,
-    imageUrl: getPlayerImageGivenPlayerId(time.playerId, players),
-    playerName: getPlayerNameGivenId(time.playerId, players),
-    teamName: getTeamNameGivenId(time.teamId, teams),
-    heatNumber: getHeatNumberGivenId(time.heatId, heats),
+    imageUrl: getPlayerImage(time.playerId, players),
+    playerName: getPlayerName(time.playerId, players),
+    teamName: getTeamName(time.teamId, teams),
+    heatNumber: getHeatNumber(time.heatId, heats),
   }));
 };
 

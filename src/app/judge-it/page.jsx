@@ -30,7 +30,6 @@ function Judge() {
   const [selectPlayerString, setSelectPlayerString] = useState("Select player");
   const [judgeType, setJudgeType] = useState("");
   const [teamPlayers, setTeamPlayers] = useState([]);
-
   const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
 
   if (!user) {
@@ -113,6 +112,8 @@ function Judge() {
             selectedPlayer={selectedPlayer}
             timeTypes={timeTypes}
             players={players}
+            timeLogs={timeLogs}
+            alert={alert}
           />
         )}
         {judgeType === BEER_JUDGE && (

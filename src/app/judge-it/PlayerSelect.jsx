@@ -6,7 +6,7 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import { getPlayerIdsGivenTeamId, getPlayerGivenId } from "@/utils/getUtils";
+import { getTeamPlayerIds, getPlayer } from "@/utils/getUtils";
 
 const PlayerSelect = ({
   teams,
@@ -21,10 +21,8 @@ const PlayerSelect = ({
 }) => {
   useEffect(() => {
     if (selectedTeamId) {
-      const teamPlayerIds = getPlayerIdsGivenTeamId(selectedTeamId, teams);
-      const teamPlayers = teamPlayerIds.map((id) =>
-        getPlayerGivenId(id, players)
-      );
+      const teamPlayerIds = getTeamPlayerIds(selectedTeamId, teams);
+      const teamPlayers = teamPlayerIds.map((id) => getPlayer(id, players));
       setTeamPlayers(teamPlayers);
     }
   }, [teams, selectedTeamId, players, setTeamPlayers]);
