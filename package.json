@@ -14,7 +14,7 @@
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@shadcn/ui": "^0.0.4",
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/supabase-js": "^2.49.8",
     "framer-motion": "^12.12.1",
     "next": "15.3.2",
     "react": "^19.0.0",
