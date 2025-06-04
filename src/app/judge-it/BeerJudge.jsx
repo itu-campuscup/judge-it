@@ -3,8 +3,13 @@ import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import { Button, Box } from "@mui/material";
 import styles from "@/app/page.module.css";
-import { getPlayerNameGivenId, getCurrentHeatGivenCtx } from "@/utils/getUtils";
-import { TIME_LOGS_TABLE, TIME_TYPE_SAIL, TIME_TYPE_BEER, TIME_TYPE_SPIN } from "@/utils/constants";
+import { getPlayerName, getCurrentHeat } from "@/utils/getUtils";
+import {
+  TIME_LOGS_TABLE,
+  TIME_TYPE_SAIL,
+  TIME_TYPE_BEER,
+  TIME_TYPE_SPIN,
+} from "@/utils/constants";
 
 const BeerJudge = ({
   players,
@@ -13,11 +18,10 @@ const BeerJudge = ({
   timeTypes = [],
   alert,
 }) => {
-
   const [isTiming, setIsTiming] = useState(false);
   const [participantApproaching, setParticipantApproaching] = useState(false);
 
-  const playerName = getPlayerNameGivenId(selectedPlayer, players);
+  const playerName = getPlayerName(selectedPlayer, players);
 
   /**
    * Create buttons for each time type
@@ -66,7 +70,7 @@ const BeerJudge = ({
    * Handle button click to start/stop the timers to send a row to the db
    */
   const handleTimeTypeClick = async (timeTypeId) => {
-    const currentHeat = await getCurrentHeatGivenCtx(supabase, alert);
+    const currentHeat = await getCurrentHeat(alert);
 
     var isValid = validateInputs();
     if (!isValid) return;

@@ -5,7 +5,7 @@ import { Button } from "@mui/material";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import SetHeat from "./SetHeat";
-import { getCurrentHeatGivenCtx } from "@/utils/getUtils";
+import { getCurrentHeat } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL, TIME_LOGS_TABLE } from "@/utils/constants";
 
 const MainJudge = ({
@@ -22,7 +22,7 @@ const MainJudge = ({
   const [selectedPlayer, setSelectedPlayer] = useState("");
   const [selectPlayerString, setSelectPlayerString] = useState("Select Player");
 
-  const currentHeat = getCurrentHeatGivenCtx(supabase, alert);
+  const currentHeat = getCurrentHeat(alert);
 
   /**
    * Handle global start timer
@@ -31,7 +31,9 @@ const MainJudge = ({
    */
   const handleGlobalStart = async () => {
     if (!checkInputs()) return;
-    const time_type_id = time_types.find((e) => e.time_eng === TIME_TYPE_SAIL).id;
+    const time_type_id = time_types.find(
+      (e) => e.time_eng === TIME_TYPE_SAIL
+    ).id;
     const heatId = currentHeat.id;
     const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
