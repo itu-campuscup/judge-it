@@ -23,7 +23,14 @@ import {
   splitTimeLogsPerHeat,
 } from "@/utils/sortFilterUtils";
 import { useState } from "react";
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Legend,
+} from "recharts";
 
 const Contestants = ({
   timeLogs = [],
@@ -83,13 +90,19 @@ const Contestants = ({
     (log) => log.time_type_id === sailId
   );
 
-  const player1BestIntraHeatBeerTime = getBestIntraHeatTime(player1BeerLogs);
-  const player1BestIntraHeatSpinTime = getBestIntraHeatTime(player1SpinnerLogs);
-  const player1BestIntraHeatSailTime = getBestIntraHeatTime(player1SailLogs);
+  const player1BestIntraHeatBeerTime =
+    getBestIntraHeatTime(player1BeerLogs)?.duration || 0;
+  const player1BestIntraHeatSpinTime =
+    getBestIntraHeatTime(player1SpinnerLogs)?.duration || 0;
+  const player1BestIntraHeatSailTime =
+    getBestIntraHeatTime(player1SailLogs)?.duration || 0;
 
-  const player2BestIntraHeatBeerTime = getBestIntraHeatTime(player2BeerLogs);
-  const player2BestIntraHeatSpinTime = getBestIntraHeatTime(player2SpinnerLogs);
-  const player2BestIntraHeatSailTime = getBestIntraHeatTime(player2SailLogs);
+  const player2BestIntraHeatBeerTime =
+    getBestIntraHeatTime(player2BeerLogs)?.duration || 0;
+  const player2BestIntraHeatSpinTime =
+    getBestIntraHeatTime(player2SpinnerLogs)?.duration || 0;
+  const player2BestIntraHeatSailTime =
+    getBestIntraHeatTime(player2SailLogs)?.duration || 0;
 
   console.log("P1 Beer", player1BestIntraHeatBeerTime);
   console.log("P1 Spin", player1BestIntraHeatSpinTime);
@@ -105,11 +118,11 @@ const Contestants = ({
     player1BestIntraHeatSailTime,
     player2BestIntraHeatBeerTime,
     player2BestIntraHeatSpinTime,
-    player2BestIntraHeatSailTime
-  ].filter(time => time > 0);
+    player2BestIntraHeatSailTime,
+  ].filter((time) => time > 0);
 
   const bestBeerTime = Math.min(
-    player1BestIntraHeatBeerTime > 0 ? players1BestIntraHeatBeerTime : Infinity,
+    player1BestIntraHeatBeerTime > 0 ? player1BestIntraHeatBeerTime : Infinity,
     player2BestIntraHeatBeerTime > 0 ? player2BestIntraHeatBeerTime : Infinity
   );
   const worstBeerTime = Math.max(
@@ -244,7 +257,15 @@ const Contestants = ({
       </FormControl>
 
       {/* Two radar charts side by side */}
-      <Box sx={{ display: "flex", justifyContent: "space-around", alignItems: "center", my: 4, flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          my: 4,
+          flexWrap: "wrap",
+        }}
+      >
         {/* Player 1 Chart */}
         <Box sx={{ textAlign: "center", mb: 2 }}>
           <Typography variant="h6" gutterBottom>
@@ -260,7 +281,11 @@ const Contestants = ({
           >
             <PolarGrid />
             <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+            <PolarRadiusAxis
+              angle={30}
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+            />
             <Radar
               name="Performance"
               dataKey="Performance"
@@ -286,7 +311,11 @@ const Contestants = ({
           >
             <PolarGrid />
             <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+            <PolarRadiusAxis
+              angle={30}
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+            />
             <Radar
               name="Performance"
               dataKey="Performance"
@@ -299,7 +328,8 @@ const Contestants = ({
       </Box>
 
       <Typography variant="body2" color="textSecondary" align="center">
-        100% = Best time between the two players | 0% = Worst time between the two players
+        100% = Best time between the two players | 0% = Worst time between the
+        two players
       </Typography>
     </>
   );
