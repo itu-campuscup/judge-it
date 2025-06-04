@@ -13,6 +13,7 @@ import {
   milliToSecs,
 } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_BEER } from "@/utils/constants";
+import { getTimeTypeId } from "@/utils/getUtils";
 import BeerAnimation from "./animations/BeerAnimation";
 
 const BeerChugger = ({
@@ -30,10 +31,7 @@ const BeerChugger = ({
     setAnimationCycleKey((prev) => prev + 1);
   };
 
-  const beerType = timeTypes.find(
-    (timeType) => timeType.time_eng === TIME_TYPE_BEER
-  );
-  const beerTypeId = beerType ? beerType.id : null;
+  const beerTypeId = getTimeTypeId(TIME_TYPE_BEER, timeTypes);
 
   const uniqueYears = getUniqueYearsGivenHeats(heats);
 

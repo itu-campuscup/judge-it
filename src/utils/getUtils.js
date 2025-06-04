@@ -1,4 +1,9 @@
-import { HEATS_TABLE, TIME_TYPES_TABLE } from "./constants";
+import { HEATS_TABLE } from "./constants";
+import {
+  calculateTimes,
+  removeDuplicateTimeEntries,
+} from "./visualizationUtils";
+import { splitTimeLogsPerHeat } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 
 /**
@@ -139,8 +144,37 @@ export const getPrevPlayerId = (teamId, heat, timeLogs) => {
  * @returns {Object} The time type object.
  */
 export const getTimeType = (timeTypeString, timeTypes) => {
-  console.log("timeTypeString: ", timeTypeString);
-  console.log("timeTypes: ", timeTypes);
-  console.log("Result: ", timeTypes.find((e) => e.time_eng === timeTypeString));
   return timeTypes.find((e) => e.time_eng === timeTypeString);
+};
+
+/**
+ * Get the time type Id given the time type string.
+ * @param {string} timeTypeString - The time type string.
+ * @param {Array} timeTypes - The list of time types.
+ * @return {number|null} The time type ID or null if not found.
+ */
+export const getTimeTypeId = (timeTypeString, timeTypes) => {
+  return getTimeType(timeTypeString, timeTypes)?.id || null;
+};
+
+/**
+ * Get the best intra-heat time from the time logs.
+ * @param {Array} timeLogs - The list of time logs. It should be sorted by heat and time as well as only contain a single contestant.
+ * @return {Object|null} The best time object or null if multiple contestants are present or no valid time is found.
+ */
+export const getBestIntraHeatTime = (timeLogs) => {
+  const splitTimeLogs = splitTimeLogsPerHeat(timeLogs);
+
+  var bestTime = { duration: 10 ** 1000 }; // Equivalent to Infinity
+
+  splitTimeLogs.forEach((heatTimes) => {
+    const times = calculateTimes(heatTimes);
+    const topTime = removeDuplicateTimeEntries(times)[0]; // As a single contestant, we can just take the first time
+
+    if (topTime && topTime.duration && topTime.duration < bestTime.duration) {
+      bestTime = topTime;
+    }
+  });
+
+  return bestTime.duration < 10 ** 1000 ? bestTime : null;
 };
