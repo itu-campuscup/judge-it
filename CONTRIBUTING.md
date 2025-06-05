@@ -179,6 +179,19 @@ You now have access to the Supabase database.
   This was last updated on 2025-05-19.
 </details>
 
+#### Creating a user for the Web App
+
+When you have access to the Supabase project you need to create a user you can use to log into the webapp.
+You can do this by following these steps:
+
+1. Go to the `judge-it` project
+2. Click on `Authentication` in the sidebar
+3. Click on `Users`
+4. Click `Add user` then `Create new user`
+5. Click `Create user` after fulfilling all fields
+
+You should now have an account you can use for when starting up the web app.
+
 #### Making Changes
 
 1. Create a new branch for your feature or bug fix
