@@ -194,6 +194,9 @@ You should now have an account you can use for when starting up the web app.
 
 #### Making Changes
 
+> Note: When starting the web app first you will have to log into the web app.
+> This is the user you should have created during the [Creating a user for the Web App](#creating-a-user-for-the-web-app) step.
+
 1. Create a new branch for your feature or bug fix
 2. Install the dependencies using `npm install`, `yarn install`, `pnpm install` or `bun install`
 3. Start the development server using `npm run dev`, `yarn dev`, `pnpm dev` or `bun dev`
