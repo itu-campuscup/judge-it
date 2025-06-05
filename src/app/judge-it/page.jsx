@@ -20,7 +20,7 @@ import ParticipantsJudge from "./ParticipantsJudge";
 import BeerJudge from "./BeerJudge";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
-import useFetchData from "../hooks/useFetchData";
+import useFetchData from "../../hooks/useFetchData";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 
 function Judge() {

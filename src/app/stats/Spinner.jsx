@@ -19,6 +19,8 @@ import {
 import { getUniqueYearsGivenHeats } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_SPIN } from "@/utils/constants";
 import SpinnerAnimation from "./animations/SpinnerAnimation";
+import useYearSelector from "@/hooks/useYearSelector";
+import YearSelect from "../components/YearSelect";
 
 const Spinner = ({
   timeLogs = [],
@@ -27,8 +29,9 @@ const Spinner = ({
   teams = [],
   heats = [],
 }) => {
-  const [selectedYear, setSelectedYear] = useState("");
   const [animationCycleKey, setAnimationCycleKey] = useState(0);
+
+  const { selectedYear, setSelectedYear, uniqueYears } = useYearSelector(heats);
 
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
@@ -39,7 +42,6 @@ const Spinner = ({
     (timeType) => timeType.time_eng === TIME_TYPE_SPIN
   );
   const spinnerTypeId = spinnerType ? spinnerType.id : null;
-  const uniqueYears = getUniqueYearsGivenHeats(heats);
   const logsForHeatsSortByTime = filterAndSortTimeLogs(
     timeLogs,
     heats,
@@ -92,22 +94,12 @@ const Spinner = ({
       <Typography variant="h4" gutterBottom>
         Spinner RPM Rankings
       </Typography>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="year-select-spinner-label">Select Year</InputLabel>
-        <Select
-          labelId="year-select-spinner-label"
-          id="year-select-spinner"
-          value={selectedYear}
-          onChange={handleYearChange}
-          label="Select Year"
-        >
-          {uniqueYears.map((year) => (
-            <MenuItem key={year} value={year}>
-              {year}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <YearSelect
+        years={uniqueYears}
+        selectedYear={selectedYear}
+        onChange={handleYearChange}
+        labelId="year-select-spinner-label"
+      />
 
       {processedRankingData.length === 0 && (
         <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center" }}>
@@ -119,9 +111,8 @@ const Spinner = ({
         <Paper elevation={2} sx={{ p: 2 }}>
           {processedRankingData.map((playerData, index) => (
             <Fragment
-              key={`${playerData.name || playerData.playerName || index}-${
-                playerData.heatNumber
-              }-${animationCycleKey}`}
+              key={`${playerData.name || playerData.playerName || index}-${playerData.heatNumber
+                }-${animationCycleKey}`}
             >
               <Box sx={{ display: "flex", alignItems: "center", p: 2, my: 1 }}>
                 <Typography
