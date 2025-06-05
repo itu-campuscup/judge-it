@@ -14,7 +14,7 @@ import {
 } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_BEER } from "@/utils/constants";
 import BeerAnimation from "./animations/BeerAnimation";
-import useYearSelector from "@/hooks/useYearSelector";
+import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
 
 const BeerChugger = ({

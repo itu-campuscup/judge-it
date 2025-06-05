@@ -14,7 +14,7 @@ import {
 } from "@/utils/visualizationUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_SAIL } from "@/utils/constants";
 import SailingAnimation from "./animations/SailingAnimation";
-import useYearSelector from "@/hooks/useYearSelector";
+import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
 
 const Sailing = ({

@@ -19,7 +19,7 @@ import {
 import { getUniqueYearsGivenHeats } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_SPIN } from "@/utils/constants";
 import SpinnerAnimation from "./animations/SpinnerAnimation";
-import useYearSelector from "@/hooks/useYearSelector";
+import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
 
 const Spinner = ({
