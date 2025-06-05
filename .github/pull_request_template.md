@@ -35,5 +35,5 @@
 
 ---
 <!-- For your first PR, remember to add yourself to all-contributors! -->
-<!-- This is done by outcommenting the below, and putting in your GitHub handle in `<username>` -->
+<!-- This is done by making a comment to this PR with the below, and putting in your GitHub handle in `<username>` -->
 <!-- @all-contributors please add @<username> for code -->
