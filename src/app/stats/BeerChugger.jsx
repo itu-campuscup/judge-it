@@ -14,6 +14,8 @@ import {
 } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_BEER } from "@/utils/constants";
 import BeerAnimation from "./animations/BeerAnimation";
+import useYearSelector from "@/app/hooks/useYearSelector";
+import YearSelect from "../components/YearSelect";
 
 const BeerChugger = ({
   timeLogs = [],
@@ -22,8 +24,9 @@ const BeerChugger = ({
   teams = [],
   heats = [],
 }) => {
-  const [selectedYear, setSelectedYear] = useState("");
   const [animationCycleKey, setAnimationCycleKey] = useState(0);
+
+  const { selectedYear, setSelectedYear, uniqueYears } = useYearSelector(heats);
 
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
@@ -34,8 +37,6 @@ const BeerChugger = ({
     (timeType) => timeType.time_eng === TIME_TYPE_BEER
   );
   const beerTypeId = beerType ? beerType.id : null;
-
-  const uniqueYears = getUniqueYearsGivenHeats(heats);
 
   const logsForHeatsSortByTime = filterAndSortTimeLogs(
     timeLogs,
@@ -97,30 +98,19 @@ const BeerChugger = ({
       <Typography variant="h4" gutterBottom>
         Beer Chugger Rankings
       </Typography>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="year-select-beer-label">Select Year</InputLabel>
-        <Select
-          labelId="year-select-beer-label"
-          id="year-select-beer"
-          value={selectedYear}
-          label="Select Year"
-          onChange={handleYearChange}
-        >
-          {uniqueYears.map((year) => (
-            <MenuItem key={year} value={year}>
-              {year}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <YearSelect
+        years={uniqueYears}
+        selectedYear={selectedYear}
+        onChange={handleYearChange}
+        labelId="year-select-beer-label"
+      />
 
       {processedRankingData.length > 0 ? (
         <Paper elevation={2} sx={{ p: 2 }}>
           {processedRankingData.map((playerData, index) => (
             <Fragment
-              key={`${playerData.name || playerData.playerName || index}-${
-                playerData.heatNumber
-              }-${animationCycleKey}`}
+              key={`${playerData.name || playerData.playerName || index}-${playerData.heatNumber
+                }-${animationCycleKey}`}
             >
               <Box sx={{ display: "flex", alignItems: "center", p: 2, my: 1 }}>
                 <Typography

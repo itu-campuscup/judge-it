@@ -14,6 +14,8 @@ import {
 } from "@/utils/visualizationUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_SAIL } from "@/utils/constants";
 import SailingAnimation from "./animations/SailingAnimation";
+import useYearSelector from "@/app/hooks/useYearSelector";
+import YearSelect from "../components/YearSelect";
 
 const Sailing = ({
   timeLogs = [],
@@ -22,8 +24,9 @@ const Sailing = ({
   teams = [],
   heats = [],
 }) => {
-  const [selectedYear, setSelectedYear] = useState("");
   const [animationCycleKey, setAnimationCycleKey] = useState(0);
+
+  const { selectedYear, setSelectedYear, uniqueYears } = useYearSelector(heats);
 
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
@@ -32,7 +35,6 @@ const Sailing = ({
 
   const sailingType = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL);
   const sailingTypeId = sailingType ? sailingType.id : null;
-  const uniqueYears = getUniqueYearsGivenHeats(heats);
   const logsForHeatsSortByTime = filterAndSortTimeLogs(
     timeLogs,
     heats,
@@ -88,30 +90,19 @@ const Sailing = ({
       <Typography variant="h4" gutterBottom>
         Sailing Rankings
       </Typography>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="year-select-sailing-label">Select Year</InputLabel>
-        <Select
-          labelId="year-select-sailing-label"
-          id="year-select-sailing"
-          value={selectedYear}
-          label="Select Year"
-          onChange={handleYearChange}
-        >
-          {uniqueYears.map((year) => (
-            <MenuItem key={year} value={year}>
-              {year}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <YearSelect
+        years={uniqueYears}
+        selectedYear={selectedYear}
+        onChange={handleYearChange}
+        labelId="year-select-sailing-label"
+      />
 
       {processedRankingData.length > 0 ? (
         <Paper elevation={2} sx={{ p: 2 }}>
           {processedRankingData.map((playerData, index) => (
             <Fragment
-              key={`${playerData.name || playerData.playerName || index}-${
-                playerData.heatNumber
-              }-${animationCycleKey}`}
+              key={`${playerData.name || playerData.playerName || index}-${playerData.heatNumber
+                }-${animationCycleKey}`}
             >
               <Box sx={{ display: "flex", alignItems: "center", p: 2, my: 1 }}>
                 <Typography
