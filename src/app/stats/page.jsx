@@ -19,7 +19,7 @@ import Spinner from "./Spinner";
 import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
-import useFetchData from "../../hooks/useFetchData";
+import useFetchData from "@/hooks/useFetchData";
 
 function Stats() {
   const { user } = useAuth();
