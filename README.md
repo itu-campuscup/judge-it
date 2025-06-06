@@ -4,10 +4,10 @@
 
 <h1 align="center">Judge IT</h1>
 
-[![All Contributors](https://img.shields.io/github/all-contributors/itu-campuscup/judge-it?color=214186&style=flat-square)](#contributors) [![License](https://img.shields.io/github/license/itu-campuscup/judge-it?color=214186&style=flat-square)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![GitHub issues](https://img.shields.io/github/issues/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/pulls) [![Last commit](https://img.shields.io/github/last-commit/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/commits)
+[![All Contributors](https://img.shields.io/github/all-contributors/itu-campuscup/judge-it?color=214186&style=flat-square)](#contributors) [![License](https://img.shields.io/github/license/itu-campuscup/judge-it?color=214186&style=flat-square)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/) [![Material-UI](https://img.shields.io/badge/Material--UI-0081CB?style=flat-square&logo=material-ui&logoColor=white)](https://mui.com/) [![GitHub issues](https://img.shields.io/github/issues/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/pulls) [![Last commit](https://img.shields.io/github/last-commit/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/commits)
 
 Welcome to **Judge IT**!
-This project was created by the **CampusCup 2024-2025 board** for the 2025 CampusCup event at the IT University of Copenhagen.
+This project was created and initiated by [the treasurer](https://github.com/lucasfth) of the [CampusCup 2024-2025 board](a "Chair: Andreas Guldborg, Vice: Lisa Hauge, Treasurer: Lucas Hanson, Sponsor: Carmen Nielsen, PR: Natalie Petersen") for the 2025 CampusCup event at the IT University of Copenhagen.
 The board will be responsible for the project, while the volunteers are welcome to contribute.
 
 ## Why create Judge IT?
@@ -15,7 +15,7 @@ The board will be responsible for the project, while the volunteers are welcome 
 The judges had highlighted the issues of identifying the winners, when a race was very close.
 Thus, the discussed the idea of creating a web application that would allow the judges to only focus on a single team at a time.
 
-But while creating a whole new web application why not make the CampusCup event even more fun for the crowd?
+But while creating a whole new web application, why not make the CampusCup event even more fun for the crowd?
 The idea was to create a web app that could thus be used by the judges but also display fun statistics for the crowd to follow along with.
 
 The idea is to include the following statistics:
