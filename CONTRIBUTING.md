@@ -200,8 +200,8 @@ You should now have an account you can use for when starting up the web app.
 > This is the user you should have created during the [Creating a user for the Web App](#creating-a-user-for-the-web-app) step.
 
 1. Create a new branch for your feature or bug fix
-2. Install the dependencies using `npm install`, `yarn install`, `pnpm install` or `bun install`
-3. Start the development server using `npm run dev`, `yarn dev`, `pnpm dev` or `bun dev`
+2. Install the dependencies using `bun install`, `npm install`, `yarn install`, `pnpm install` or `bun install`
+3. Start the development server using `bun run dev`, `npm run dev`, `yarn dev`, `pnpm dev` or `bun dev`
     - This will start the server on [http://localhost:3000](http://localhost:3000)
 4. Make your changes and test them in the development server
 5. Commit your changes with a clear and descriptive commit message
