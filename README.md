@@ -1,9 +1,10 @@
-# Judge IT
+<div align="center">
+  <img src="https://github.com/itu-campuscup/.github/blob/50aaa28abe375ead7588372c5afa0daae36014cf/campus.png?raw=true" alt="CampusCup Logo" width="200"/>
+</div>
 
-[![All Contributors](https://img.shields.io/github/all-contributors/itu-campuscup/judge-it?color=ee8449&style=flat-square)](#contributors)
-[![License](https://img.shields.io/github/license/itu-campuscup/judge-it?color=ee8449&style=flat-square)](./LICENSE)
+<h1 align="center">Judge IT</h1>
 
-![CampusCup Logo](https://github.com/itu-campuscup/.github/blob/50aaa28abe375ead7588372c5afa0daae36014cf/campus.png?raw=true)
+[![All Contributors](https://img.shields.io/github/all-contributors/itu-campuscup/judge-it?color=214186&style=flat-square)](#contributors) [![License](https://img.shields.io/github/license/itu-campuscup/judge-it?color=214186&style=flat-square)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![GitHub issues](https://img.shields.io/github/issues/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/pulls) [![Last commit](https://img.shields.io/github/last-commit/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/commits)
 
 Welcome to **Judge IT**!
 This project was created by the **CampusCup 2024-2025 board** for the 2025 CampusCup event at the IT University of Copenhagen.
