@@ -5,6 +5,7 @@ import {
   Select,
   MenuItem,
   Box,
+  Avatar,
 } from "@mui/material";
 import {
   TIME_TYPE_BEER,
@@ -20,17 +21,25 @@ import {
   filterTimeLogsByPlayerId,
   sortTimeLogsByTime,
   sortTimeLogsByHeat,
-  splitTimeLogsPerHeat,
 } from "@/utils/sortFilterUtils";
 import { useState } from "react";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  Legend,
-} from "recharts";
+import { generateRadarChartData } from "@/utils/visualizationUtils";
+import RadarChartComponent from "./components/RadarChartComponent";
+
+const PERFORMANCE_SCALES = {
+  BEER: {
+    MIN_TIME: 2000, // 2 seconds
+    MAX_TIME: 120000, // 120 seconds (2 minutes)
+  },
+  SPIN: {
+    MIN_TIME: 5000, // 5 seconds
+    MAX_TIME: 60000, // 60 seconds (1 minute)
+  },
+  SAIL: {
+    MIN_TIME: 10000, // 10 seconds
+    MAX_TIME: 120000, // 120 seconds (2 minutes)
+  },
+};
 
 const Contestants = ({
   timeLogs = [],
@@ -90,140 +99,38 @@ const Contestants = ({
     (log) => log.time_type_id === sailId
   );
 
-  const player1BestIntraHeatBeerTime =
-    getBestIntraHeatTime(player1BeerLogs)?.duration || 0;
-  const player1BestIntraHeatSpinTime =
-    getBestIntraHeatTime(player1SpinnerLogs)?.duration || 0;
-  const player1BestIntraHeatSailTime =
-    getBestIntraHeatTime(player1SailLogs)?.duration || 0;
-
-  const player2BestIntraHeatBeerTime =
-    getBestIntraHeatTime(player2BeerLogs)?.duration || 0;
-  const player2BestIntraHeatSpinTime =
-    getBestIntraHeatTime(player2SpinnerLogs)?.duration || 0;
-  const player2BestIntraHeatSailTime =
-    getBestIntraHeatTime(player2SailLogs)?.duration || 0;
-
-  console.log("P1 Beer", player1BestIntraHeatBeerTime);
-  console.log("P1 Spin", player1BestIntraHeatSpinTime);
-  console.log("P1 Sail", player1BestIntraHeatSailTime);
-
-  console.log("P2 Beer", player2BestIntraHeatBeerTime);
-  console.log("P2 Spin", player2BestIntraHeatSpinTime);
-  console.log("P2 Sail", player2BestIntraHeatSailTime);
-
-  const allTimes = [
-    player1BestIntraHeatBeerTime,
-    player1BestIntraHeatSpinTime,
-    player1BestIntraHeatSailTime,
-    player2BestIntraHeatBeerTime,
-    player2BestIntraHeatSpinTime,
-    player2BestIntraHeatSailTime,
-  ].filter((time) => time > 0);
-
-  const bestBeerTime = Math.min(
-    player1BestIntraHeatBeerTime > 0 ? player1BestIntraHeatBeerTime : Infinity,
-    player2BestIntraHeatBeerTime > 0 ? player2BestIntraHeatBeerTime : Infinity
-  );
-  const worstBeerTime = Math.max(
-    player1BestIntraHeatBeerTime,
-    player2BestIntraHeatBeerTime
-  );
-  const bestSpinTime = Math.min(
-    player1BestIntraHeatSpinTime > 0 ? player1BestIntraHeatSpinTime : Infinity,
-    player2BestIntraHeatSpinTime > 0 ? player2BestIntraHeatSpinTime : Infinity
-  );
-  const worstSpinTime = Math.max(
-    player1BestIntraHeatSpinTime,
-    player2BestIntraHeatSpinTime
-  );
-  const bestSailTime = Math.min(
-    player1BestIntraHeatSailTime > 0 ? player1BestIntraHeatSailTime : Infinity,
-    player2BestIntraHeatSailTime > 0 ? player2BestIntraHeatSailTime : Infinity
-  );
-  const worstSailTime = Math.max(
-    player1BestIntraHeatSailTime,
-    player2BestIntraHeatSailTime
-  );
-
-  const timeToPercentage = (time, bestTime, worstTime) => {
-    if (time <= 0 || bestTime <= 0 || worstTime <= 0) return 0;
-    if (bestTime === worstTime) return 100;
-    if (bestTime === Infinity) return 0;
-
-    return Math.round(100 - ((time - bestTime) / (worstTime - bestTime)) * 100);
+  const player1BestTimes = {
+    [TIME_TYPE_BEER]: getBestIntraHeatTime(player1BeerLogs)?.duration || 0,
+    [TIME_TYPE_SPIN]: getBestIntraHeatTime(player1SpinnerLogs)?.duration || 0,
+    [TIME_TYPE_SAIL]: getBestIntraHeatTime(player1SailLogs)?.duration || 0,
   };
 
-  const player1Name = getPlayerName(selectedPlayer1Id, players);
-  const player2Name = getPlayerName(selectedPlayer2Id, players);
+  const player2BestTimes = {
+    [TIME_TYPE_BEER]: getBestIntraHeatTime(player2BeerLogs)?.duration || 0,
+    [TIME_TYPE_SPIN]: getBestIntraHeatTime(player2SpinnerLogs)?.duration || 0,
+    [TIME_TYPE_SAIL]: getBestIntraHeatTime(player2SailLogs)?.duration || 0,
+  };
 
-  const player1Data = [
-    {
-      subject: TIME_TYPE_BEER,
-      Performance: timeToPercentage(
-        player1BestIntraHeatBeerTime,
-        bestBeerTime,
-        worstBeerTime
-      ),
-      fullMark: 100,
-    },
-    {
-      subject: TIME_TYPE_SPIN,
-      Performance: timeToPercentage(
-        player1BestIntraHeatSpinTime,
-        bestSpinTime,
-        worstSpinTime
-      ),
-      fullMark: 100,
-    },
-    {
-      subject: TIME_TYPE_SAIL,
-      Performance: timeToPercentage(
-        player1BestIntraHeatSailTime,
-        bestSailTime,
-        worstSailTime
-      ),
-      fullMark: 100,
-    },
-  ];
+  const player1ChartData = generateRadarChartData(
+    selectedPlayer1Id,
+    player1BestTimes,
+    players,
+    PERFORMANCE_SCALES,
+    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
+  );
 
-  const player2Data = [
-    {
-      subject: TIME_TYPE_BEER,
-      Performance: timeToPercentage(
-        player2BestIntraHeatBeerTime,
-        bestBeerTime,
-        worstBeerTime
-      ),
-      fullMark: 100,
-    },
-    {
-      subject: TIME_TYPE_SPIN,
-      Performance: timeToPercentage(
-        player2BestIntraHeatSpinTime,
-        bestSpinTime,
-        worstSpinTime
-      ),
-      fullMark: 100,
-    },
-    {
-      subject: TIME_TYPE_SAIL,
-      Performance: timeToPercentage(
-        player2BestIntraHeatSailTime,
-        bestSailTime,
-        worstSailTime
-      ),
-      fullMark: 100,
-    },
-  ];
-
-  console.log("Player 1 Data:", player1Data);
-  console.log("Player 2 Data:", player2Data);
+  const player2ChartData = generateRadarChartData(
+    selectedPlayer2Id,
+    player2BestTimes,
+    players,
+    PERFORMANCE_SCALES,
+    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
+  );
 
   return (
     <>
       <Typography variant="h4" gutterBottom>
-        Contestant Stats
+        Contestant Comparison
       </Typography>
       <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
         <InputLabel id="player1-select-label">Select Player 1</InputLabel>
@@ -261,75 +168,37 @@ const Contestants = ({
         sx={{
           display: "flex",
           justifyContent: "space-around",
-          alignItems: "center",
+          alignItems: "flex-start",
           my: 4,
           flexWrap: "wrap",
         }}
       >
-        {/* Player 1 Chart */}
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {player1Name}
-          </Typography>
-          <RadarChart
-            cx={200}
-            cy={150}
-            outerRadius={120}
-            width={400}
-            height={300}
-            data={player1Data}
-          >
-            <PolarGrid />
-            <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
-            />
-            <Radar
-              name="Performance"
-              dataKey="Performance"
-              stroke="#8884d8"
-              fill="#8884d8"
-              fillOpacity={0.6}
-            />
-          </RadarChart>
-        </Box>
+        <RadarChartComponent
+          imageUrl={player1ChartData.imageUrl}
+          name={player1ChartData.playerName}
+          altTextType="Fun Fact"
+          altText={player1ChartData.funFact}
+          data={player1ChartData.data}
+        />
 
-        {/* Player 2 Chart */}
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {player2Name}
-          </Typography>
-          <RadarChart
-            cx={200}
-            cy={150}
-            outerRadius={120}
-            width={400}
-            height={300}
-            data={player2Data}
-          >
-            <PolarGrid />
-            <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
-            />
-            <Radar
-              name="Performance"
-              dataKey="Performance"
-              stroke="#82ca9d"
-              fill="#82ca9d"
-              fillOpacity={0.6}
-            />
-          </RadarChart>
-        </Box>
+        <RadarChartComponent
+          imageUrl={player2ChartData.imageUrl}
+          name={player2ChartData.playerName}
+          altTextType="Fun Fact"
+          altText={player2ChartData.funFact}
+          data={player2ChartData.data}
+        />
       </Box>
 
       <Typography variant="body2" color="textSecondary" align="center">
-        100% = Best time between the two players | 0% = Worst time between the
-        two players
+        100% = Excellent performance (under{" "}
+        {PERFORMANCE_SCALES.BEER.MIN_TIME / 1000}s beer,{" "}
+        {PERFORMANCE_SCALES.SPIN.MIN_TIME / 1000}s spin,{" "}
+        {PERFORMANCE_SCALES.SAIL.MIN_TIME / 1000}s sail)
+        <br />
+        0% = Poor performance (over {PERFORMANCE_SCALES.BEER.MAX_TIME / 1000}s
+        beer, {PERFORMANCE_SCALES.SPIN.MAX_TIME / 1000}s spin,{" "}
+        {PERFORMANCE_SCALES.SAIL.MAX_TIME / 1000}s sail)
       </Typography>
     </>
   );

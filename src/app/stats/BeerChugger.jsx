@@ -4,7 +4,7 @@ import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import {
   filterAndSortTimeLogs,
   calculateTimes,
-  generateChartableData,
+  generateRankableData,
   removeDuplicateTimeEntries,
 } from "@/utils/visualizationUtils";
 import {
@@ -44,7 +44,7 @@ const BeerChugger = ({
   const chugTimes = calculateTimes(logsForHeatsSortByTime);
   const topChugTimes = removeDuplicateTimeEntries(chugTimes);
 
-  const initialBarData = generateChartableData(
+  const initialBarData = generateRankableData(
     topChugTimes,
     players,
     teams,

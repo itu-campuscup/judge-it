@@ -178,3 +178,14 @@ export const getBestIntraHeatTime = (timeLogs) => {
 
   return bestTime.duration < 10 ** 1000 ? bestTime : null;
 };
+
+/**
+ * Get the fun fact of a player given their ID.
+ * @param {number} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @returns {string|null} The fun fact of the player or null if not found.
+ */
+export const getPlayerFunFact = (playerId, players) => {
+  const player = players.find((p) => p.id === playerId);
+  return player?.fun_fact || null;
+}

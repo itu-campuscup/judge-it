@@ -9,6 +9,8 @@ import {
   getHeatNumber,
   getTeamName,
   getPlayerImage,
+  getPlayerFunFact,
+  getPlayer,
 } from "./getUtils";
 import { REVOLUTIONS } from "./constants";
 
@@ -134,7 +136,7 @@ export const getEndTime = (
  * @param {Array} heats - The list of heats.
  * @returns {Array} The bar chart data.
  */
-export const generateChartableData = (topTimes, players, teams, heats) => {
+export const generateRankableData = (topTimes, players, teams, heats) => {
   return topTimes.map((time) => ({
     time: time.duration,
     imageUrl: getPlayerImage(time.playerId, players),
@@ -153,7 +155,7 @@ export const generateChartableData = (topTimes, players, teams, heats) => {
  * @returns {Array} The chart data with RPM.
  */
 export const generateRPMData = (topTimes, players, teams, heats) => {
-  const chartData = generateChartableData(topTimes, players, teams, heats);
+  const chartData = generateRankableData(topTimes, players, teams, heats);
   return chartData.map((data) => {
     const rpm = calcRPM(data.time);
     return {
@@ -161,4 +163,49 @@ export const generateRPMData = (topTimes, players, teams, heats) => {
       rpm: rpm,
     };
   });
+};
+
+/**
+ * Generates radar chart data with player information including images and team names.
+ * @param {number} playerId - The player ID.
+ * @param {Object} bestTimes - Object containing best times for each activity type.
+ * @param {Array} players - The list of players.
+ * @param {Object} performanceScales - Performance scale constants for each activity.
+ * @param {Array} timeTypes - Available time type constants.
+ * @returns {Object} The radar chart data including player name, fun fact, image URL, and performance data.
+ */
+export const generateRadarChartData = (
+  playerId,
+  bestTimes,
+  players,
+  performanceScales,
+  timeTypes
+) => {
+  const playerName = getPlayerName(playerId, players);
+  const funFact = getPlayerFunFact(playerId, players);
+  const imageUrl = getPlayerImage(playerId, players);
+
+  const timeToPercentage = (time, minTime, maxTime) => {
+    if (time <= 0) return 0;
+    if (time <= minTime) return 100;
+    if (time >= maxTime) return 0;
+    return Math.round(100 - ((time - minTime) / (maxTime - minTime)) * 100);
+  };
+
+  const radarData = timeTypes.map((timeType) => ({
+    subject: timeType,
+    Performance: timeToPercentage(
+      bestTimes[timeType] || 0,
+      performanceScales[timeType.toUpperCase()]?.MIN_TIME || 0,
+      performanceScales[timeType.toUpperCase()]?.MAX_TIME || 100000
+    ),
+    fullMark: 100,
+  }));
+
+  return {
+    playerName,
+    funFact,
+    imageUrl,
+    data: radarData,
+  };
 };
