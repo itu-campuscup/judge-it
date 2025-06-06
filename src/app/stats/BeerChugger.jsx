@@ -4,7 +4,7 @@ import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import {
   filterAndSortTimeLogs,
   calculateTimes,
-  generateChartableData,
+  generateRankableData,
   removeDuplicateTimeEntries,
 } from "@/utils/visualizationUtils";
 import {
@@ -13,6 +13,7 @@ import {
   milliToSecs,
 } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_BEER } from "@/utils/constants";
+import { getTimeTypeId } from "@/utils/getUtils";
 import BeerAnimation from "./animations/BeerAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
@@ -33,10 +34,7 @@ const BeerChugger = ({
     setAnimationCycleKey((prev) => prev + 1);
   };
 
-  const beerType = timeTypes.find(
-    (timeType) => timeType.time_eng === TIME_TYPE_BEER
-  );
-  const beerTypeId = beerType ? beerType.id : null;
+  const beerTypeId = getTimeTypeId(TIME_TYPE_BEER, timeTypes);
 
   const logsForHeatsSortByTime = filterAndSortTimeLogs(
     timeLogs,
@@ -47,7 +45,7 @@ const BeerChugger = ({
   const chugTimes = calculateTimes(logsForHeatsSortByTime);
   const topChugTimes = removeDuplicateTimeEntries(chugTimes);
 
-  const initialBarData = generateChartableData(
+  const initialBarData = generateRankableData(
     topChugTimes,
     players,
     teams,

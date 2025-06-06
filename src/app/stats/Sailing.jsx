@@ -9,7 +9,7 @@ import {
 import {
   filterAndSortTimeLogs,
   calculateTimes,
-  generateChartableData,
+  generateRankableData,
   removeDuplicateTimeEntries,
 } from "@/utils/visualizationUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_SAIL } from "@/utils/constants";
@@ -44,7 +44,7 @@ const Sailing = ({
   const sailTimes = calculateTimes(logsForHeatsSortByTime);
   const topTimes = removeDuplicateTimeEntries(sailTimes);
 
-  const sailData = generateChartableData(topTimes, players, teams, heats);
+  const sailData = generateRankableData(topTimes, players, teams, heats);
 
   let processedRankingData = useMemo(() => [], []);
   if (sailData.length > 0) {

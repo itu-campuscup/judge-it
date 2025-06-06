@@ -16,6 +16,7 @@ import Header from "../components/Header";
 import BeerChugger from "./BeerChugger";
 import Sailing from "./Sailing";
 import Spinner from "./Spinner";
+import Contestant from "./Contestants";
 import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
@@ -28,6 +29,7 @@ function Stats() {
   const BEER_CHUGGER_STAT = "BeerChugger";
   const SAILING_STAT = "Sailing";
   const SPINNER_STAT = "Spinner";
+  const CONTESTANT_STAT = "Contestants";
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -63,6 +65,8 @@ function Stats() {
         return <Sailing {...commonProps} />;
       case SPINNER_STAT:
         return <Spinner {...commonProps} />;
+      case CONTESTANT_STAT:
+        return <Contestant {...commonProps} />;
       default:
         return null;
     }
@@ -118,6 +122,12 @@ function Stats() {
               selected={selectedStat === SPINNER_STAT}
             >
               Spinner
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleMenuItemClick(CONTESTANT_STAT)}
+              selected={selectedStat === CONTESTANT_STAT}
+            >
+              Contestants
             </MenuItem>
           </Menu>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
