@@ -155,8 +155,6 @@ const Teams: React.FC<TeamsProps> = ({
     false
   );
 
-  console.log("Team 1 Chart Data:", team1ChartData);
-
   return (
     <>
       <Typography variant="h4" gutterBottom>
