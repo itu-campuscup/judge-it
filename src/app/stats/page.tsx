@@ -1,17 +1,15 @@
 "use client";
 
-import { useState, MouseEvent } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
   AppBar,
   Toolbar,
-  IconButton,
-  Menu,
-  MenuItem,
   Paper,
+  Box,
+  Button,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import Header from "../components/Header";
 import BeerChugger from "./BeerChugger";
 import Sailing from "./Sailing";
@@ -30,30 +28,34 @@ type SelectedStat =
   | "Contestants"
   | "Teams";
 
+const STATS_CONFIG = [
+  { key: "BeerChugger", label: "Beer Chugger", number: 1 },
+  { key: "Sailing", label: "Sailing", number: 2 },
+  { key: "Spinner", label: "Spinner", number: 3 },
+  { key: "Contestants", label: "Contestants", number: 4 },
+  { key: "Teams", label: "Teams", number: 5 },
+] as const;
+
 function Stats() {
   const { user } = useAuth();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedStat, setSelectedStat] = useState<SelectedStat>("BeerChugger");
-  const BEER_CHUGGER_STAT: SelectedStat = "BeerChugger";
-  const SAILING_STAT: SelectedStat = "Sailing";
-  const SPINNER_STAT: SelectedStat = "Spinner";
-  const CONTESTANT_STAT: SelectedStat = "Contestants";
-  const TEAM_STAT: SelectedStat = "Teams";
-
-  const handleMenuOpen = (event: MouseEvent<HTMLElement>): void => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = (): void => {
-    setAnchorEl(null);
-  };
-
-  const handleMenuItemClick = (stat: SelectedStat): void => {
-    setSelectedStat(stat);
-    handleMenuClose();
-  };
-
   const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const key = e.key;
+      const statConfig = STATS_CONFIG.find(
+        (stat) => stat.number.toString() === key
+      );
+
+      if (statConfig) {
+        setSelectedStat(statConfig.key as SelectedStat);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
 
   if (!user) {
     return <NotLoggedIn />;
@@ -68,15 +70,15 @@ function Stats() {
       heats,
     };
     switch (selectedStat) {
-      case BEER_CHUGGER_STAT:
+      case "BeerChugger":
         return <BeerChugger {...commonProps} />;
-      case SAILING_STAT:
+      case "Sailing":
         return <Sailing {...commonProps} />;
-      case SPINNER_STAT:
+      case "Spinner":
         return <Spinner {...commonProps} />;
-      case CONTESTANT_STAT:
+      case "Contestants":
         return <Contestant {...commonProps} />;
-      case TEAM_STAT:
+      case "Teams":
         return <Teams {...commonProps} />;
       default:
         return null;
@@ -88,66 +90,36 @@ function Stats() {
       <Header user={user} />
       <AppBar position="static" sx={{ mb: 3, backgroundColor: "primary.main" }}>
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            aria-controls="stats-menu"
-            aria-haspopup="true"
-            onClick={handleMenuOpen}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            id="stats-menu"
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            keepMounted
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-          >
-            <MenuItem
-              onClick={() => handleMenuItemClick(BEER_CHUGGER_STAT)}
-              selected={selectedStat === BEER_CHUGGER_STAT}
-            >
-              Beer Chugger
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleMenuItemClick(SAILING_STAT)}
-              selected={selectedStat === SAILING_STAT}
-            >
-              Sailing
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleMenuItemClick(SPINNER_STAT)}
-              selected={selectedStat === SPINNER_STAT}
-            >
-              Spinner
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleMenuItemClick(CONTESTANT_STAT)}
-              selected={selectedStat === CONTESTANT_STAT}
-            >
-              Contestants
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleMenuItemClick(TEAM_STAT)}
-              selected={selectedStat === TEAM_STAT}
-            >
-              Teams
-            </MenuItem>
-          </Menu>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {selectedStat} Stats
-          </Typography>
+          <Box sx={{ display: "flex", gap: 1, flexGrow: 1}}>
+            {STATS_CONFIG.map((stat) => (
+              <Button
+                key={stat.key}
+                onClick={() => setSelectedStat(stat.key as SelectedStat)}
+                variant={selectedStat === stat.key ? "contained" : "text"}
+                sx={{
+                  color: selectedStat === stat.key ? "primary.contrastText" : "white",
+                  backgroundColor: selectedStat === stat.key ? "rgba(255,255,255,0.2)" : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
+                  minWidth: "auto",
+                  px: 2,
+                  py: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
+                <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
+                  {stat.number}
+                </Typography>
+                <Typography variant="caption" component="span" sx={{ fontSize: "0.75rem" }}>
+                  {stat.label}
+                </Typography>
+              </Button>
+            ))}
+          </Box>
         </Toolbar>
       </AppBar>
 
