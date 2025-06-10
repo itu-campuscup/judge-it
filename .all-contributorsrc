@@ -5,7 +5,7 @@
     "README.md"
   ],
   "commitType": "docs",
-  "commitConvention": "angular",
+  "commitConvention": "none",
   "contributorsPerLine": 7,
   "contributors": [
     {
