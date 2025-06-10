@@ -50,7 +50,10 @@ const Contestants: React.FC<ContestantsProps> = ({
   const [selectedPlayer1Id, setSelectedPlayer1Id] = useState<string>("");
   const [selectedPlayer2Id, setSelectedPlayer2Id] = useState<string>("");
 
-  const handlePlayerChange = (e: any, playerNumber: number) => {
+  const handlePlayerChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    playerNumber: number
+  ) => {
     if (playerNumber === 1) {
       setSelectedPlayer1Id(e.target.value);
     } else if (playerNumber === 2) {
