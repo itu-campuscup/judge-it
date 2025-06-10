@@ -4,12 +4,13 @@
 export interface Team {
   id: number;
   name: string;
-  is_out?: boolean;
   player_1_id?: number;
   player_2_id?: number;
   player_3_id?: number;
   player_4_id?: number;
+  image_url?: string;
   created_at?: string;
+  is_out?: boolean;
 }
 
 export interface Player {

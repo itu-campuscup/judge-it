@@ -10,12 +10,13 @@ import {
   getPlayerName,
   getHeatNumber,
   getTeamName,
-  getPlayerImage,
+  getPlayerImageUrl,
   getPlayerFunFact,
   getPlayer,
+  getTeamImageUrl,
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
-import type { TimeLog, Heat, Player, TimeTypeKey } from "../types";
+import type { TimeLog, Heat, Player, TimeTypeKey, Team } from "../types";
 
 /**
  * Filters and sorts time logs for a given year and time type.
@@ -142,7 +143,7 @@ export const generateRankableData = (
 ): any[] => {
   return topTimes.map((time: any) => ({
     time: time.duration,
-    imageUrl: getPlayerImage(time.playerId, players),
+    imageUrl: getPlayerImageUrl(time.playerId, players),
     playerName: getPlayerName(time.playerId, players),
     teamName: getTeamName(time.teamId, teams),
     heatNumber: getHeatNumber(time.heatId, heats),
@@ -174,18 +175,30 @@ export const generateRPMData = (
 };
 
 /**
- * Generates radar chart data with player information including images and team names.
+ * Generates radar chart data with player or team information.
+ * @param {number} playerOrTeamId - The ID of the player or team.
+ * @param {Object} bestTimes - The best times for different time types.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @param {Array} timeTypes - The list of time types.
+ * @param {boolean} isPlayer - Whether the ID belongs to a player or a team (default is true).
+ * @returns {Object} The radar chart data including player/team name, fun fact, image URL, and radar data.
  */
 export const generateRadarChartData = (
-  playerId: number,
+  playerOrTeamId: number,
   bestTimes: Record<string, number>,
   players: Player[],
-  performanceScales: typeof PERFORMANCE_SCALES,
-  timeTypes: string[]
+  teams: Team[],
+  timeTypes: string[],
+  isPlayer: boolean = true
 ) => {
-  const playerName = getPlayerName(playerId, players);
-  const funFact = getPlayerFunFact(playerId, players);
-  const imageUrl = getPlayerImage(playerId, players);
+  const name = isPlayer
+    ? getPlayerName(playerOrTeamId, players)
+    : getTeamName(playerOrTeamId, teams);
+  const funFact = isPlayer ? getPlayerFunFact(playerOrTeamId, players) : "";
+  const imageUrl = isPlayer
+    ? getPlayerImageUrl(playerOrTeamId, players)
+    : getTeamImageUrl(playerOrTeamId, teams);
 
   const timeToPercentage = (
     time: number,
@@ -201,8 +214,8 @@ export const generateRadarChartData = (
   const radarData = timeTypes.map((timeType) => {
     const time = bestTimes[timeType] || 0;
     const scaleKey = timeType.toUpperCase() as keyof typeof PERFORMANCE_SCALES;
-    const minTime = performanceScales[scaleKey]?.min || 0;
-    const maxTime = performanceScales[scaleKey]?.max || 100000;
+    const minTime = PERFORMANCE_SCALES[scaleKey]?.min || 0;
+    const maxTime = PERFORMANCE_SCALES[scaleKey]?.max || 100000;
 
     const timeInSeconds = milliToSecs(time, -1);
     if (typeof timeInSeconds !== "number") {
@@ -225,7 +238,7 @@ export const generateRadarChartData = (
   });
 
   return {
-    playerName,
+    name: name,
     funFact,
     imageUrl,
     data: radarData,
