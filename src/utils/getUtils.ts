@@ -1,4 +1,9 @@
-import { HEATS_TABLE } from "./constants";
+import {
+  HEATS_TABLE,
+  TIME_TYPE_BEER,
+  TIME_TYPE_SAIL,
+  TIME_TYPE_SPIN,
+} from "./constants";
 import {
   calculateTimes,
   removeDuplicateTimeEntries,
@@ -50,9 +55,23 @@ export const getTeamName = (teamId: number, teams: Team[]): string => {
  * @param {Array} players - The list of players.
  * @returns {string} The player image URL.
  */
-export const getPlayerImage = (playerId: number, players: Player[]): string => {
+export const getPlayerImageUrl = (
+  playerId: number,
+  players: Player[]
+): string => {
   const player = players.find((p: Player) => p.id === playerId);
   return player?.image_url || "";
+};
+
+/**
+ * Gets the team image URL given the team ID.
+ * @param {number} teamId - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The team image URL.
+ */
+export const getTeamImageUrl = (teamId: number, teams: Team[]): string => {
+  const team = teams.find((t: Team) => t.id === teamId);
+  return team?.image_url || "";
 };
 
 /**
@@ -81,13 +100,14 @@ export const getPlayer = (
  * Gets the players given the team ID.
  * @param {number} teamId - The team ID.
  * @param {Array} teams - The list of teams.
- * @returns {Array} The list of players.
+ * @returns {Array} The list of player IDs in the team.
  */
 export const getTeamPlayerIds = (
   teamId: number | string,
   teams: Team[]
 ): number[] => {
   const team = teams.filter((t: Team) => t.id === Number(teamId))[0];
+  if (!team) return [];
   return [
     team.player_1_id,
     team.player_2_id,
@@ -157,13 +177,46 @@ export const getPrevPlayerId = (
  * Get the time type given the time type string.
  * @param {string} timeTypeString - The time type string.
  * @param {Array} timeTypes - The list of time types.
- * @returns {Object} The time type object.
+ * @returns {Object|undefined} The time type object or undefined if not found.
  */
 export const getTimeType = (
   timeTypeString: string,
   timeTypes: TimeType[]
 ): TimeType | undefined => {
   return timeTypes.find((e: TimeType) => e.time_eng === timeTypeString);
+};
+
+/**
+ * Get the time type for beer.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object for beer or undefined if not found.
+ */
+export const getTimeTypeBeer = (
+  timeTypes: TimeType[]
+): TimeType | undefined => {
+  return getTimeType(TIME_TYPE_BEER, timeTypes);
+};
+
+/**
+ * Get the time type for spin.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object for spin or undefined if not found.
+ */
+export const getTimeTypeSpinner = (
+  timeTypes: TimeType[]
+): TimeType | undefined => {
+  return getTimeType(TIME_TYPE_SPIN, timeTypes);
+};
+
+/**
+ * Get the time type for sail.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object for sail or undefined if not found.
+ */
+export const getTimeTypeSail = (
+  timeTypes: TimeType[]
+): TimeType | undefined => {
+  return getTimeType(TIME_TYPE_SAIL, timeTypes);
 };
 
 /**

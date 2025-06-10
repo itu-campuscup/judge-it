@@ -1,4 +1,3 @@
-// filepath: c:\projects\judge-it\src\app\stats\Contestants.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -19,13 +18,15 @@ import {
 } from "@/utils/constants";
 import {
   getBestIntraHeatTime,
-  getPlayerName,
-  getTimeType,
+  getTimeTypeBeer,
+  getTimeTypeSail,
+  getTimeTypeSpinner,
 } from "@/utils/getUtils";
 import {
   filterTimeLogsByPlayerId,
   sortTimeLogsByTime,
   sortTimeLogsByHeat,
+  filterTimeLogsByTimeType,
 } from "@/utils/sortFilterUtils";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
 import RadarChartComponent from "./components/RadarChartComponent";
@@ -49,16 +50,19 @@ const Contestants: React.FC<ContestantsProps> = ({
   const [selectedPlayer1Id, setSelectedPlayer1Id] = useState<string>("");
   const [selectedPlayer2Id, setSelectedPlayer2Id] = useState<string>("");
 
-  const handlePlayerChange = (e: any, playerNumber: number) => {
+  const handlePlayerChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    playerNumber: number
+  ) => {
     if (playerNumber === 1) {
       setSelectedPlayer1Id(e.target.value);
     } else if (playerNumber === 2) {
       setSelectedPlayer2Id(e.target.value);
     }
   };
-  const beerTypeId = getTimeType(TIME_TYPE_BEER, timeTypes)?.id || 0;
-  const spinnerId = getTimeType(TIME_TYPE_SPIN, timeTypes)?.id || 0;
-  const sailId = getTimeType(TIME_TYPE_SAIL, timeTypes)?.id || 0;
+  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || 0;
+  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || 0;
+  const sailTypeId = getTimeTypeSail(timeTypes)?.id || 0;
   const logsFilteredByPlayer1 = filterTimeLogsByPlayerId(
     timeLogs,
     Number(selectedPlayer1Id)
@@ -74,24 +78,30 @@ const Contestants: React.FC<ContestantsProps> = ({
   const player2logsSortedByHeatAndTime = sortTimeLogsByHeat(
     sortTimeLogsByTime(logsFilteredByPlayer2)
   );
-  const player1BeerLogs = player1logsSortedByHeatAndTime.filter(
-    (log: TimeLog) => log.time_type_id === beerTypeId
-  );
-  const player1SpinnerLogs = player1logsSortedByHeatAndTime.filter(
-    (log: TimeLog) => log.time_type_id === spinnerId
-  );
-  const player1SailLogs = player1logsSortedByHeatAndTime.filter(
-    (log: TimeLog) => log.time_type_id === sailId
-  );
 
-  const player2BeerLogs = player2logsSortedByHeatAndTime.filter(
-    (log: TimeLog) => log.time_type_id === beerTypeId
+  const player1BeerLogs = filterTimeLogsByTimeType(
+    player1logsSortedByHeatAndTime,
+    beerTypeId
   );
-  const player2SpinnerLogs = player2logsSortedByHeatAndTime.filter(
-    (log: TimeLog) => log.time_type_id === spinnerId
+  const player1SpinnerLogs = filterTimeLogsByTimeType(
+    player1logsSortedByHeatAndTime,
+    spinnerTypeId
   );
-  const player2SailLogs = player2logsSortedByHeatAndTime.filter(
-    (log: TimeLog) => log.time_type_id === sailId
+  const player1SailLogs = filterTimeLogsByTimeType(
+    player1logsSortedByHeatAndTime,
+    sailTypeId
+  );
+  const player2BeerLogs = filterTimeLogsByTimeType(
+    player2logsSortedByHeatAndTime,
+    beerTypeId
+  );
+  const player2SpinnerLogs = filterTimeLogsByTimeType(
+    player2logsSortedByHeatAndTime,
+    spinnerTypeId
+  );
+  const player2SailLogs = filterTimeLogsByTimeType(
+    player2logsSortedByHeatAndTime,
+    sailTypeId
   );
 
   const player1BestTimes = {
@@ -109,7 +119,7 @@ const Contestants: React.FC<ContestantsProps> = ({
     Number(selectedPlayer1Id),
     player1BestTimes,
     players,
-    PERFORMANCE_SCALES,
+    [],
     [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
   );
 
@@ -117,7 +127,7 @@ const Contestants: React.FC<ContestantsProps> = ({
     Number(selectedPlayer2Id),
     player2BestTimes,
     players,
-    PERFORMANCE_SCALES,
+    [],
     [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
   );
 
@@ -157,7 +167,6 @@ const Contestants: React.FC<ContestantsProps> = ({
         </Select>
       </FormControl>
 
-      {/* Two radar charts side by side */}
       <Box
         sx={{
           display: "flex",
@@ -169,7 +178,7 @@ const Contestants: React.FC<ContestantsProps> = ({
       >
         <RadarChartComponent
           imageUrl={player1ChartData.imageUrl}
-          name={player1ChartData.playerName}
+          name={player1ChartData.name}
           altTextType="Fun Fact"
           altText={player1ChartData.funFact || ""}
           data={player1ChartData.data}
@@ -177,7 +186,7 @@ const Contestants: React.FC<ContestantsProps> = ({
 
         <RadarChartComponent
           imageUrl={player2ChartData.imageUrl}
-          name={player2ChartData.playerName}
+          name={player2ChartData.name}
           altTextType="Fun Fact"
           altText={player2ChartData.funFact || ""}
           data={player2ChartData.data}

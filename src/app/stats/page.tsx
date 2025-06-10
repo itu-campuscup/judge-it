@@ -17,12 +17,18 @@ import BeerChugger from "./BeerChugger";
 import Sailing from "./Sailing";
 import Spinner from "./Spinner";
 import Contestant from "./Contestants";
+import Teams from "./Teams";
 import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchData from "../hooks/useFetchData";
 
-type SelectedStat = "BeerChugger" | "Sailing" | "Spinner" | "Contestants";
+type SelectedStat =
+  | "BeerChugger"
+  | "Sailing"
+  | "Spinner"
+  | "Contestants"
+  | "Teams";
 
 function Stats() {
   const { user } = useAuth();
@@ -32,6 +38,7 @@ function Stats() {
   const SAILING_STAT: SelectedStat = "Sailing";
   const SPINNER_STAT: SelectedStat = "Spinner";
   const CONTESTANT_STAT: SelectedStat = "Contestants";
+  const TEAM_STAT: SelectedStat = "Teams";
 
   const handleMenuOpen = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
@@ -69,6 +76,8 @@ function Stats() {
         return <Spinner {...commonProps} />;
       case CONTESTANT_STAT:
         return <Contestant {...commonProps} />;
+      case TEAM_STAT:
+        return <Teams {...commonProps} />;
       default:
         return null;
     }
@@ -128,6 +137,12 @@ function Stats() {
               selected={selectedStat === CONTESTANT_STAT}
             >
               Contestants
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleMenuItemClick(TEAM_STAT)}
+              selected={selectedStat === TEAM_STAT}
+            >
+              Teams
             </MenuItem>
           </Menu>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
