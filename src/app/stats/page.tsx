@@ -111,7 +111,7 @@ function Stats() {
                   gap: 0.5,
                 }}
               >
-                <Typography variant="h6" component="span" sx={{ fontWeight: "bolt" }}>
+                <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
                   {stat.number}
                 </Typography>
                 <Typography variant="caption" component="span" sx={{ fontSize: "0.75rem" }}>
