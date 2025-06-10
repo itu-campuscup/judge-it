@@ -31,41 +31,43 @@ The board is open to suggestions for other statistics that could be included in 
 
 ## Table of Contents
 
-- [🪪 License](#license)
-- [➕ Contributing](#contributing)
-- [🏃‍➡️ Getting Started](#getting-started)
-- [⚡ Database](#database)
-- [🔺 Deploy on Vercel](#vercel)
-- [⭐ Contributors](#contributors)
+- [🪪 License](#-license)
+- [➕ Contributing](#-contributing)
+- [🏃‍➡️ Getting Started](#%EF%B8%8F-getting-started)
+- [⚡ Database](#-database)
+- [🔺 Deploy on Vercel](#-deploy-on-vercel)
+- [⭐ Contributors](#-contributors)
 
-## 🪪 License {#license}
+## 🪪 License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
 
-## ➕ Contributing {#contributing}
+## ➕ Contributing
 
 To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md) file.
 
-## 🏃‍➡️ Getting Started {#getting-started}
+## 🏃‍➡️ Getting Started
 
 To get started with the project, please read the [Getting Started](./CONTRIBUTING.md#getting-started) section in the [CONTRIBUTING](./CONTRIBUTING.md) file.
 
-## ⚡ Database {#database}
+## ⚡ Database
 
 This project uses [Supabase](https://supabase.com/) as a database.
 Thus no local database is needed.
 
-### ⚡ Connecting to Supabase {#database-supabase}
+### ⚡ Connecting to Supabase
 
 To set up Supabase for the project, please read the [Connecting to Supabase](./CONTRIBUTING.md#connecting-to-supabase) section in the [CONTRIBUTING](./CONTRIBUTING.md) file.
 
-## 🔺 Deploy on Vercel {#vercel}
+## 🔺 Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## ⭐ Contributors {#contributors}
+## ⭐ Contributors
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -83,3 +85,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
