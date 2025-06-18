@@ -21,7 +21,7 @@
 
 <p align="center">
   <a href="./CONTRIBUTING.md">Get Started</a> -
-  <a href="./CONTRIBUTING.md#suggesting-enhancements">Suggest a enhancement</a> -
+  <a href="./CONTRIBUTING.md#suggesting-enhancements">Suggest an enhancement</a> -
   <a href="./CONTRIBUTING.md#reporting-bugs">Report a bug</a> -
   <a href="./SECURITY.md">Report a vulnerability</a>
 </p>
