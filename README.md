@@ -4,7 +4,28 @@
 
 <h1 align="center">⚓ Judge IT</h1>
 
-[![All Contributors](https://img.shields.io/github/all-contributors/itu-campuscup/judge-it?color=214186&style=flat-square)](#contributors) [![License](https://img.shields.io/github/license/itu-campuscup/judge-it?color=214186&style=flat-square)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/) [![Material-UI](https://img.shields.io/badge/Material--UI-0081CB?style=flat-square&logo=material-ui&logoColor=white)](https://mui.com/) [![Bun](https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white)](https://bun.sh/) [![GitHub issues](https://img.shields.io/github/issues/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/pulls) [![Last commit](https://img.shields.io/github/last-commit/itu-campuscup/judge-it?color=214186&style=flat-square)](https://github.com/itu-campuscup/judge-it/commits)
+<p align="center">
+  <img alt="All Contributors" src="https://img.shields.io/github/all-contributors/itu-campuscup/judge-it" />
+  <img alt="License" src="https://img.shields.io/github/license/itu-campuscup/judge-it" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white" />
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white" />
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white" />
+  <img alt="Material-UI" src="https://img.shields.io/badge/Material--UI-0081CB?logo=material-ui&logoColor=white" />
+  <img alt="Bun" src="https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white" />
+</p>
+<p align="center">
+  <img alt="GitHub issues" src="https://img.shields.io/github/issues/itu-campuscup/judge-it" />
+  <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/itu-campuscup/judge-it" />
+  <img alt="Commit activity" src="https://img.shields.io/github/commit-activity/m/itu-campuscup/judge-it?style" />
+</p>
+
+<p align="center">
+  <a href="./CONTRIBUTING.md">Get Started</a> -
+  <a href="./CONTRIBUTING.md#suggesting-enhancements">Suggest a enhancement</a> -
+  <a href="./CONTRIBUTING.md#reporting-bugs">Report a bug</a> -
+  <a href="./SECURITY.md">Report a vulnerability</a>
+</p>
+<br />
 
 Welcome to **Judge IT**!
 This project was created and initiated by [the treasurer](https://github.com/lucasfth) of the [CampusCup 2024-2025 board](a "Chair: Andreas Guldborg, Vice: Lisa Hauge, Treasurer: Lucas Hanson, Sponsor: Carmen Nielsen, PR: Natalie Petersen") for the 2025 CampusCup event at the IT University of Copenhagen.
@@ -12,11 +33,11 @@ The board will be responsible for the project, while the volunteers are welcome 
 
 ## ⚓ Why create Judge IT?
 
-The judges had highlighted the issues of identifying the winners, when a race was very close.
-Thus, the discussed the idea of creating a web application that would allow the judges to only focus on a single team at a time.
+The judges had highlighted the issues of identifying the winners when a race was very close.
+Thus, the idea of creating a web application was discussed to help the judges focus on a single team at a time.
 
 But while creating a whole new web application, why not make the CampusCup event even more fun for the crowd?
-The idea was to create a web app that could thus be used by the judges but also display fun statistics for the crowd to follow along with.
+The idea was to create a web app that could be used by the judges but also display fun statistics for the crowd to follow along with.
 
 The idea is to include the following statistics:
 
