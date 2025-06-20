@@ -30,14 +30,14 @@ import {
 } from "@/utils/sortFilterUtils";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
 import RadarChartComponent from "./components/RadarChartComponent";
-import type { TimeLog, Player, Team, Heat } from "@/types";
+import type { TimeLog, Player, Team, Heat, TimeType } from "@/types";
 
 interface ContestantsProps {
   timeLogs: TimeLog[];
   players: Player[];
   teams: Team[];
   heats: Heat[];
-  timeTypes: any[];
+  timeTypes: TimeType[];
 }
 
 const Contestants: React.FC<ContestantsProps> = ({

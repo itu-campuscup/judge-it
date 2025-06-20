@@ -20,13 +20,15 @@ import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchData from "../hooks/useFetchData";
+import CurrentHeat from "./CurrentHeat";
 
 type SelectedStat =
   | "BeerChugger"
   | "Sailing"
   | "Spinner"
   | "Contestants"
-  | "Teams";
+  | "Teams"
+  | "Heat";
 
 const STATS_CONFIG = [
   { key: "BeerChugger", label: "Beer Chugger", number: 1 },
@@ -34,6 +36,7 @@ const STATS_CONFIG = [
   { key: "Spinner", label: "Spinner", number: 3 },
   { key: "Contestants", label: "Contestants", number: 4 },
   { key: "Teams", label: "Teams", number: 5 },
+  { key: "Heat", label: "Heat", number: 6 },
 ] as const;
 
 function Stats() {
@@ -80,6 +83,8 @@ function Stats() {
         return <Contestant {...commonProps} />;
       case "Teams":
         return <Teams {...commonProps} />;
+      case "Heat":
+        return <CurrentHeat alert={undefined} {...commonProps} />;
       default:
         return null;
     }

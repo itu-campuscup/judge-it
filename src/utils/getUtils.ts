@@ -119,7 +119,7 @@ export const getTeamPlayerIds = (
 /**
  * Get current heat
  * @param {Object} alert - The alert object to set error messages (optional).
- * @returns {Object} The current heat.
+ * @returns {Promise<Heat|null>} The current heat or null if not found.
  */
 export const getCurrentHeat = async (alert?: any): Promise<Heat | null> => {
   const { data, error } = await supabase
