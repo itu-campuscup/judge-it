@@ -1,5 +1,5 @@
 import React from "react";
-import { AppBar, Toolbar, Button, Menu, MenuItem } from "@mui/material";
+import { AppBar, Toolbar, Button, Menu, MenuItem, Divider } from "@mui/material";
 import { supabase } from "@/SupabaseClient";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -35,11 +35,16 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                 onClose={() => handleMenuToggle()}
               >
                 <MenuItem onClick={() => handleMenuToggle()}>
-                  <Link href="/stats">Stats</Link>
+                  <Link href="/stats" style={{ textDecoration: "none", color: "inherit" }}>
+                    Stats Page
+                  </Link>
                 </MenuItem>
                 <MenuItem onClick={() => handleMenuToggle()}>
-                  <Link href="/judge-it">Judge</Link>
+                  <Link href="/judge-it" style={{ textDecoration: "none", color: "inherit" }}>
+                    Judge Page
+                  </Link>
                 </MenuItem>
+                <Divider />
                 <MenuItem onClick={() => {handleMenuToggle();handleLogout();}}>Logout</MenuItem>
               </Menu>
             </>
