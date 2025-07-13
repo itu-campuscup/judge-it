@@ -100,6 +100,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://linktr.ee/lucashanson"><img src="https://avatars.githubusercontent.com/u/94063597?v=4?s=100" width="100px;" alt="Lucas Hanson"/><br /><sub><b>Lucas Hanson</b></sub></a><br /><a href="#code-lucasfth" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/anderswagner"><img src="https://avatars.githubusercontent.com/u/12821408?v=4?s=100" width="100px;" alt="Anders Wagner"/><br /><sub><b>Anders Wagner</b></sub></a><br /><a href="#code-anderswagner" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/NatalieClaraPetersen"><img src="https://avatars.githubusercontent.com/u/133771163?v=4?s=100" width="100px;" alt="NatalieCP"/><br /><sub><b>NatalieCP</b></sub></a><br /><a href="#code-NatalieClaraPetersen" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
