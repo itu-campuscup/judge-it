@@ -69,6 +69,14 @@ export interface StatsData {
   fastestTime: number;
 }
 
+export type ParticipantsStatusType = "active" | "inactive" | "upcomming";
+
+export interface participants_status {
+  id: number;
+  status: ParticipantsStatusType;
+  have_finished: boolean;
+}
+
 export interface YearSelectorProps {
   selectedYear: number;
   onYearChange: (year: number) => void;

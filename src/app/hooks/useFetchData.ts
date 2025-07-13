@@ -6,6 +6,7 @@ import {
   TEAMS_TABLE,
   TIME_LOGS_TABLE,
   TIME_TYPES_TABLE,
+  PARTICIPANTS_STATUS_TABLE
 } from "@/utils/constants";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
 
@@ -160,6 +161,16 @@ const useFetchData = (): UseFetchDataReturn => {
       )
       .subscribe();
 
+    const participantsTypesListener = supabase
+      .channel("public:participants_status")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: PARTICIPANTS_STATUS_TABLE },
+        fetchTimeTypes
+      )
+      .subscribe();
+
+
     // Cleanup function
     return () => {
       supabase.removeChannel(timeLogsListener);
@@ -167,6 +178,8 @@ const useFetchData = (): UseFetchDataReturn => {
       supabase.removeChannel(heatsListener);
       supabase.removeChannel(teamsListener);
       supabase.removeChannel(timeTypesListener);
+      supabase.removeChannel(participantsTypesListener);
+
     };
   }, []);
 
