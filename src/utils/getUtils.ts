@@ -28,6 +28,24 @@ export const getPlayerName = (
 };
 
 /**
+ * Gets the player name with team name given the player ID.
+ * @param {number} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The player name - team name.
+ */
+export const getPlayerNameWithTeam = (
+  playerId: number | string,
+  players: Player[],
+  teams: Team[]
+): string => {
+  if (typeof playerId !== "number") playerId = parseInt(playerId);
+  const player = players.find((p) => p.id === playerId);
+  const team = getPlayerTeam(playerId, teams)
+  return player && team ? `${player.name} - ${team.name}` : "";
+}
+
+/**
  * Gets the heat number given the heat ID.
  * @param {number} heatId - The heat ID.
  * @param {Array} heats - The list of heats.
@@ -258,7 +276,7 @@ export const getBestIntraHeatTime = (timeLogs: TimeLog[]): any => {
  * Get the fun fact of a player given their ID.
  * @param {number} playerId - The player ID.
  * @param {Array} players - The list of players.
- * @returns {string|null} The fun fact of the player or null if not found.
+ * @returns {string|null} - The fun fact of the player or null if not found.
  */
 export const getPlayerFunFact = (
   playerId: number,
@@ -267,3 +285,22 @@ export const getPlayerFunFact = (
   const player = players.find((p: Player) => p.id === playerId);
   return player?.fun_fact || null;
 };
+
+/**
+ * Gets the team for a player given their ID
+ * @param playerId - The player ID
+ * @param teams - The list of teams.
+ * @returns {Team|null} - The team for the player or null if not found.
+ */
+export const getPlayerTeam = (
+  playerId: number | string,
+  teams: Team[]
+): Team | null => {
+  const team = teams.find((t: Team) =>
+    t.player_1_id === playerId ||
+    t.player_2_id === playerId ||
+    t.player_3_id === playerId ||
+    t.player_4_id === playerId
+  )
+  return team ? team : null
+}
