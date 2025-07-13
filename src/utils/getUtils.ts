@@ -11,6 +11,7 @@ import {
 import { splitTimeLogsPerHeat } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
+import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
 
 /**
  * Gets the player name given the player ID.
@@ -114,6 +115,25 @@ export const getTeamPlayerIds = (
     team.player_3_id,
     team.player_4_id,
   ].filter((id) => id !== null && id !== undefined) as number[];
+};
+
+/**
+ * Get players given the team ID.
+ * @param teamId - The team ID.
+ * @param teams - The list of teams.
+ * @param players - The list of players.
+ * @returns {Array} The list of players in the team.
+ */
+export const getTeamPlayer = (
+  teamId: number | string,
+  teams: Team[],
+  players: Player[]
+): Player[] => {
+  const playerIds = getTeamPlayerIds(teamId, teams);
+
+  return playerIds
+    .map((pId) => getPlayer(pId, players))
+    .filter((player): player is Player => player !== undefined);
 };
 
 /**

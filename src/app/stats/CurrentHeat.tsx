@@ -15,6 +15,8 @@ import {
 import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
 import {
   getCurrentHeat,
+  getTeamPlayer,
+  getTeamPlayerIds,
   getTimeTypeBeer,
   getTimeTypeSail,
   getTimeTypeSpinner,
@@ -116,6 +118,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
       const teamIds = [
         ...new Set(currentHeatTimeLogs.map((log) => log.team_id)),
       ];
+      console.log("Found team IDs:", teamIds);
 
       const processedTeams: TeamData[] = teamIds
         .filter((teamId): teamId is number => typeof teamId === "number")
@@ -125,83 +128,94 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
             filterTimeLogsByTeamId(currentHeatTimeLogs, teamId)
           );
 
-        const beerLogs = filterTimeLogsByTimeType(teamLogs, beerTypeId);
-        const sailLogs = filterTimeLogsByTimeType(teamLogs, sailTypeId);
-        const spinLogs = filterTimeLogsByTimeType(teamLogs, spinnerTypeId);
+          console.log("Team ID:", teamId);
 
-        // Process players data - assuming 4 players per team
-        const playersData: PlayerProgress[] = [];
-        const teamPlayers = players.filter((p) => p.team_id === teamId);
+          const beerLogs = filterTimeLogsByTimeType(teamLogs, beerTypeId);
+          const sailLogs = filterTimeLogsByTimeType(teamLogs, sailTypeId);
+          const spinLogs = filterTimeLogsByTimeType(teamLogs, spinnerTypeId);
 
-        teamPlayers.forEach((player, index) => {
-          // Calculate indices based on race progression
-          const sail1stIndex = index * 2 + 1;
-          const beerIndex = index * 2 + 1;
-          const spinIndex = index * 2 + 1;
-          const sail2ndIndex = index * 2 + 2;
+          console.log("\tBeer Logs:", beerLogs);
+          console.log("\tSail Logs:", sailLogs);
+          console.log("\tSpin Logs:", spinLogs);
 
-          const sail1stTime = sailLogs[sail1stIndex]?.time || null;
-          const beerTime = beerLogs[beerIndex]?.time || null;
-          const spinTime = spinLogs[spinIndex]?.time || null;
-          const sail2ndTime = sailLogs[sail2ndIndex]?.time || null;
+          // Process players data - assuming 4 players per team
+          const playersData: PlayerProgress[] = [];
+          const teamPlayers = getTeamPlayer(teamId, teams, players);
 
-          // Calculate progress and current stage
-          let currentStage: PlayerProgress["currentStage"] = "waiting";
-          let progress = 0;
+          console.log("\tTeam Players:", teamPlayers);
 
-          if (sail2ndTime) {
-            currentStage = "finished";
-            progress = 100;
-          } else if (spinTime) {
-            currentStage = "sailing-back";
-            progress = 75;
-          } else if (beerTime) {
-            currentStage = "spinning";
-            progress = 50;
-          } else if (sail1stTime) {
-            currentStage = "drinking";
-            progress = 25;
-          } else {
-            const hasStarted = sailLogs.some(
-              (log) => log.player_id === player.id
-            );
-            if (hasStarted) {
-              currentStage = "sailing";
-              progress = 12.5;
+          teamPlayers.forEach((player, index) => {
+            // Calculate indices based on race progression
+            const sail1stIndex = index * 2 + 1;
+            const beerIndex = index * 2 + 1;
+            const spinIndex = index * 2 + 1;
+            const sail2ndIndex = index * 2 + 2;
+
+            const sail1stTime = sailLogs[sail1stIndex]?.time || null;
+            console.log("\tSail 1st Time:", sail1stTime);
+            const beerTime = beerLogs[beerIndex]?.time || null;
+            const spinTime = spinLogs[spinIndex]?.time || null;
+            const sail2ndTime = sailLogs[sail2ndIndex]?.time || null;
+
+            // Calculate progress and current stage
+            let currentStage: PlayerProgress["currentStage"] = "waiting";
+            let progress = 0;
+
+            if (sail2ndTime) {
+              currentStage = "finished";
+              progress = 100;
+            } else if (spinTime) {
+              currentStage = "sailing-back";
+              progress = 75;
+            } else if (beerTime) {
+              currentStage = "spinning";
+              progress = 50;
+            } else if (sail1stTime) {
+              currentStage = "drinking";
+              progress = 25;
+            } else {
+              const hasStarted = sailLogs.some(
+                (log) => log.player_id === player.id
+              );
+              if (hasStarted) {
+                currentStage = "sailing";
+                progress = 12.5;
+              }
             }
-          }
 
-          const sail1stTimeMilli = timeToMilli(sail1stTime || "");
-          const beerTimeMilli = timeToMilli(beerTime || "");
-          const spinTimeMilli = timeToMilli(spinTime || "");
-          const sail2ndTimeMilli = timeToMilli(sail2ndTime || "");
-          const totalTimeMilli = timeToMilli(sail2ndTime || "");
+            console.log("Log time: ", sail1stTime);
 
-          playersData.push({
-            playerId: player.id,
-            playerName: player.name,
-            sail1stTime: sail1stTimeMilli,
-            beerTime: beerTimeMilli,
-            spinTime: spinTimeMilli,
-            sail2ndTime: sail2ndTimeMilli,
-            totalTime: totalTimeMilli,
-            currentStage,
-            progress,
+            const sail1stTimeMilli = timeToMilli(sail1stTime || "00:00:00.000");
+            const beerTimeMilli = timeToMilli(beerTime || "00:00:00.000");
+            const spinTimeMilli = timeToMilli(spinTime || "00:00:00.000");
+            const sail2ndTimeMilli = timeToMilli(sail2ndTime || "00:00:00.000");
+            const totalTimeMilli = timeToMilli(sail2ndTime || "00:00:00.000");
+
+            playersData.push({
+              playerId: player.id,
+              playerName: player.name,
+              sail1stTime: sail1stTimeMilli,
+              beerTime: beerTimeMilli,
+              spinTime: spinTimeMilli,
+              sail2ndTime: sail2ndTimeMilli,
+              totalTime: totalTimeMilli,
+              currentStage,
+              progress,
+            });
           });
+
+          const totalProgress =
+            playersData.reduce((sum, p) => sum + p.progress, 0) /
+            playersData.length;
+
+          return {
+            teamId,
+            teamName: team?.name || `Team ${teamId}`,
+            teamImage: team?.image_url,
+            players: playersData,
+            totalProgress,
+          };
         });
-
-        const totalProgress =
-          playersData.reduce((sum, p) => sum + p.progress, 0) /
-          playersData.length;
-
-        return {
-          teamId,
-          teamName: team?.name || `Team ${teamId}`,
-          teamImage: team?.image_url,
-          players: playersData,
-          totalProgress,
-        };
-      });
 
       setTeamsData(
         processedTeams.sort((a, b) => b.totalProgress - a.totalProgress)
