@@ -6,7 +6,7 @@ import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import SetHeat from "./SetHeat";
 import { getCurrentHeat } from "@/utils/getUtils";
-import { TIME_TYPE_SAIL, TIME_LOGS_TABLE } from "@/utils/constants";
+import { TIME_TYPE_SAIL, TIME_LOGS_TABLE, PARTICIPANTS_STATUS_TABLE } from "@/utils/constants";
 import type { Team, Player, TimeType } from "@/types";
 
 interface MainJudgeProps {
@@ -114,6 +114,39 @@ const MainJudge: React.FC<MainJudgeProps> = ({
     return true;
   };
 
+  function setParticipantStatus() {
+
+    const updateParticipantsStatus = async (): Promise<void> => {
+      try {
+        const teamIdParsed = parseInt(selectedTeamId);
+
+        const { error } = await supabase
+          .from(PARTICIPANTS_STATUS_TABLE)
+          .update({ status: 'upcoming' })
+          .eq("id", selectedTeamId)
+
+
+
+        if (error) throw new Error("Update 1 failed: " + error.message);
+
+        const { error: error2 } = await supabase
+          .from(PARTICIPANTS_STATUS_TABLE)
+          .update({ status: 'upcoming' })
+          .eq("id", parentTeam);
+
+        if (error2) throw new Error("Update 2 failed: " + error2.message);
+
+        console.log("Status updates completed.");
+      } catch (err) {
+        console.error("💥 updateParticipantsStatus threw an error:", err);
+      }
+    };
+
+
+    updateParticipantsStatus()
+      
+  }
+
   return (
     <>
       <AlertComponent
@@ -152,7 +185,10 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       <Button
         variant="contained"
         color="primary"
-        onClick={() => handleGlobalStart()}
+        onClick={() => {
+          setParticipantStatus()        
+          //handleGlobalStart()
+        }}
       >
         Global start
       </Button>
