@@ -51,6 +51,14 @@ export const TIME_LOGS_TABLE: string = "time_logs";
 export const TIME_TYPES_TABLE: string = "time_types";
 
 /**
+ * @constant {string} PARTICIPANTS_STATUS_TABLE
+ * @description Constant representing the name of the participants status table in the database.
+ * This is used for querying and managing the status of participants in the event.
+ */
+export const PARTICIPANTS_STATUS_TABLE: string = "team_participation_status";
+
+
+/**
  * @constant {string} TEAMS_TABLE
  * @description Constant representing the name of the teams table in the database.
  * This is used for querying and managing teams participating in the event.
