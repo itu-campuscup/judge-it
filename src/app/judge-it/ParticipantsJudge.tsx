@@ -190,7 +190,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
           color="primary"
           className={styles.timeTypeButton}
           onClick={() => {
-            //handleStartStop(prevPlayerId)
+            handleStartStop(prevPlayerId)
             changeParticipantStatus()
           }}
         >

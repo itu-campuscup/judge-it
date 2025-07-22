@@ -187,7 +187,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         color="primary"
         onClick={() => {
           setParticipantStatus()        
-          //handleGlobalStart()
+          handleGlobalStart()
         }}
       >
         Global start
