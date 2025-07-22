@@ -14,6 +14,7 @@ import {
   getPlayerFunFact,
   getPlayer,
   getTeamImageUrl,
+  getPlayerNameWithTeam,
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
 import type { TimeLog, Heat, Player, TimeTypeKey, Team } from "../types";
@@ -193,7 +194,7 @@ export const generateRadarChartData = (
   isPlayer: boolean = true
 ) => {
   const name = isPlayer
-    ? getPlayerName(playerOrTeamId, players)
+    ? getPlayerNameWithTeam(playerOrTeamId, players, teams)
     : getTeamName(playerOrTeamId, teams);
   const funFact = isPlayer ? getPlayerFunFact(playerOrTeamId, players) : "";
   const imageUrl = isPlayer
