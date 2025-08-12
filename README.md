@@ -27,6 +27,11 @@
 </p>
 <br />
 
+> **⚠️ Code Freeze:**  
+> This repository is under a **code freeze** starting **August 30, 2025**.  
+> No new features or non-critical changes will be accepted after this date.  
+> Only critical bug fixes and security updates will be considered.
+
 Welcome to **Judge IT**!
 This project was created and initiated by [the treasurer](https://github.com/lucasfth) of the [CampusCup 2024-2025 board](a "Chair: Andreas Guldborg, Vice: Lisa Hauge, Treasurer: Lucas Hanson, Sponsor: Carmen Nielsen, PR: Natalie Petersen") for the 2025 CampusCup event at the IT University of Copenhagen.
 The board will be responsible for the project, while the volunteers are welcome to contribute.
