@@ -292,14 +292,6 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
     }
   }
 
-  if (!currentHeat) {
-    return (
-      <Paper elevation={2} sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="h4">No heat selected</Typography>
-      </Paper>
-    );
-  }
-
   return (
     <Box
       sx={{

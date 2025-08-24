@@ -7,11 +7,8 @@ import type { Heat } from "../types";
  * @returns {number} The time in milliseconds.
  */
 export const timeToMilli = (time: string): number => {
-  // console.log("\tTimeToMilli prre: ", time);
   const [hours, minutes, seconds] = time.split(":");
-  // console.log("\tTimeToMilli pre: ", hours, minutes, seconds);
   const [secs, millis] = seconds.split(".");
-  // console.log("\tTimeToMilli post: ", secs, millis);
   const millisValue = parseInt(millis ? millis.substring(0, 3) : "0");
   return (
     parseInt(hours) * 60 * 60 * 1000 +
