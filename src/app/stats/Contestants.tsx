@@ -21,6 +21,7 @@ import {
   getTimeTypeBeer,
   getTimeTypeSail,
   getTimeTypeSpinner,
+  getPlayerNameWithTeam
 } from "@/utils/getUtils";
 import {
   filterTimeLogsByPlayerId,
@@ -119,7 +120,7 @@ const Contestants: React.FC<ContestantsProps> = ({
     Number(selectedPlayer1Id),
     player1BestTimes,
     players,
-    [],
+    teams,
     [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
   );
 
@@ -127,7 +128,7 @@ const Contestants: React.FC<ContestantsProps> = ({
     Number(selectedPlayer2Id),
     player2BestTimes,
     players,
-    [],
+    teams,
     [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
   );
 
@@ -146,7 +147,7 @@ const Contestants: React.FC<ContestantsProps> = ({
         >
           {players.map((player) => (
             <MenuItem key={player.id} value={player.id}>
-              {player.name}
+              {getPlayerNameWithTeam(player.id, players, teams)}
             </MenuItem>
           ))}
         </Select>
@@ -161,7 +162,7 @@ const Contestants: React.FC<ContestantsProps> = ({
         >
           {players.map((player) => (
             <MenuItem key={player.id} value={player.id}>
-              {player.name}
+              {getPlayerNameWithTeam(player.id, players, teams)}
             </MenuItem>
           ))}
         </Select>

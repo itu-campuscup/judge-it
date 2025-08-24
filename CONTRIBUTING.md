@@ -158,16 +158,17 @@ Once you have access do the following in the Supabase dashboard:
 2. Click on `Project Settings` in the sidebar
 3. Click on `Data API`
 4. Copy the `URL`
-5. Copy the `anon public` key
-6. Create a `.env.local` file in the root of the project
-7. Add the following lines to the `.env.local` file:
+5. Click on `API Key` in the sidebar
+7. Copy the `anon public` key
+8. Create a `.env.local` file in the root of the project
+9. Add the following lines to the `.env.local` file:
 
     ```env
     NEXT_PUBLIC_SUPABASE_URL=<url>
     NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon public key>
     ```
 
-8. Save the file
+10. Save the file
 
 You now have access to the Supabase database.
 
