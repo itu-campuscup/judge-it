@@ -95,15 +95,21 @@ function Stats() {
       <Header user={user} />
       <AppBar position="static" sx={{ mb: 3, backgroundColor: "primary.main" }}>
         <Toolbar>
-          <Box sx={{ display: "flex", gap: 1, flexGrow: 1}}>
+          <Box sx={{ display: "flex", gap: 1, flexGrow: 1 }}>
             {STATS_CONFIG.map((stat) => (
               <Button
                 key={stat.key}
                 onClick={() => setSelectedStat(stat.key as SelectedStat)}
                 variant={selectedStat === stat.key ? "contained" : "text"}
                 sx={{
-                  color: selectedStat === stat.key ? "primary.contrastText" : "white",
-                  backgroundColor: selectedStat === stat.key ? "rgba(255,255,255,0.2)" : "transparent",
+                  color:
+                    selectedStat === stat.key
+                      ? "primary.contrastText"
+                      : "white",
+                  backgroundColor:
+                    selectedStat === stat.key
+                      ? "rgba(255,255,255,0.2)"
+                      : "transparent",
                   "&:hover": {
                     backgroundColor: "rgba(255, 255, 255, 0.1)",
                   },
@@ -116,10 +122,18 @@ function Stats() {
                   gap: 0.5,
                 }}
               >
-                <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  component="span"
+                  sx={{ fontWeight: "bold" }}
+                >
                   {stat.number}
                 </Typography>
-                <Typography variant="caption" component="span" sx={{ fontSize: "0.75rem" }}>
+                <Typography
+                  variant="caption"
+                  component="span"
+                  sx={{ fontSize: "0.75rem" }}
+                >
                   {stat.label}
                 </Typography>
               </Button>

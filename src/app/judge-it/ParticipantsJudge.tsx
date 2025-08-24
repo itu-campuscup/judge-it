@@ -53,7 +53,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       setCurrentHeat(some);
     };
     loadCurrentHeat();
-  }, []);
+  }, [timeLogs]);
   const prevPlayerId = currentHeat
     ? getPrevPlayerId(selectedTeam?.id || 0, currentHeat, timeLogs)
     : "No previous player";
@@ -80,6 +80,12 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     }
 
     const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
+      {
+        team_id: selectedTeam?.id,
+        player_id: prevPlayerId,
+        time_type_id: timeTypeId,
+        heat_id: currentHeat.id,
+      },
       {
         team_id: selectedTeam?.id,
         player_id: typeof playerId === "string" ? parseInt(playerId) : playerId,
