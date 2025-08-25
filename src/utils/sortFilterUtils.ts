@@ -15,6 +15,19 @@ export const filterTimeLogsByPlayerId = (
 };
 
 /**
+ * Filters time logs by team ID
+ * @param {Array} timeLogs - The list of time logs.
+ * @param {number} teamId - The team ID to filter by.
+ * @returns {Array} The filtered time logs.
+ */
+export const filterTimeLogsByTeamId = (
+  timeLogs: TimeLog[],
+  teamId: number
+): TimeLog[] => {
+  return timeLogs.filter((log: TimeLog) => log.team_id === teamId);
+}
+
+/**
  * Sorts time logs by heat ID.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by heat ID.
@@ -24,9 +37,9 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 };
 
 /**
- * Sorts time logs by time.
+ * Sorts time logs by time in ascending order.
  * @param {Array} timeLogs - The list of time logs.
- * @returns {Array} The sorted time logs by time.
+ * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
   return timeLogs.sort(
@@ -71,4 +84,14 @@ export const splitTimeLogsPerHeat = (timeLogs: TimeLog[]): TimeLog[][] => {
   }
 
   return heatSplitLogs;
+};
+
+/**
+ * Filters time logs by heat ID.
+ * @param {Array} timeLogs - The list of time logs.
+ * @param {number} heatId - The heat ID to filter by.
+ * @returns {Array} The filtered time logs for the specified heat ID.
+ */
+export const filterTimeLogsByHeatId = (timeLogs: TimeLog[], heatId: number): TimeLog[] => {
+  return timeLogs.filter((log: TimeLog) => log.heat_id === heatId);
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { Heat, Player, Team, TimeLog } from "@/types";
+import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
 import {
   getBestIntraHeatTime,
   getTeamPlayerIds,
@@ -37,7 +37,7 @@ interface TeamsProps {
   players: Player[];
   teams: Team[];
   heats: Heat[];
-  timeTypes: any[];
+  timeTypes: TimeType[];
 }
 
 const Teams: React.FC<TeamsProps> = ({
