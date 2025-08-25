@@ -13,10 +13,11 @@ import {
 } from "@/utils/getUtils";
 import {
   HEATS_TABLE,
+  PARTICIPANTS_STATUS_TABLE,
   TIME_LOGS_TABLE,
   TIME_TYPE_SAIL,
 } from "@/utils/constants";
-import type { Team, Player, TimeType, TimeLog, Heat } from "@/types";
+import type { Team, Player, TimeType, TimeLog, Heat, participants_status } from "@/types";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
@@ -35,6 +36,8 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   timeLogs = [],
   alert,
 }) => {
+  const [participants_status, setParticipantsStatus] = useState<participants_status[]>([]);
+
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
     "error"
@@ -63,6 +66,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       : prevPlayerId;
   console.log("Current heat: ", currentHeat);
   console.log("Prev player: ", prevPlayerId);
+
   const handleStartStop = async (playerId: number | string | null) => {
     if (!playerId || !currentHeat) {
       setAlertOpen(true);
@@ -105,9 +109,78 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     setAlertSeverity("success");
     setAlertText(
       "Inserted log of type: " +
-        (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown")
+      (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown")
     );
   };
+
+
+
+  function changeParticipantStatus() {
+
+    console.log("changeParticipantStatus CALLED");
+
+    const fetchParticipantsStatus = async (): Promise<void> => {
+      const { data, error } = await supabase.from(PARTICIPANTS_STATUS_TABLE)
+        .select("*")
+        .eq('status', 'upcoming');
+
+
+      if (error) {
+        const err = "Error fetching participants status:" + error.message;
+        setAlertOpen(true);
+        setAlertSeverity("error");
+        setAlertText(err);
+        console.error(err);
+      } else {
+        setParticipantsStatus(data || []);
+      }
+
+      const verification_check = data?.filter((data) => data.team_id !== selectedTeam?.id && data.have_finished === true)
+      console.log("Fetched participants status: ", data);
+
+      if (verification_check && verification_check.length > 0) {
+        // if the data where not selectedTeam?.id have have_finished=true
+        // then change the selectedTeam to status "inactive" and other team to "active". other team have_finished=false
+        console.log("Last team have finished, changing status to inactive");
+
+        await supabase
+          .from(PARTICIPANTS_STATUS_TABLE)
+          .update({ status: 'inactive' })
+          .eq("id", selectedTeam?.id);
+        await supabase
+          .from(PARTICIPANTS_STATUS_TABLE)
+          .update({ have_finished: false, status: 'active' })
+          .eq("have_finished", true)
+      }
+      else {
+        console.log("First team have finished, changing status to active");
+
+        // else the data where not selectedTeam?.id have have_finished=false
+        // then change the selectedTeam to have_finished "true" 
+        await supabase
+          .from(PARTICIPANTS_STATUS_TABLE)
+          .update({ have_finished: "TRUE" })
+          .eq("id", selectedTeam?.id);
+      }
+
+
+
+
+      const participantsStatusListener = supabase
+        .channel("public:participants_status")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: PARTICIPANTS_STATUS_TABLE },
+          fetchParticipantsStatus
+        )
+        .subscribe();
+
+      await supabase.removeChannel(participantsStatusListener);
+    }
+    fetchParticipantsStatus();
+
+  }
+
 
   return (
     <>
@@ -122,7 +195,10 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
           variant="contained"
           color="primary"
           className={styles.timeTypeButton}
-          onClick={() => handleStartStop(prevPlayerId)}
+          onClick={() => {
+            handleStartStop(prevPlayerId)
+            changeParticipantStatus()
+          }}
         >
           STOP {prevPlayerName} {TIME_TYPE_SAIL}
         </Button>
