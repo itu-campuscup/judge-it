@@ -42,9 +42,9 @@ export const getPlayerNameWithTeam = (
 ): string => {
   if (typeof playerId !== "number") playerId = parseInt(playerId);
   const player = players.find((p) => p.id === playerId);
-  const team = getPlayerTeam(playerId, teams)
+  const team = getPlayerTeam(playerId, teams);
   return player && team ? `${player.name} - ${team.name}` : "";
-}
+};
 
 /**
  * Gets the heat number given the heat ID.
@@ -316,11 +316,12 @@ export const getPlayerTeam = (
   playerId: number | string,
   teams: Team[]
 ): Team | null => {
-  const team = teams.find((t: Team) =>
-    t.player_1_id === playerId ||
-    t.player_2_id === playerId ||
-    t.player_3_id === playerId ||
-    t.player_4_id === playerId
-  )
-  return team ? team : null
-}
+  const team = teams.find(
+    (t: Team) =>
+      t.player_1_id === playerId ||
+      t.player_2_id === playerId ||
+      t.player_3_id === playerId ||
+      t.player_4_id === playerId
+  );
+  return team ? team : null;
+};
