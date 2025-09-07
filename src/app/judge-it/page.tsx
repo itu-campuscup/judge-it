@@ -24,7 +24,7 @@ import useFetchData from "../hooks/useFetchData";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 import type { Player } from "@/types";
 
-function Judge(): JSX.Element {
+function Judge(): React.ReactElement {
   const { user } = useAuth();
   const [selectedTeamId, setSelectedTeam] = useState<string>("");
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
