@@ -51,7 +51,7 @@ const Teams: React.FC<TeamsProps> = ({
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>("");
 
   const handleTeamChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement> | (Event & { target: { value: string; name: string } }),
     teamNumber: number
   ) => {
     if (teamNumber === 1) {
