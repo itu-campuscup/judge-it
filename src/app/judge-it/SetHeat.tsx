@@ -7,48 +7,16 @@ import type { Heat } from "@/types";
 
 interface SetHeatProps {
   user: any;
+  heats: Heat[];
 }
 
-const SetHeat: React.FC<SetHeatProps> = ({ user }) => {
+const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
     "error"
   );
   const [alertText, setAlertText] = useState<string>("");
-  const [heats, setHeats] = useState<Heat[]>([]);
   const [heatNumber, setHeatNumber] = useState<string>("");
-
-  useEffect(() => {
-    if (user) {
-      const fetchHeats = async (): Promise<void> => {
-        const { data, error } = await supabase.from(HEATS_TABLE).select("*");
-        if (error) {
-          const err = "Error fetching heats:" + error.message;
-          setAlertOpen(true);
-          setAlertSeverity("error");
-          setAlertText(err);
-          console.error(err);
-        } else {
-          setHeats(data || []);
-        }
-      };
-
-      fetchHeats();
-
-      const heatsListener = supabase
-        .channel("public:heats")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: HEATS_TABLE },
-          fetchHeats
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(heatsListener);
-      };
-    }
-  }, [user]);
 
   const getCurYear = (): number => {
     return new Date().getFullYear();
@@ -56,7 +24,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user }) => {
 
   const getThisYearsHeats = (): Heat[] => {
     return heats.filter(
-      (heat) => new Date(heat.date).getFullYear() === getCurYear()
+      (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear()
     );
   };
 

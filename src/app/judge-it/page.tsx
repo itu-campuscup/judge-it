@@ -127,6 +127,7 @@ function Judge(): React.ReactElement {
             parentPlayer={selectedPlayer ? Number(selectedPlayer) : null}
             teams={teams}
             players={players}
+            heats={heats}
             time_types={timeTypes}
             alert={alert}
           />

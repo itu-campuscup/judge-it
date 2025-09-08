@@ -7,7 +7,7 @@ import AlertComponent from "../components/AlertComponent";
 import SetHeat from "./SetHeat";
 import { getCurrentHeat } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL, TIME_LOGS_TABLE } from "@/utils/constants";
-import type { Team, Player, TimeType } from "@/types";
+import type { Team, Player, TimeType, Heat } from "@/types";
 
 interface MainJudgeProps {
   user: any;
@@ -16,6 +16,7 @@ interface MainJudgeProps {
   teams: Team[];
   players: Player[];
   time_types: TimeType[];
+  heats: Heat[]; // Add heats prop
   alert: any;
 }
 
@@ -26,6 +27,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
   teams,
   players,
   time_types,
+  heats, // Add heats prop
   alert,
 }) => {
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
@@ -122,7 +124,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         open={alert.open}
         setOpen={alert.setOpen}
       />
-      <SetHeat user={user} />
+      <SetHeat user={user} heats={heats} />
       {/**
        * Show team selection as a dropdown
        * Will only show active teams
