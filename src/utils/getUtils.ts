@@ -325,3 +325,28 @@ export const getPlayerTeam = (
   );
   return team ? team : null;
 };
+
+/**
+ * Gets the player image URL with team image as fallback.
+ * If the player doesn't have an image, returns the team's image.
+ * @param {number} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The player image URL or team image URL as fallback.
+ */
+export const getPlayerImageWithFallback = (
+  playerId: number,
+  players: Player[],
+  teams: Team[]
+): string => {
+  const player = players.find((p: Player) => p.id === playerId);
+
+  // If player has an image, return it
+  if (player?.image_url) {
+    return player.image_url;
+  }
+
+  // Otherwise, get the team's image as fallback
+  const team = getPlayerTeam(playerId, teams);
+  return team?.image_url || "";
+};

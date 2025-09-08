@@ -15,6 +15,7 @@ import {
   getPlayer,
   getTeamImageUrl,
   getPlayerNameWithTeam,
+  getPlayerImageWithFallback,
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
 import type { TimeLog, Heat, Player, TimeTypeKey, Team } from "../types";
@@ -144,7 +145,7 @@ export const generateRankableData = (
 ): any[] => {
   return topTimes.map((time: any) => ({
     time: time.duration,
-    imageUrl: getPlayerImageUrl(time.playerId, players),
+    imageUrl: getPlayerImageWithFallback(time.playerId, players, teams),
     playerName: getPlayerName(time.playerId, players),
     teamName: getTeamName(time.teamId, teams),
     heatNumber: getHeatNumber(time.heatId, heats),
@@ -198,7 +199,7 @@ export const generateRadarChartData = (
     : getTeamName(playerOrTeamId, teams);
   const funFact = isPlayer ? getPlayerFunFact(playerOrTeamId, players) : "";
   const imageUrl = isPlayer
-    ? getPlayerImageUrl(playerOrTeamId, players)
+    ? getPlayerImageWithFallback(playerOrTeamId, players, teams)
     : getTeamImageUrl(playerOrTeamId, teams);
 
   const timeToPercentage = (
