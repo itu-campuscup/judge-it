@@ -29,7 +29,7 @@ interface UseFetchDataReturn {
  * Hook to fetch data from db and listen for changes
  * @returns {UseFetchDataReturn} players, heats, teams, timeTypes, timeLogs, and alert object
  */
-const useFetchData = (): UseFetchDataReturn => {
+export const useFetchData = (): UseFetchDataReturn => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [heats, setHeats] = useState<Heat[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -114,59 +114,84 @@ const useFetchData = (): UseFetchDataReturn => {
     fetchTeams();
     fetchTimeTypes();
 
-    // Set up real-time listeners
-    const timeLogsListener = supabase
-      .channel("public:time_logs")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TIME_LOGS_TABLE },
-        fetchTimeLogs
-      )
-      .subscribe();
+    // Set up real-time listeners with proper cleanup
+    let timeLogsListener: any = null;
+    let playersListener: any = null;
+    let heatsListener: any = null;
+    let teamsListener: any = null;
+    let timeTypesListener: any = null;
 
-    const playersListener = supabase
-      .channel("public:players")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: PLAYERS_TABLE },
-        fetchPlayers
-      )
-      .subscribe();
+    // Add a small delay to ensure proper initialization in production
+    const setupListeners = async () => {
+      try {
+        timeLogsListener = supabase
+          .channel("public:time_logs")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: TIME_LOGS_TABLE },
+            fetchTimeLogs
+          )
+          .subscribe();
 
-    const heatsListener = supabase
-      .channel("public:heats")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: HEATS_TABLE },
-        fetchHeats
-      )
-      .subscribe();
+        playersListener = supabase
+          .channel("public:players")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: PLAYERS_TABLE },
+            fetchPlayers
+          )
+          .subscribe();
 
-    const teamsListener = supabase
-      .channel("public:teams")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TEAMS_TABLE },
-        fetchTeams
-      )
-      .subscribe();
+        heatsListener = supabase
+          .channel("public:heats")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: HEATS_TABLE },
+            fetchHeats
+          )
+          .subscribe();
 
-    const timeTypesListener = supabase
-      .channel("public:time_types")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TIME_TYPES_TABLE },
-        fetchTimeTypes
-      )
-      .subscribe();
+        teamsListener = supabase
+          .channel("public:teams")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: TEAMS_TABLE },
+            fetchTeams
+          )
+          .subscribe();
+
+        timeTypesListener = supabase
+          .channel("public:time_types")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: TIME_TYPES_TABLE },
+            fetchTimeTypes
+          )
+          .subscribe();
+      } catch (error) {
+        console.error("Error setting up realtime listeners:", error);
+      }
+    };
+
+    setupListeners();
 
     // Cleanup function
     return () => {
-      supabase.removeChannel(timeLogsListener);
-      supabase.removeChannel(playersListener);
-      supabase.removeChannel(heatsListener);
-      supabase.removeChannel(teamsListener);
-      supabase.removeChannel(timeTypesListener);
+      if (timeLogsListener) {
+        supabase.removeChannel(timeLogsListener);
+      }
+      if (playersListener) {
+        supabase.removeChannel(playersListener);
+      }
+      if (heatsListener) {
+        supabase.removeChannel(heatsListener);
+      }
+      if (teamsListener) {
+        supabase.removeChannel(teamsListener);
+      }
+      if (timeTypesListener) {
+        supabase.removeChannel(timeTypesListener);
+      }
     };
   }, []);
 
