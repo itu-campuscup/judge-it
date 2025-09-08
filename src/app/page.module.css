@@ -7,10 +7,12 @@
   grid-template-rows: 20px 1fr 20px;
   align-items: center;
   justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
-  gap: 64px;
+  min-height: 100vh;
+  max-height: 100vh; /* Prevent overflow */
+  padding: 20px; /* Reduced padding for better space utilization */
+  gap: 16px; /* Reduced gap */
   font-family: var(--font-geist-sans);
+  overflow: hidden; /* Prevent scrolling on main container */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,8 +29,26 @@
 .main {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px; /* Reduced gap between elements */
   grid-row-start: 2;
+  width: 100%;
+  max-height: calc(100vh - 80px); /* Account for padding and grid gaps */
+  overflow-y: auto; /* Allow scrolling within main content only */
+}
+
+/* Special class for MainJudge to allow slightly more height */
+.mainJudgeContainer {
+  max-height: calc(110vh - 80px); /* MainJudge can be 10% taller */
+}
+
+/* Compact spacing for judge components */
+.judgeSection {
+  margin-bottom: 8px;
+}
+
+/* Ensure FormControl elements are compact */
+.compactForm {
+  margin: 8px 0 !important;
 }
 
 .main ol {
@@ -47,14 +67,16 @@
 
 .timeTypeButtonContainer {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column; /* Stack buttons vertically */
   gap: 16px; /* Space between buttons */
-  justify-content: space-between; /* Align buttons to the sides */
+  width: 100%;
 }
 
 .timeTypeButton {
-  flex: 1 1 calc(50% - 16px); /* Two buttons per row with space between them */
-  margin-bottom: 16px; /* Space below each button */
+  width: 100%; /* Full width buttons */
+  min-height: 80px; /* Minimum button height for touch targets */
+  font-size: clamp(1rem, 2.5vw, 1.5rem); /* Responsive font size */
+  padding: 16px; /* Padding for better touch targets */
 }
 
 .main code {
@@ -136,16 +158,28 @@ a.secondary {
 
 @media (max-width: 600px) {
   .page {
-    padding: 32px;
-    padding-bottom: 80px;
+    padding: 16px; /* Further reduced padding for mobile */
+    padding-bottom: 20px;
   }
 
   .main {
     align-items: center;
+    gap: 12px; /* Reduced gap for mobile */
+    max-height: calc(100vh - 60px); /* Adjust for smaller padding */
   }
 
   .main ol {
     text-align: center;
+  }
+
+  .timeTypeButtonContainer {
+    /* Keep vertical layout on mobile too */
+    flex-direction: column;
+  }
+
+  .timeTypeButton {
+    min-height: 60px; /* Smaller buttons on mobile */
+    font-size: 0.9rem; /* Smaller font on mobile */
   }
 
   .ctas {
@@ -166,6 +200,13 @@ a.secondary {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
+  }
+}
+
+@media (max-width: 768px) and (min-width: 601px) {
+  .timeTypeButton {
+    font-size: 1.1rem; /* Medium font size for tablets */
+    min-height: 70px;
   }
 }
 

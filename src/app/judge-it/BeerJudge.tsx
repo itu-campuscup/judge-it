@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
-import { Button, Box } from "@mui/material";
-import styles from "@/app/page.module.css";
+import { Button, Stack } from "@mui/material";
 import { getPlayerName, getCurrentHeat } from "@/utils/getUtils";
 import {
   TIME_LOGS_TABLE,
@@ -28,7 +27,6 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
   alert,
 }) => {
   const [isTiming, setIsTiming] = useState<boolean>(false);
-  const [participantApproaching, setParticipantApproaching] =
     useState<boolean>(false);
 
   const playerName = getPlayerName(selectedPlayer || 0, players);
@@ -41,13 +39,13 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
     () =>
       timeTypes.map((timeType: TimeType) => {
         const sailingText = `${
-          participantApproaching ? "Stop " : "Start "
+          "Start/Stop "
         }${playerName} ${timeType.time_eng}`;
         const beerText = `${
-          participantApproaching ? "Start " : "Stop "
+          "Start/Stop "
         }${playerName} ${timeType.time_eng}`;
         const spinText = `${
-          participantApproaching ? "Start " : "Stop "
+          "Start/Stop "
         }${playerName} ${timeType.time_eng}`;
 
         const text = (name: string): string => {
@@ -66,14 +64,20 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
             key={timeType.id}
             variant="contained"
             color="primary"
-            className={styles.timeTypeButton}
+            size="large"
+            fullWidth
+            sx={{
+              minHeight: 80,
+              fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
+              padding: 2,
+            }}
             onClick={() => handleTimeTypeClick(timeType.id)}
           >
             {text(timeType.time_eng)}
           </Button>
         );
       }),
-    [timeTypes, playerName, participantApproaching]
+    [timeTypes, playerName]
   );
   /**
    * Handle button click to start/stop the timers to send a row to the db
@@ -147,7 +151,9 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
         open={alert.open}
         setOpen={alert.setOpen}
       />
-      <Box className={styles.timeTypeButtonContainer}>{timeTypeButtons()}</Box>
+      <Stack spacing={2} sx={{ width: "100%" }}>
+        {timeTypeButtons()}
+      </Stack>
     </>
   );
 };

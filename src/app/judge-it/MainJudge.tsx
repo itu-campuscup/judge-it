@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TeamSelect from "./TeamSelect";
 import PlayerSelect from "./PlayerSelect";
-import { Button } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import SetHeat from "./SetHeat";
@@ -149,13 +149,22 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         setSelectPlayerString={setSelectPlayerString}
         alert={alert}
       />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => handleGlobalStart()}
-      >
-        Global start
-      </Button>
+      <Stack spacing={2} sx={{ width: "100%" }}>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          fullWidth
+          sx={{
+            minHeight: 80,
+            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
+            padding: 2,
+          }}
+          onClick={() => handleGlobalStart()}
+        >
+          Global start
+        </Button>
+      </Stack>
     </>
   );
 };

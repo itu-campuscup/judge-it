@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/SupabaseClient";
-import { Button, Box } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
-import styles from "@/app/page.module.css";
 import {
   getPlayerName,
   getCurrentHeat,
@@ -117,11 +116,17 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
         text={alertText}
         setOpen={setAlertOpen}
       />
-      <Box className={styles.timeTypeButtonContainer}>
+      <Stack spacing={2} sx={{ width: "100%" }}>
         <Button
           variant="contained"
           color="primary"
-          className={styles.timeTypeButton}
+          size="large"
+          fullWidth
+          sx={{
+            minHeight: 80,
+            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
+            padding: 2,
+          }}
           onClick={() => handleStartStop(prevPlayerId)}
         >
           STOP {prevPlayerName} {TIME_TYPE_SAIL}
@@ -129,12 +134,18 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
         <Button
           variant="contained"
           color="primary"
-          className={styles.timeTypeButton}
+          size="large"
+          fullWidth
+          sx={{
+            minHeight: 80,
+            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
+            padding: 2,
+          }}
           onClick={() => handleStartStop(selectedPlayer?.id || null)}
         >
-          Start {playerName} {TIME_TYPE_SAIL}
+          Stop prev and Start {playerName} {TIME_TYPE_SAIL}
         </Button>
-      </Box>
+      </Stack>
     </>
   );
 };
