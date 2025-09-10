@@ -1,5 +1,12 @@
 import React from "react";
-import { AppBar, Toolbar, Button, Menu, MenuItem, Divider } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Menu,
+  MenuItem,
+  Divider,
+} from "@mui/material";
 import { supabase } from "@/SupabaseClient";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -23,10 +30,20 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   return (
     <>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar sx={{ minHeight: "36px !important", py: 0.5 }}>
           {user && (
             <>
-              <Button color="inherit" onClick={handleMenuToggle}>
+              <Button
+                color="inherit"
+                onClick={handleMenuToggle}
+                size="small"
+                sx={{
+                  fontSize: "0.75rem",
+                  px: 1,
+                  py: 0.25,
+                  minHeight: "28px",
+                }}
+              >
                 Menu
               </Button>
               <Menu
@@ -34,18 +51,38 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                 open={Boolean(anchorEl)}
                 onClose={() => handleMenuToggle()}
               >
-                <MenuItem onClick={() => handleMenuToggle()}>
-                  <Link href="/stats" style={{ textDecoration: "none", color: "inherit" }}>
+                <MenuItem
+                  onClick={() => handleMenuToggle()}
+                  sx={{ fontSize: "0.875rem", py: 0.5 }}
+                >
+                  <Link
+                    href="/stats"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
                     Stats Page
                   </Link>
                 </MenuItem>
-                <MenuItem onClick={() => handleMenuToggle()}>
-                  <Link href="/judge-it" style={{ textDecoration: "none", color: "inherit" }}>
+                <MenuItem
+                  onClick={() => handleMenuToggle()}
+                  sx={{ fontSize: "0.875rem", py: 0.5 }}
+                >
+                  <Link
+                    href="/judge-it"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
                     Judge Page
                   </Link>
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={() => {handleMenuToggle();handleLogout();}}>Logout</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleMenuToggle();
+                    handleLogout();
+                  }}
+                  sx={{ fontSize: "0.875rem", py: 0.5 }}
+                >
+                  Logout
+                </MenuItem>
               </Menu>
             </>
           )}

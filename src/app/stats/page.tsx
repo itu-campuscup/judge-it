@@ -1,15 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  AppBar,
-  Toolbar,
-  Paper,
-  Box,
-  Button,
-} from "@mui/material";
+import { Typography, AppBar, Toolbar, Paper, Box, Button } from "@mui/material";
 import Header from "../components/Header";
 import BeerChugger from "./BeerChugger";
 import Sailing from "./Sailing";
@@ -91,10 +83,20 @@ function Stats() {
   };
 
   return (
-    <Container maxWidth="xl">
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Header user={user} />
-      <AppBar position="static" sx={{ mb: 3, backgroundColor: "primary.main" }}>
-        <Toolbar>
+      <AppBar
+        position="static"
+        sx={{ backgroundColor: "primary.main", flexShrink: 0 }}
+      >
+        <Toolbar sx={{ minHeight: "60px !important" }}>
           <Box sx={{ display: "flex", gap: 1, flexGrow: 1 }}>
             {STATS_CONFIG.map((stat) => (
               <Button
@@ -114,25 +116,26 @@ function Stats() {
                     backgroundColor: "rgba(255, 255, 255, 0.1)",
                   },
                   minWidth: "auto",
-                  px: 2,
-                  py: 1,
+                  px: 1.5,
+                  py: 0.5,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: 0.5,
+                  gap: 0.25,
+                  height: "50px",
                 }}
               >
                 <Typography
                   variant="h6"
                   component="span"
-                  sx={{ fontWeight: "bold" }}
+                  sx={{ fontWeight: "bold", fontSize: "1.2rem" }}
                 >
                   {stat.number}
                 </Typography>
                 <Typography
                   variant="caption"
                   component="span"
-                  sx={{ fontSize: "0.75rem" }}
+                  sx={{ fontSize: "0.75rem", fontWeight: "medium" }}
                 >
                   {stat.label}
                 </Typography>
@@ -142,8 +145,19 @@ function Stats() {
         </Toolbar>
       </AppBar>
 
-      <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mt: 2, mb: 2 }}>
-        {renderSelectedStat()}
+      <Paper
+        elevation={3}
+        sx={{
+          flex: 1,
+          m: 1,
+          p: 2,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
+      >
+        <Box sx={{ flex: 1, overflow: "auto" }}>{renderSelectedStat()}</Box>
       </Paper>
 
       <AlertComponent
@@ -152,7 +166,7 @@ function Stats() {
         text={alert.text}
         setOpen={alert.setOpen}
       />
-    </Container>
+    </Box>
   );
 }
 

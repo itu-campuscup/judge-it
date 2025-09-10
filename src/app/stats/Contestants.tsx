@@ -21,7 +21,7 @@ import {
   getTimeTypeBeer,
   getTimeTypeSail,
   getTimeTypeSpinner,
-  getPlayerNameWithTeam
+  getPlayerNameWithTeam,
 } from "@/utils/getUtils";
 import {
   filterTimeLogsByPlayerId,
@@ -52,7 +52,9 @@ const Contestants: React.FC<ContestantsProps> = ({
   const [selectedPlayer2Id, setSelectedPlayer2Id] = useState<string>("");
 
   const handlePlayerChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement> | (Event & { target: {value: string; name: string }}),
+    e:
+      | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+      | (Event & { target: { value: string; name: string } }),
     playerNumber: number
   ) => {
     if (playerNumber === 1) {
@@ -133,68 +135,119 @@ const Contestants: React.FC<ContestantsProps> = ({
   );
 
   return (
-    <>
-      <Typography variant="h4" gutterBottom>
-        Contestant Comparison
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h2"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          mb: 2,
+          fontSize: "3rem",
+          fontWeight: "bold",
+          flexShrink: 0,
+        }}
+      >
+        ⚔️ Contestant Comparison
       </Typography>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="player1-select-label">Select Player 1</InputLabel>
-        <Select
-          labelId="player1-select-label"
-          value={selectedPlayer1Id}
-          onChange={(e) => handlePlayerChange(e, 1)}
-          label="Select Player 1"
-        >
-          {players.map((player) => (
-            <MenuItem key={player.id} value={player.id}>
-              {getPlayerNameWithTeam(player.id, players, teams)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="player2-select-label">Select Player 2</InputLabel>
-        <Select
-          labelId="player2-select-label"
-          value={selectedPlayer2Id}
-          onChange={(e) => handlePlayerChange(e, 2)}
-          label="Select Player 2"
-        >
-          {players.map((player) => (
-            <MenuItem key={player.id} value={player.id}>
-              {getPlayerNameWithTeam(player.id, players, teams)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 3, flexShrink: 0 }}>
+        <FormControl fullWidth margin="normal" variant="filled">
+          <InputLabel id="player1-select-label" sx={{ fontSize: "1.2rem" }}>
+            Select Player 1
+          </InputLabel>
+          <Select
+            labelId="player1-select-label"
+            value={selectedPlayer1Id}
+            onChange={(e) => handlePlayerChange(e, 1)}
+            label="Select Player 1"
+            sx={{ fontSize: "1.2rem", minHeight: "60px" }}
+          >
+            {players.map((player) => (
+              <MenuItem
+                key={player.id}
+                value={player.id}
+                sx={{ fontSize: "1.1rem" }}
+              >
+                {getPlayerNameWithTeam(player.id, players, teams)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" variant="filled">
+          <InputLabel id="player2-select-label" sx={{ fontSize: "1.2rem" }}>
+            Select Player 2
+          </InputLabel>
+          <Select
+            labelId="player2-select-label"
+            value={selectedPlayer2Id}
+            onChange={(e) => handlePlayerChange(e, 2)}
+            label="Select Player 2"
+            sx={{ fontSize: "1.2rem", minHeight: "60px" }}
+          >
+            {players.map((player) => (
+              <MenuItem
+                key={player.id}
+                value={player.id}
+                sx={{ fontSize: "1.1rem" }}
+              >
+                {getPlayerNameWithTeam(player.id, players, teams)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           justifyContent: "space-around",
-          alignItems: "flex-start",
-          my: 4,
-          flexWrap: "wrap",
+          alignItems: "stretch",
+          gap: 3,
+          overflow: "hidden",
+          minHeight: 0,
         }}
       >
-        <RadarChartComponent
-          imageUrl={player1ChartData.imageUrl}
-          name={player1ChartData.name}
-          altTextType="Fun Fact"
-          altText={player1ChartData.funFact || ""}
-          data={player1ChartData.data}
-        />
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <RadarChartComponent
+            imageUrl={player1ChartData.imageUrl}
+            name={player1ChartData.name}
+            altTextType="Fun Fact"
+            altText={player1ChartData.funFact || ""}
+            data={player1ChartData.data}
+          />
+        </Box>
 
-        <RadarChartComponent
-          imageUrl={player2ChartData.imageUrl}
-          name={player2ChartData.name}
-          altTextType="Fun Fact"
-          altText={player2ChartData.funFact || ""}
-          data={player2ChartData.data}
-        />
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <RadarChartComponent
+            imageUrl={player2ChartData.imageUrl}
+            name={player2ChartData.name}
+            altTextType="Fun Fact"
+            altText={player2ChartData.funFact || ""}
+            data={player2ChartData.data}
+          />
+        </Box>
       </Box>
 
-      <Typography variant="body2" color="textSecondary" align="center">
+      <Typography
+        variant="h6"
+        color="textSecondary"
+        align="center"
+        sx={{
+          flexShrink: 0,
+          fontSize: "1.2rem",
+          p: 2,
+          mt: 2,
+        }}
+      >
         100% = Excellent performance (under {PERFORMANCE_SCALES.BEER.min}s beer,{" "}
         {PERFORMANCE_SCALES.SPIN.min}s spin, {PERFORMANCE_SCALES.SAIL.min}s
         sail)
@@ -203,7 +256,7 @@ const Contestants: React.FC<ContestantsProps> = ({
         {PERFORMANCE_SCALES.SPIN.max}s spin, {PERFORMANCE_SCALES.SAIL.max}s
         sail)
       </Typography>
-    </>
+    </Box>
   );
 };
 

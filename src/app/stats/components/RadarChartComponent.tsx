@@ -34,7 +34,7 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
       sx={{
         textAlign: "center",
         mb: 2,
-        maxWidth: "450px",
+        maxWidth: "550px",
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -45,8 +45,8 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          mb: 2,
-          minHeight: "120px",
+          mb: 3,
+          minHeight: "200px",
           flexShrink: 0,
         }}
       >
@@ -54,19 +54,28 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
           <Avatar
             src={imageUrl}
             alt={name}
-            sx={{ width: 100, height: 100, mr: 2 }}
+            sx={{ width: 160, height: 160, mr: 3 }}
           />
         )}
         <Box sx={{ textAlign: "left", flex: 1 }}>
-          <Typography variant="h5" component="div">
+          <Typography
+            variant="h2"
+            component="div"
+            sx={{
+              fontSize: "2.5rem",
+              fontWeight: "bold",
+              mb: 1,
+            }}
+          >
             {name}
           </Typography>
           <Typography
-            variant="h6"
+            variant="h5"
             color="text.secondary"
             sx={{
               wordWrap: "break-word",
               overflowWrap: "break-word",
+              fontSize: "1.5rem",
             }}
           >
             {altText != null && altText != ""
@@ -85,19 +94,23 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
         }}
       >
         <RadarChart
-          cx={200}
-          cy={150}
-          outerRadius={120}
-          width={400}
-          height={300}
+          cx={250}
+          cy={200}
+          outerRadius={160}
+          width={500}
+          height={400}
           data={data}
         >
           <PolarGrid gridType="circle" />
-          <PolarAngleAxis dataKey="subject" />
+          <PolarAngleAxis
+            dataKey="subject"
+            style={{ fontSize: "14px", fontWeight: "bold" }}
+          />
           <PolarRadiusAxis
             angle={30}
             domain={[0, 100]}
             tickFormatter={(value) => `${value}%`}
+            style={{ fontSize: "12px" }}
           />
           <Radar
             name="Performance"
@@ -105,6 +118,7 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
             stroke="#8884d8"
             fill="#8884d8"
             fillOpacity={0.6}
+            strokeWidth={3}
           />
         </RadarChart>
       </Box>
