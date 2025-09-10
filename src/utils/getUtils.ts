@@ -8,7 +8,11 @@ import {
   calculateTimes,
   removeDuplicateTimeEntries,
 } from "./visualizationUtils";
-import { filterTimeLogsByTeamId, sortTimeLogsByHeat, splitTimeLogsPerHeat } from "./sortFilterUtils";
+import {
+  filterTimeLogsByTeamId,
+  sortTimeLogsByHeat,
+  splitTimeLogsPerHeat,
+} from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
 import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
