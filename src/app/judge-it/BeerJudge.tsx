@@ -2,7 +2,12 @@ import React, { useCallback } from "react";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import { Button, Stack } from "@mui/material";
-import { getPlayerName, getCurrentHeat, getPlayer, getPlayerIdGivenTeamAndTimeLogs } from "@/utils/getUtils";
+import {
+  getPlayerName,
+  getCurrentHeat,
+  getPlayer,
+  getPlayerIdGivenTeamAndTimeLogs,
+} from "@/utils/getUtils";
 import {
   TIME_LOGS_TABLE,
   TIME_TYPE_SAIL,
@@ -26,9 +31,14 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
   timeLogs = [],
   alert,
 }) => {
-
-  const latestPlayer = getPlayerIdGivenTeamAndTimeLogs(selectedTeam || 0, timeLogs);
-  const playerName = getPlayerName(latestPlayer || 0, players);
+  const latestPlayer =
+    selectedTeam !== null
+      ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam, timeLogs)
+      : null;
+  const playerName =
+    latestPlayer !== null
+      ? getPlayerName(latestPlayer, players)
+      : "player null";
   /**
    * Create buttons for each time type
    *

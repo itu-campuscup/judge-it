@@ -8,7 +8,7 @@ import {
   calculateTimes,
   removeDuplicateTimeEntries,
 } from "./visualizationUtils";
-import { sortTimeLogsByHeat, splitTimeLogsPerHeat } from "./sortFilterUtils";
+import { filterTimeLogsByTeamId, sortTimeLogsByHeat, splitTimeLogsPerHeat } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
 import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
@@ -355,9 +355,8 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   teamId: number,
   timeLogs: TimeLog[]
 ): number | null => {
-  const recentLogs = sortTimeLogsByHeat(timeLogs).filter(
-    (log) => log.team_id === teamId
-  );
+  const teamLogs = filterTimeLogsByTeamId(timeLogs, teamId);
+  const recentLogs = sortTimeLogsByHeat(teamLogs);
   if (recentLogs.length === 0) return null;
   const latestLog = recentLogs[recentLogs.length - 1];
   const playerId = latestLog.player_id;
