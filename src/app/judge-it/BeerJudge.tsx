@@ -1,35 +1,34 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
 import { Button, Stack } from "@mui/material";
-import { getPlayerName, getCurrentHeat } from "@/utils/getUtils";
+import { getPlayerName, getCurrentHeat, getPlayer, getPlayerIdGivenTeamAndTimeLogs } from "@/utils/getUtils";
 import {
   TIME_LOGS_TABLE,
   TIME_TYPE_SAIL,
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type { Player, TimeType } from "@/types";
+import type { Player, TimeLog, TimeType } from "@/types";
 
 interface BeerJudgeProps {
   players: Player[];
   selectedTeam: number | null;
-  selectedPlayer: number | null;
   timeTypes: TimeType[];
+  timeLogs: TimeLog[];
   alert: any;
 }
 
 const BeerJudge: React.FC<BeerJudgeProps> = ({
   players,
   selectedTeam,
-  selectedPlayer,
   timeTypes = [],
+  timeLogs = [],
   alert,
 }) => {
-  const [isTiming, setIsTiming] = useState<boolean>(false);
-    useState<boolean>(false);
 
-  const playerName = getPlayerName(selectedPlayer || 0, players);
+  const latestPlayer = getPlayerIdGivenTeamAndTimeLogs(selectedTeam || 0, timeLogs);
+  const playerName = getPlayerName(latestPlayer || 0, players);
   /**
    * Create buttons for each time type
    *
@@ -38,15 +37,11 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
   const timeTypeButtons = useCallback(
     () =>
       timeTypes.map((timeType: TimeType) => {
-        const sailingText = `${
-          "Start/Stop "
-        }${playerName} ${timeType.time_eng}`;
-        const beerText = `${
-          "Start/Stop "
-        }${playerName} ${timeType.time_eng}`;
-        const spinText = `${
-          "Start/Stop "
-        }${playerName} ${timeType.time_eng}`;
+        const sailingText = `${"Start/Stop "}${playerName} ${
+          timeType.time_eng
+        }`;
+        const beerText = `${"Start/Stop "}${playerName} ${timeType.time_eng}`;
+        const spinText = `${"Start/Stop "}${playerName} ${timeType.time_eng}`;
 
         const text = (name: string): string => {
           if (name === TIME_TYPE_SAIL) return sailingText;
@@ -97,7 +92,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
     const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: selectedTeam,
-        player_id: selectedPlayer,
+        player_id: latestPlayer,
         time_type_id: timeTypeId,
         heat_id: currentHeat.id,
       },
@@ -126,7 +121,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
 
     if (!selectedTeam) {
       errorTxt = "Team has not been selected";
-    } else if (!selectedPlayer) {
+    } else if (!latestPlayer) {
       errorTxt = "Player has not been selected";
     } else if (!timeTypes.length) {
       errorTxt = "No time types available";

@@ -8,7 +8,7 @@ import {
   calculateTimes,
   removeDuplicateTimeEntries,
 } from "./visualizationUtils";
-import { splitTimeLogsPerHeat } from "./sortFilterUtils";
+import { sortTimeLogsByHeat, splitTimeLogsPerHeat } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
 import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
@@ -349,4 +349,17 @@ export const getPlayerImageWithFallback = (
   // Otherwise, get the team's image as fallback
   const team = getPlayerTeam(playerId, teams);
   return team?.image_url || "";
+};
+
+export const getPlayerIdGivenTeamAndTimeLogs = (
+  teamId: number,
+  timeLogs: TimeLog[]
+): number | null => {
+  const recentLogs = sortTimeLogsByHeat(timeLogs).filter(
+    (log) => log.team_id === teamId
+  );
+  if (recentLogs.length === 0) return null;
+  const latestLog = recentLogs[recentLogs.length - 1];
+  const playerId = latestLog.player_id;
+  return playerId ? playerId : null;
 };
