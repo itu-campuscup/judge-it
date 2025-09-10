@@ -28,7 +28,7 @@ export const filterTimeLogsByTeamId = (
 };
 
 /**
- * Sorts time logs by heat ID.
+ * Sorts time logs by heat ID in ascending order.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by heat ID.
  */

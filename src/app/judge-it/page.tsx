@@ -95,24 +95,26 @@ function Judge(): React.ReactElement {
           />
         </Box>
 
-        <Box>
-          {/**
-           * Show player selection as a group of radio buttons
-           * Disable the radio group if there are no players
-           */}
-          <PlayerSelect
-            teams={teams}
-            selectedTeamId={selectedTeamId}
-            selectedPlayer={selectedPlayer}
-            setSelectedPlayer={setSelectedPlayer}
-            players={players}
-            teamPlayers={teamPlayers}
-            setTeamPlayers={setTeamPlayers}
-            selectPlayerString={selectPlayerString}
-            setSelectPlayerString={setSelectPlayerString}
-            alert={alert}
-          />
-        </Box>
+        {judgeType !== BEER_JUDGE && (
+          <Box>
+            {/**
+             * Show player selection as a group of radio buttons
+             * Disable the radio group if there are no players
+             */}
+            <PlayerSelect
+              teams={teams}
+              selectedTeamId={selectedTeamId}
+              selectedPlayer={selectedPlayer}
+              setSelectedPlayer={setSelectedPlayer}
+              players={players}
+              teamPlayers={teamPlayers}
+              setTeamPlayers={setTeamPlayers}
+              selectPlayerString={selectPlayerString}
+              setSelectPlayerString={setSelectPlayerString}
+              alert={alert}
+            />
+          </Box>
+        )}
         {/**
          * Display the specific judge extra functionality
          *
@@ -149,8 +151,8 @@ function Judge(): React.ReactElement {
         {judgeType === BEER_JUDGE && (
           <BeerJudge
             players={players}
+            timeLogs={timeLogs}
             selectedTeam={selectedTeamId ? Number(selectedTeamId) : null}
-            selectedPlayer={selectedPlayer ? Number(selectedPlayer) : null}
             timeTypes={timeTypes}
             alert={alert}
           />
