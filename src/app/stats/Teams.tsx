@@ -51,7 +51,9 @@ const Teams: React.FC<TeamsProps> = ({
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>("");
 
   const handleTeamChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement> | (Event & { target: { value: string; name: string } }),
+    e:
+      | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+      | (Event & { target: { value: string; name: string } }),
     teamNumber: number
   ) => {
     if (teamNumber === 1) {
@@ -156,67 +158,119 @@ const Teams: React.FC<TeamsProps> = ({
   );
 
   return (
-    <>
-      <Typography variant="h4" gutterBottom>
-        Teams Comparison
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h2"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          mb: 2,
+          fontSize: "3rem",
+          fontWeight: "bold",
+          flexShrink: 0,
+        }}
+      >
+        🏆 Teams Comparison
       </Typography>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="team1-select-label">Select Team 1</InputLabel>
-        <Select
-          labelId="team1-select-label"
-          value={selectedTeam1Id}
-          onChange={(e) => handleTeamChange(e, 1)}
-          label="Select Team 1"
-        >
-          {teams.map((team: Team) => (
-            <MenuItem key={team.id} value={team.id}>
-              {team.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth margin="normal" variant="filled" sx={{ mb: 2 }}>
-        <InputLabel id="team2-select-label">Select Team 2</InputLabel>
-        <Select
-          labelId="team2-select-label"
-          value={selectedTeam2Id}
-          onChange={(e) => handleTeamChange(e, 2)}
-          label="Select Team 2"
-        >
-          {teams.map((team: Team) => (
-            <MenuItem key={team.id} value={team.id}>
-              {team.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 3, flexShrink: 0 }}>
+        <FormControl fullWidth margin="normal" variant="filled">
+          <InputLabel id="team1-select-label" sx={{ fontSize: "1.2rem" }}>
+            Select Team 1
+          </InputLabel>
+          <Select
+            labelId="team1-select-label"
+            value={selectedTeam1Id}
+            onChange={(e) => handleTeamChange(e, 1)}
+            label="Select Team 1"
+            sx={{ fontSize: "1.2rem", minHeight: "60px" }}
+          >
+            {teams.map((team: Team) => (
+              <MenuItem
+                key={team.id}
+                value={team.id}
+                sx={{ fontSize: "1.1rem" }}
+              >
+                {team.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" variant="filled">
+          <InputLabel id="team2-select-label" sx={{ fontSize: "1.2rem" }}>
+            Select Team 2
+          </InputLabel>
+          <Select
+            labelId="team2-select-label"
+            value={selectedTeam2Id}
+            onChange={(e) => handleTeamChange(e, 2)}
+            label="Select Team 2"
+            sx={{ fontSize: "1.2rem", minHeight: "60px" }}
+          >
+            {teams.map((team: Team) => (
+              <MenuItem
+                key={team.id}
+                value={team.id}
+                sx={{ fontSize: "1.1rem" }}
+              >
+                {team.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       <Box
         sx={{
+          flex: 1,
           display: "flex",
           justifyContent: "space-around",
-          alignItems: "flex-start",
-          my: 4,
-          flexWrap: "wrap",
+          alignItems: "stretch",
+          gap: 3,
+          overflow: "hidden",
+          minHeight: 0,
         }}
       >
-        <RadarChartComponent
-          imageUrl={team1ChartData.imageUrl}
-          name={team1ChartData.name}
-          altTextType=""
-          altText=""
-          data={team1ChartData.data}
-        />
-        <RadarChartComponent
-          imageUrl={team2ChartData.imageUrl}
-          name={team2ChartData.name}
-          altTextType=""
-          altText=""
-          data={team2ChartData.data}
-        />
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <RadarChartComponent
+            imageUrl={team1ChartData.imageUrl}
+            name={team1ChartData.name}
+            altTextType=""
+            altText=""
+            data={team1ChartData.data}
+          />
+        </Box>
+
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <RadarChartComponent
+            imageUrl={team2ChartData.imageUrl}
+            name={team2ChartData.name}
+            altTextType=""
+            altText=""
+            data={team2ChartData.data}
+          />
+        </Box>
       </Box>
 
-      <Typography variant="body2" color="text.secondary" align="center">
+      <Typography
+        variant="h6"
+        color="text.secondary"
+        align="center"
+        sx={{
+          flexShrink: 0,
+          fontSize: "1.2rem",
+          p: 2,
+          mt: 2,
+        }}
+      >
         100% = Excellent performance (under {PERFORMANCE_SCALES.BEER.min}s beer,{" "}
         {PERFORMANCE_SCALES.SPIN.min}s spin, {PERFORMANCE_SCALES.SAIL.min}s
         sail)
@@ -227,7 +281,7 @@ const Teams: React.FC<TeamsProps> = ({
         <br />
         (On Average)
       </Typography>
-    </>
+    </Box>
   );
 };
 

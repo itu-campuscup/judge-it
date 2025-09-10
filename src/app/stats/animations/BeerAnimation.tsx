@@ -14,7 +14,7 @@ const BeerAnimation: React.FC<BeerAnimationProps> = ({
   animationCycleKey,
 }) => {
   if (!(actualTime > 0)) {
-    return <Box sx={{ width: "20px", height: "40px", marginRight: 1.5 }} />;
+    return <Box sx={{ width: "40px", height: "80px", marginRight: 2 }} />;
   }
 
   return (
@@ -22,14 +22,14 @@ const BeerAnimation: React.FC<BeerAnimationProps> = ({
       key={`beer-anim-${playerName}-${animationCycleKey}`}
       aria-label="emptying beer animation"
       sx={{
-        width: "20px",
-        height: "40px",
+        width: "40px",
+        height: "80px",
         backgroundColor: "rgba(255, 223, 0, 0.2)",
-        border: "1px solid #ccc",
-        borderRadius: "3px 3px 0 0",
+        border: "2px solid #ccc",
+        borderRadius: "6px 6px 0 0",
         position: "relative",
         overflow: "hidden",
-        marginRight: 1.5,
+        marginRight: 2,
         "&::after": {
           content: '""',
           position: "absolute",

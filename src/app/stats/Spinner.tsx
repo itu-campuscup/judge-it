@@ -103,35 +103,96 @@ const Spinner: React.FC<SpinnerProps> = ({
   }
 
   return (
-    <>
-      <Typography variant="h4" gutterBottom>
-        Spinner RPM Rankings
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h2"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          mb: 2,
+          fontSize: "3rem",
+          fontWeight: "bold",
+          flexShrink: 0,
+        }}
+      >
+        🌪️ Spinner RPM Rankings
       </Typography>
-      <YearSelect
-        years={uniqueYears}
-        selectedYear={selectedYear}
-        onChange={handleYearChange}
-        labelId="year-select-spinner-label"
-      />
+
+      <Box
+        sx={{ display: "flex", justifyContent: "center", mb: 2, flexShrink: 0 }}
+      >
+        <YearSelect
+          years={uniqueYears}
+          selectedYear={selectedYear}
+          onChange={handleYearChange}
+          labelId="year-select-spinner-label"
+        />
+      </Box>
 
       {processedRankingData.length === 0 && (
-        <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center" }}>
-          No spin data available for the selected year.
-        </Typography>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography
+            variant="h3"
+            sx={{
+              textAlign: "center",
+              fontSize: "2rem",
+            }}
+          >
+            No spin data available for the selected year.
+          </Typography>
+        </Box>
       )}
 
       {processedRankingData.length > 0 && (
-        <Paper elevation={2} sx={{ p: 2 }}>
+        <Paper
+          elevation={2}
+          sx={{
+            flex: 1,
+            overflow: "auto",
+            display: "flex",
+            flexDirection: "column",
+            p: 1,
+          }}
+        >
           {processedRankingData.map((playerData, index) => (
             <Fragment
               key={`${playerData.playerName || index}-${
                 playerData.heatNumber
               }-${animationCycleKey}`}
             >
-              <Box sx={{ display: "flex", alignItems: "center", p: 2, my: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  p: 3,
+                  minHeight: "120px",
+                  "&:nth-of-type(odd)": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
                 <Typography
-                  variant="h6"
-                  sx={{ minWidth: "30px", textAlign: "center", mr: 2 }}
+                  variant="h2"
+                  sx={{
+                    minWidth: "80px",
+                    textAlign: "center",
+                    mr: 3,
+                    fontSize: "3rem",
+                  }}
                 >
                   {MEDAL_EMOJIS[index]}
                 </Typography>
@@ -139,29 +200,46 @@ const Spinner: React.FC<SpinnerProps> = ({
                   <Avatar
                     src={playerData.imageUrl}
                     alt={playerData.playerName}
-                    sx={{ width: 100, height: 100, mr: 2 }}
+                    sx={{ width: 120, height: 120, mr: 3 }}
                   />
                 ) : (
-                  <Box sx={{ width: 100, height: 100, mr: 2 }} />
+                  <Box sx={{ width: 120, height: 120, mr: 3 }} />
                 )}
-                <Box sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>
+                <Box sx={{ flexGrow: 1, minWidth: 0, mr: 3 }}>
                   <Typography
-                    variant="h5"
+                    variant="h3"
                     component="div"
                     noWrap
-                    sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontSize: "2.5rem",
+                      fontWeight: "bold",
+                      mb: 1,
+                    }}
                   >
                     {playerData.playerName}
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant="h5"
                     color="text.secondary"
                     noWrap
-                    sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontSize: "1.5rem",
+                      mb: 1,
+                    }}
                   >
                     Team: {playerData.teamName}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="h5"
+                    color="text.secondary"
+                    sx={{
+                      fontSize: "1.5rem",
+                    }}
+                  >
                     Heat: {playerData.heatNumber}
                   </Typography>
                 </Box>
@@ -182,17 +260,25 @@ const Spinner: React.FC<SpinnerProps> = ({
                   />
                   <Box sx={{ flexGrow: 1, textAlign: "right" }}>
                     <Typography
-                      variant="h5"
+                      variant="h3"
                       component="div"
                       color={index === 0 ? "primary" : "text.primary"}
+                      sx={{
+                        fontSize: "2rem",
+                        fontWeight: "medium",
+                        mb: 1,
+                      }}
                     >
                       {playerData.displayRpmLabel}
                     </Typography>
                     {index > 0 && (
                       <Typography
-                        variant="caption"
+                        variant="h5"
                         display="block"
                         color="text.secondary"
+                        sx={{
+                          fontSize: "1.5rem",
+                        }}
                       >
                         ({Math.round(playerData.rpm)} RPM)
                       </Typography>
@@ -205,7 +291,7 @@ const Spinner: React.FC<SpinnerProps> = ({
           ))}
         </Paper>
       )}
-    </>
+    </Box>
   );
 };
 
