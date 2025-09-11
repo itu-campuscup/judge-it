@@ -4,9 +4,12 @@ import PlayerSelect from "./PlayerSelect";
 import { Button, Stack } from "@mui/material";
 import { supabase } from "@/SupabaseClient";
 import AlertComponent from "../components/AlertComponent";
-import SetHeat from "./SetHeat";
 import { getCurrentHeat } from "@/utils/getUtils";
-import { TIME_TYPE_SAIL, TIME_LOGS_TABLE } from "@/utils/constants";
+import {
+  TIME_TYPE_SAIL,
+  TIME_LOGS_TABLE,
+  HEATS_TABLE,
+} from "@/utils/constants";
 import type { Team, Player, TimeType, Heat } from "@/types";
 
 interface MainJudgeProps {
@@ -35,22 +38,71 @@ const MainJudge: React.FC<MainJudgeProps> = ({
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
   const [selectPlayerString, setSelectPlayerString] =
     useState<string>("Select Player");
+  const [nextHeatNumber, setNextHeatNumber] = useState<number>(1);
 
-  const currentHeat = getCurrentHeat(alert);
+  // Calculate next heat number when component mounts
+  useEffect(() => {
+    const calculateNextHeat = async () => {
+      const nextHeat = await getNextHeatNumber();
+      setNextHeatNumber(nextHeat);
+    };
+    calculateNextHeat();
+  }, []);
 
   /**
-   * Handle global start timer
-   * @returns {Promise<void>}
-   * @throws {Error} If there is an error starting the timer
-   */ const handleGlobalStart = async (): Promise<void> => {
-    if (!checkInputs()) return;
-
+   * Get the next heat number based on current heat
+   */
+  const getNextHeatNumber = async (): Promise<number> => {
     const currentHeatData = await getCurrentHeat(alert);
-    if (!currentHeatData) {
+    return currentHeatData ? currentHeatData.heat + 1 : 1;
+  };
+
+  /**
+   * Create and set a new heat as current
+   */
+  const createAndSetNewHeat = async (): Promise<Heat | null> => {
+    // Set all existing heats to not current
+    const { error: updateError } = await supabase
+      .from(HEATS_TABLE)
+      .update({ is_current: false })
+      .eq("is_current", true);
+
+    if (updateError) {
       alert.setOpen(true);
       alert.setSeverity("error");
-      alert.setText("No current heat found");
-      return;
+      alert.setText("Error updating current heat: " + updateError.message);
+      return null;
+    }
+
+    // Create new heat
+    const { data: newHeat, error: createError } = await supabase
+      .from(HEATS_TABLE)
+      .insert([{ heat: nextHeatNumber, is_current: true }])
+      .select()
+      .single();
+
+    if (createError) {
+      alert.setOpen(true);
+      alert.setSeverity("error");
+      alert.setText("Error creating new heat: " + createError.message);
+      return null;
+    }
+
+    return newHeat;
+  };
+
+  /**
+   * Handle global start timer with automatic heat increment
+   * @returns {Promise<void>}
+   * @throws {Error} If there is an error starting the timer
+   */
+  const handleGlobalStart = async (): Promise<void> => {
+    if (!checkInputs()) return;
+
+    // Automatically create and set new heat
+    const newHeat = await createAndSetNewHeat();
+    if (!newHeat) {
+      return; // Error already shown in createAndSetNewHeat
     }
 
     const sailTimeType = time_types.find((e) => e.time_eng === TIME_TYPE_SAIL);
@@ -66,13 +118,13 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         team_id: parentTeam,
         player_id: parentPlayer,
         time_type_id: sailTimeType.id,
-        heat_id: currentHeatData.id,
+        heat_id: newHeat.id,
       },
       {
         team_id: parseInt(selectedTeamId),
         player_id: parseInt(selectedPlayer),
         time_type_id: sailTimeType.id,
-        heat_id: currentHeatData.id,
+        heat_id: newHeat.id,
       },
     ]);
     if (error) {
@@ -84,7 +136,11 @@ const MainJudge: React.FC<MainJudgeProps> = ({
     } else {
       alert.setOpen(true);
       alert.setSeverity("success");
-      alert.setText("Global timer started");
+      alert.setText(`Heat ${newHeat.heat} started! Global timer running.`);
+
+      // Update next heat number for the button
+      const updatedNextHeat = await getNextHeatNumber();
+      setNextHeatNumber(updatedNextHeat);
     }
   };
   /**
@@ -124,7 +180,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         open={alert.open}
         setOpen={alert.setOpen}
       />
-      <SetHeat user={user} heats={heats} />
       {/**
        * Show team selection as a dropdown
        * Will only show active teams
@@ -164,7 +219,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
           }}
           onClick={() => handleGlobalStart()}
         >
-          Global start
+          Start Heat {nextHeatNumber} & Global Timer
         </Button>
       </Stack>
     </>
