@@ -61,8 +61,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
    * Create and set a new heat as current
    */
   const createAndSetNewHeat = async (): Promise<Heat | null> => {
-    const nextHeatNumber = await getNextHeatNumber();
-
     // Set all existing heats to not current
     const { error: updateError } = await supabase
       .from(HEATS_TABLE)
@@ -92,8 +90,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
 
     return newHeat;
   };
-
-  const currentHeat = getCurrentHeat(alert);
 
   /**
    * Handle global start timer with automatic heat increment
