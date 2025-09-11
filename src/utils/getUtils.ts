@@ -10,7 +10,7 @@ import {
 } from "./visualizationUtils";
 import {
   filterTimeLogsByTeamId,
-  sortTimeLogsByHeat,
+  sortTimeLogsByTime,
   splitTimeLogsPerHeat,
 } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
@@ -366,10 +366,15 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   timeLogs: TimeLog[]
 ): number | null => {
   const teamLogs = filterTimeLogsByTeamId(timeLogs, teamId);
-  const recentLogs = sortTimeLogsByHeat(teamLogs);
+  const recentLogs = sortTimeLogsByTime(teamLogs);
   if (recentLogs.length === 0) return null;
-  // As start and stop times are the same when changing players we need to check the
-  // last three logs and choose the one that is the new player
+
+  // Sorry for the following if statements
+  // Reasoning: As the teams change players, two time logs are inserted with the same start and stop times
+  // Thus to figure out the new player, we need to check the last three logs and choose the one that is the new player
+  // Last 3 logs: [PlayerA, PlayerA, PlayerB]
+  // Then we choose PlayerB as they appear only once in the last three logs
+  // Also if there are less than three logs, we just return the latest log's player as that means we are in the beginning of the game
   const first = recentLogs[recentLogs.length - 1];
   const second = recentLogs[recentLogs.length - 2];
   const third = recentLogs[recentLogs.length - 3];
