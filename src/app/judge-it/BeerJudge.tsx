@@ -49,9 +49,13 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       timeTypes.map((timeType: TimeType) => {
         const sailingText = `${"Start/Stop "}${playerName} ${
           timeType.time_eng
-        }`;
-        const beerText = `${"Start/Stop "}${playerName} ${timeType.time_eng}`;
-        const spinText = `${"Start/Stop "}${playerName} ${timeType.time_eng}`;
+        } ⛵`;
+        const beerText = `${"Start/Stop "}${playerName} ${
+          timeType.time_eng
+        } 🍺`;
+        const spinText = `${"Start/Stop "}${playerName} ${
+          timeType.time_eng
+        } 🌪️`;
 
         const text = (name: string): string => {
           if (name === TIME_TYPE_SAIL) return sailingText;
