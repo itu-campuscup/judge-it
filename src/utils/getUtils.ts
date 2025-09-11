@@ -367,7 +367,6 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   const first = recentLogs[recentLogs.length - 1];
   const second = recentLogs[recentLogs.length - 2];
   const third = recentLogs[recentLogs.length - 3];
-  // const [latestLog, setLatestLog] = useState<TimeLog | null>(null);
   let latestLog: TimeLog | null = null;
   if (recentLogs.length < 7) {
     latestLog = first;
