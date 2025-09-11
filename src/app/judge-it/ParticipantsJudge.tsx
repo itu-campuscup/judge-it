@@ -40,15 +40,11 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   );
   const [alertText, setAlertText] = useState<string>("");
   const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
-  console.log("ParticipantsJudge - selectedPlayer: ", selectedPlayer);
   const playerName = getPlayerName(selectedPlayer?.id || 0, players);
-  console.log("Players: ", players);
-  console.log("Selected player: ", playerName);
 
   useEffect(() => {
     const loadCurrentHeat = async () => {
       const some = await getCurrentHeat(alert);
-      console.log("Current heat: ", some);
       setCurrentHeat(some);
     };
     loadCurrentHeat();
@@ -60,8 +56,6 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     typeof prevPlayerId === "number"
       ? getPlayerName(prevPlayerId, players)
       : prevPlayerId;
-  console.log("Current heat: ", currentHeat);
-  console.log("Prev player: ", prevPlayerId);
   const handleStartStop = async (playerId: number | string | null) => {
     if (!playerId || !currentHeat) {
       setAlertOpen(true);
@@ -119,7 +113,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       <Stack spacing={2} sx={{ width: "100%" }}>
         <Button
           variant="contained"
-          color="primary"
+          color="error"
           size="large"
           fullWidth
           sx={{

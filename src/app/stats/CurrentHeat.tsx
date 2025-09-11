@@ -301,8 +301,18 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
         overflow: "hidden",
       }}
     >
-      <Typography variant="h4" gutterBottom sx={{ mb: 2, textAlign: "center" }}>
-        Heat #{currentHeat.id}
+      <Typography
+        variant="h2"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          mb: 2,
+          fontSize: "3rem",
+          fontWeight: "bold",
+          flexShrink: 0,
+        }}
+      >
+        🔥 Heat #{currentHeat?.id ?? currentHeat?.heat ?? "🙈"}
       </Typography>
 
       <Box
