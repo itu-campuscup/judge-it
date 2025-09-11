@@ -16,7 +16,6 @@ import {
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
 import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
-import { useState } from "react";
 
 /**
  * Gets the player name given the player ID.
