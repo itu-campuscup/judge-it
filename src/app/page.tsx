@@ -91,7 +91,7 @@ function Home() {
                 background: "#224186",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
-                color: "#224186",
+                WebkitTextFillColor: "transparent",
               }}
             >
               🏆 Welcome, {user.email?.split("@")[0] || 'User'}!
@@ -104,7 +104,7 @@ function Home() {
                 fontSize: { xs: "1.1rem", sm: "1.3rem" },
               }}
             >
-              Ready to judge some epic competitions? 🎯
+              Ready to judge? 🎯
             </Typography>
             <Box
               sx={{
@@ -344,13 +344,18 @@ function Home() {
               href="https://github.com/itu-campuscup/judge-it"
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: "white",
-                textDecoration: "underline",
-                marginLeft: 4,
-              }}
+              style={{ textDecoration: "none" }}
             >
-              GitHub Repository
+              <Typography
+                component="span"
+                sx={{
+                  color: "white",
+                  textDecoration: "underline",
+                  ml: 0.5,
+                }}
+              >
+                GitHub Repository
+              </Typography>
             </Link>
           </Typography>
         </Box>
