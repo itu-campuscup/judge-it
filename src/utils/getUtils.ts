@@ -375,18 +375,18 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   const third = recentLogs[recentLogs.length - 3];
   let latestLog: TimeLog | null = null;
   if (
-    first.player_id !== second.player_id &&
-    first.player_id !== third.player_id
+    first?.player_id !== second?.player_id &&
+    first?.player_id !== third?.player_id
   ) {
     latestLog = first;
   } else if (
-    second.player_id !== first.player_id &&
-    second.player_id !== third.player_id
+    second?.player_id !== first?.player_id &&
+    second?.player_id !== third?.player_id
   ) {
     latestLog = second;
   } else {
     latestLog = first;
   }
-  const playerId = latestLog.player_id;
+  const playerId = latestLog?.player_id;
   return playerId ? playerId : null;
 };
