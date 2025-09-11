@@ -312,7 +312,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
           flexShrink: 0,
         }}
       >
-        🔥 Heat #{currentHeat?.id ?? currentHeat?.heat ?? "🙈"}
+        🔥 Heat #{currentHeat?.heat ?? "🙈"}
       </Typography>
 
       <Box
