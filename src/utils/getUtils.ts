@@ -355,6 +355,12 @@ export const getPlayerImageWithFallback = (
   return team?.image_url || "";
 };
 
+/**
+ * Get the player ID given the team ID and time logs.
+ * @param teamId - The team ID.
+ * @param timeLogs - The list of time logs.
+ * @returns The player ID or null if not found.
+ */
 export const getPlayerIdGivenTeamAndTimeLogs = (
   teamId: number,
   timeLogs: TimeLog[]
@@ -368,9 +374,7 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   const second = recentLogs[recentLogs.length - 2];
   const third = recentLogs[recentLogs.length - 3];
   let latestLog: TimeLog | null = null;
-  if (recentLogs.length < 7) {
-    latestLog = first;
-  } else if (
+  if (
     first.player_id !== second.player_id &&
     first.player_id !== third.player_id
   ) {
