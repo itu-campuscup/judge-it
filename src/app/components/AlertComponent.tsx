@@ -97,23 +97,22 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
 
       const playVibration = () => {
         try {
-          switch (severity) {
-            case "success":
-              navigator.vibrate?.([100, 50, 100]);
-              break;
-            case "error":
-              navigator.vibrate?.([200, 100, 200, 100, 200]);
-              break;
-            case "warning":
-              navigator.vibrate?.([150, 75, 150]);
-              break;
-            default:
-              break;
+          if ("vibrate" in navigator) {
+            switch (severity) {
+              case "success":
+                navigator.vibrate?.([100, 50, 100]);
+                break;
+              case "error":
+                navigator.vibrate?.([200, 100, 200, 100, 200]);
+                break;
+              case "warning":
+                navigator.vibrate?.([150, 75, 150]);
+                break;
+              default:
+                break;
+            }
           }
-        } catch (vibrationError) {
-          // Silently ignore vibration errors
-          console.debug("Vibration not supported or blocked");
-        }
+        } catch (_) {}
       };
 
       playSound();
