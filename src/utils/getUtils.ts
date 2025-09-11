@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
 import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
+import { useState } from "react";
 
 /**
  * Gets the player name given the player ID.
@@ -362,7 +363,28 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   const teamLogs = filterTimeLogsByTeamId(timeLogs, teamId);
   const recentLogs = sortTimeLogsByHeat(teamLogs);
   if (recentLogs.length === 0) return null;
-  const latestLog = recentLogs[recentLogs.length - 1];
+  // As start and stop times are the same when changing players we need to check the
+  // last three logs and choose the one that is the new player
+  const first = recentLogs[recentLogs.length - 1];
+  const second = recentLogs[recentLogs.length - 2];
+  const third = recentLogs[recentLogs.length - 3];
+  // const [latestLog, setLatestLog] = useState<TimeLog | null>(null);
+  let latestLog: TimeLog | null = null;
+  if (recentLogs.length < 7) {
+    latestLog = first;
+  } else if (
+    first.player_id !== second.player_id &&
+    first.player_id !== third.player_id
+  ) {
+    latestLog = first;
+  } else if (
+    second.player_id !== first.player_id &&
+    second.player_id !== third.player_id
+  ) {
+    latestLog = second;
+  } else {
+    latestLog = first;
+  }
   const playerId = latestLog.player_id;
   return playerId ? playerId : null;
 };
