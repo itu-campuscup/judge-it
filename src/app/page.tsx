@@ -52,71 +52,310 @@ function Home() {
 
   if (user) {
     return (
-      <Container>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #224186 0%, #1a3670 100%)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Header user={user} />
-        <Box>
-          <Typography variant="h3">Welcome, {user.email}</Typography>
-          <Typography>You are authenticated!</Typography>
-          <nav>
-            <Link href="/stats">
-              <Button variant="contained" color="primary">
-                Go to stats page
-              </Button>
-            </Link>
-            <Link href="/judge-it">
-              <Button variant="contained" color="primary">
-                Go to judge page
-              </Button>
-            </Link>
-          </nav>
-        </Box>
-      </Container>
+        <Container
+          maxWidth="md"
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            py: 4,
+          }}
+        >
+          <Card
+            elevation={8}
+            sx={{
+              p: { xs: 3, sm: 4, md: 5 },
+              borderRadius: 3,
+              textAlign: "center",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              width: "100%",
+            }}
+          >
+            <Typography
+              variant="h2"
+              sx={{
+                mb: 2,
+                fontWeight: "bold",
+                fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                background: "#224186",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "#224186",
+              }}
+            >
+              🏆 Welcome, {user.email?.split("@")[0]}!
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                mb: 4,
+                color: "text.secondary",
+                fontSize: { xs: "1.1rem", sm: "1.3rem" },
+              }}
+            >
+              Ready to judge some epic competitions? 🎯
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 3,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Link
+                href="/stats"
+                style={{ textDecoration: "none", width: "100%" }}
+              >
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  sx={{
+                    py: 2,
+                    px: 4,
+                    fontSize: { xs: "1.1rem", sm: "1.2rem" },
+                    fontWeight: "bold",
+                    background: "#224186",
+                    borderRadius: 2,
+                    textTransform: "none",
+                    minHeight: "60px",
+                    "&:hover": {
+                      background: "#1a3670",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  📊 View Stats
+                </Button>
+              </Link>
+              <Link
+                href="/judge-it"
+                style={{ textDecoration: "none", width: "100%" }}
+              >
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  sx={{
+                    py: 2,
+                    px: 4,
+                    fontSize: { xs: "1.1rem", sm: "1.2rem" },
+                    fontWeight: "bold",
+                    background: "linear-gradient(45deg, #f093fb, #f5576c)",
+                    borderRadius: 2,
+                    textTransform: "none",
+                    minHeight: "60px",
+                    "&:hover": {
+                      background: "linear-gradient(45deg, #e084eb, #f04658)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  ⚖️ Start Judging
+                </Button>
+              </Link>
+            </Box>
+          </Card>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Container>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #224186 0%, #1a3670 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 2,
+      }}
+    >
       <AlertComponent
         open={alertOpen}
         severity={alertSeverity}
         text={alertText}
         setOpen={setAlertOpen}
       />
-      <Box>
-        <Image
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <Card>
-          <CardContent>
+      <Container maxWidth="sm">
+        <Card
+          elevation={12}
+          sx={{
+            borderRadius: 4,
+            overflow: "hidden",
+            background: "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(15px)",
+          }}
+        >
+          <Box
+            sx={{
+              background: "#224186",
+              p: 4,
+              textAlign: "center",
+              color: "white",
+            }}
+          >
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: "bold",
+                mb: 1,
+                fontSize: { xs: "2rem", sm: "2.5rem" },
+              }}
+            >
+              Judge-IT
+            </Typography>
+          </Box>
+
+          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+            <Box sx={{ textAlign: "center", mb: 3 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                }}
+              >
+                Sign in to start judging competitions
+              </Typography>
+            </Box>
+
             <form onSubmit={handleLogin}>
               <TextField
                 type="email"
-                label="Email"
+                label="Email Address"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 fullWidth
                 margin="normal"
+                variant="outlined"
+                required
+                sx={{
+                  mb: 2,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    fontSize: { xs: "1rem", sm: "1.1rem" },
+                    "& fieldset": {
+                      borderColor: "rgba(0,0,0,0.1)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#224186",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#224186",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontSize: { xs: "1rem", sm: "1.1rem" },
+                    "&.Mui-focused": {
+                      color: "#224186",
+                    },
+                  },
+                }}
               />
               <TextField
                 type="password"
                 label="Password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 fullWidth
                 margin="normal"
+                variant="outlined"
+                required
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    fontSize: { xs: "1rem", sm: "1.1rem" },
+                    "& fieldset": {
+                      borderColor: "rgba(0,0,0,0.1)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#224186",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#224186",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontSize: { xs: "1rem", sm: "1.1rem" },
+                    "&.Mui-focused": {
+                      color: "#224186",
+                    },
+                  },
+                }}
               />
-              <Button type="submit" variant="contained" color="primary">
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                sx={{
+                  py: 1.5,
+                  fontSize: { xs: "1.1rem", sm: "1.2rem" },
+                  fontWeight: "bold",
+                  background: "#224186",
+                  borderRadius: 2,
+                  textTransform: "none",
+                  "&:hover": {
+                    background: "#1a3670",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
                 Login
               </Button>
             </form>
           </CardContent>
         </Card>
-      </Box>
-    </Container>
+
+        <Box sx={{ textAlign: "center", mt: 3 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "rgba(255,255,255,0.8)",
+              fontSize: { xs: "0.8rem", sm: "0.9rem" },
+            }}
+          >
+            Judge-IT{" "}
+            <Link
+              href="https://github.com/itu-campuscup/judge-it"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "white",
+                textDecoration: "underline",
+                marginLeft: 4,
+              }}
+            >
+              GitHub Repository
+            </Link>
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 
