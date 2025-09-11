@@ -94,7 +94,7 @@ function Home() {
                 color: "#224186",
               }}
             >
-              🏆 Welcome, {user.email?.split("@")[0]}!
+              🏆 Welcome, {user.email?.split("@")[0] || 'User'}!
             </Typography>
             <Typography
               variant="h5"
