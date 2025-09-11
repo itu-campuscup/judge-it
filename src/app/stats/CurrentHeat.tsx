@@ -343,15 +343,26 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
             <>
               <Avatar
                 src={team1.teamImage}
-                sx={{ width: 100, height: 100, mb: 2 }}
+                sx={{ width: 160, height: 160, mb: 3 }}
               />
-              <Typography variant="h5" sx={{ mb: 1, textAlign: "center" }}>
+              <Typography
+                variant="h2"
+                sx={{
+                  mb: 2,
+                  textAlign: "center",
+                  fontSize: "2.5rem",
+                  fontWeight: "bold",
+                }}
+              >
                 {team1.teamName}
               </Typography>
               <Typography
-                variant="h6"
+                variant="h3"
                 color="text.secondary"
-                sx={{ textAlign: "center" }}
+                sx={{
+                  textAlign: "center",
+                  fontSize: "2rem",
+                }}
               >
                 {team1.currentPlayer?.name || "No player"}
               </Typography>
@@ -400,15 +411,26 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
             <>
               <Avatar
                 src={team2.teamImage}
-                sx={{ width: 100, height: 100, mb: 2 }}
+                sx={{ width: 160, height: 160, mb: 3 }}
               />
-              <Typography variant="h5" sx={{ mb: 1, textAlign: "center" }}>
+              <Typography
+                variant="h2"
+                sx={{
+                  mb: 2,
+                  textAlign: "center",
+                  fontSize: "2.5rem",
+                  fontWeight: "bold",
+                }}
+              >
                 {team2.teamName}
               </Typography>
               <Typography
-                variant="h6"
+                variant="h3"
                 color="text.secondary"
-                sx={{ textAlign: "center" }}
+                sx={{
+                  textAlign: "center",
+                  fontSize: "2rem",
+                }}
               >
                 {team2.currentPlayer?.name || "No player"}
               </Typography>
