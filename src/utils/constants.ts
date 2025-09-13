@@ -104,7 +104,7 @@ export const CAMPUSCUP_LIGHT_BLUE: string = "#093fbd";
  * Each activity has a min/max time range for meaningful comparison
  */
 export const PERFORMANCE_SCALES = {
-  BEER: { min: 2, max: 120 }, // 2 seconds (very fast) to 120 seconds (slow)
-  SPIN: { min: 5, max: 60 }, // 5 seconds (very fast) to 60 seconds (slow)
-  SAIL: { min: 10, max: 120 }, // 10 seconds (very fast) to 120 seconds (slow)
+  BEER: { min: 3, max: 20 }, // 2 seconds (very fast) to 20 seconds (slow)
+  SPIN: { min: 5, max: 20 }, // 5 seconds (very fast) to 20 seconds (slow)
+  SAIL: { min: 8, max: 30 }, // 8 seconds (very fast) to 30 seconds (slow)
 } as const;
