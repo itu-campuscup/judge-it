@@ -94,7 +94,7 @@ export const removeDuplicateTimeEntriesAll = (timeEntries: any[]): any[] => {
     filteredEntries.push(entry);
   }
   return filteredEntries;
-}
+};
 
 /**
  * Remove time entries which have same player ID.
