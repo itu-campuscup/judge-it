@@ -66,7 +66,7 @@ const Spinner: React.FC<SpinnerProps> = ({
     ) {
       downloadCSV(spinTimes, players, teams, heats, "spinner_times.csv");
     }
-  });
+  }, [topSpinTimes]);
 
   const rpmData = generateRPMData(topSpinTimes, players, teams, heats);
 

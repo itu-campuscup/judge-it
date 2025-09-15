@@ -6,16 +6,10 @@ import {
   calculateTimes,
   generateRankableData,
   removeDuplicateTimeEntries,
-  removeDuplicateTimeEntriesAll,
 } from "@/utils/visualizationUtils";
 import { formatTime, milliToSecs } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_BEER } from "@/utils/constants";
-import {
-  getHeatNumber,
-  getPlayerName,
-  getTeamName,
-  getTimeTypeId,
-} from "@/utils/getUtils";
+import { getTimeTypeId } from "@/utils/getUtils";
 import BeerAnimation from "./animations/BeerAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
