@@ -82,6 +82,26 @@ export const calculateTimes = (logsForHeatsSortByTime: TimeLog[]) => {
  * @returns {Array} The list of time entries without duplicates.
  * @description Maintains
  */
+export const removeDuplicateTimeEntriesAll = (timeEntries: any[]): any[] => {
+  const playerIds = new Set();
+  const filteredEntries = [];
+  for (const entry of timeEntries) {
+    const playerId = entry.playerId;
+    if (playerIds.has(playerId)) {
+      continue;
+    }
+    playerIds.add(playerId);
+    filteredEntries.push(entry);
+  }
+  return filteredEntries;
+}
+
+/**
+ * Remove time entries which have same player ID.
+ * @param {Array} timeEntries - The list of filtered time entries.
+ * @returns {Array} The list of time entries without duplicates.
+ * @description Maintains
+ */
 export const removeDuplicateTimeEntries = (timeEntries: any[]): any[] => {
   const playerIds = new Set();
   const filteredEntries = [];

@@ -12,6 +12,7 @@ import SpinnerAnimation from "./animations/SpinnerAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
 import { Player, Team, Heat, TimeType, TimeLog } from "@/types";
+import { downloadCSV } from "@/utils/exportData";
 
 interface SpinnerProps {
   timeLogs: TimeLog[];
@@ -57,6 +58,15 @@ const Spinner: React.FC<SpinnerProps> = ({
       : [];
   const spinTimes = calculateTimes(logsForHeatsSortByTime);
   const topSpinTimes = removeDuplicateTimeEntries(spinTimes);
+
+  useEffect((): void => {
+    if (
+      window.location.search.includes("export=true") &&
+      topSpinTimes.length > 0
+    ) {
+      downloadCSV(spinTimes, players, teams, heats, "spinner_times.csv");
+    }
+  });
 
   const rpmData = generateRPMData(topSpinTimes, players, teams, heats);
 

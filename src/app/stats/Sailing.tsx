@@ -13,6 +13,7 @@ import SailingAnimation from "./animations/SailingAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
 import { Player, Team, Heat, TimeType, TimeLog } from "@/types";
+import { downloadCSV } from "@/utils/exportData";
 
 interface SailingProps {
   timeLogs: TimeLog[];
@@ -56,6 +57,12 @@ const Sailing: React.FC<SailingProps> = ({
       : [];
   const sailTimes = calculateTimes(logsForHeatsSortByTime);
   const topTimes = removeDuplicateTimeEntries(sailTimes);
+
+  useEffect((): void => {
+    if (window.location.search.includes("export=true") && topTimes.length > 0) {
+      downloadCSV(sailTimes, players, teams, heats, "sailing_times.csv");
+    }
+  }, [topTimes]);
 
   const sailData = generateRankableData(topTimes, players, teams, heats);
 

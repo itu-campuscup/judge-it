@@ -6,14 +6,21 @@ import {
   calculateTimes,
   generateRankableData,
   removeDuplicateTimeEntries,
+  removeDuplicateTimeEntriesAll,
 } from "@/utils/visualizationUtils";
 import { formatTime, milliToSecs } from "@/utils/timeUtils";
 import { MEDAL_EMOJIS, TIME_TYPE_BEER } from "@/utils/constants";
-import { getTimeTypeId } from "@/utils/getUtils";
+import {
+  getHeatNumber,
+  getPlayerName,
+  getTeamName,
+  getTimeTypeId,
+} from "@/utils/getUtils";
 import BeerAnimation from "./animations/BeerAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
 import { Player, Team, Heat, TimeType, TimeLog } from "@/types";
+import { downloadCSV } from "@/utils/exportData";
 
 interface BeerChuggerProps {
   timeLogs: TimeLog[];
@@ -56,6 +63,15 @@ const BeerChugger: React.FC<BeerChuggerProps> = ({
       : [];
   const chugTimes = calculateTimes(logsForHeatsSortByTime);
   const topChugTimes = removeDuplicateTimeEntries(chugTimes);
+
+  useEffect((): void => {
+    if (
+      window.location.search.includes("export=true") &&
+      topChugTimes.length > 0
+    ) {
+      downloadCSV(chugTimes, players, teams, heats, "beer_chugger_times.csv");
+    }
+  }, [topChugTimes]);
 
   const initialBarData = generateRankableData(
     topChugTimes,

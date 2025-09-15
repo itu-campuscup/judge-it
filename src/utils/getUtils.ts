@@ -62,6 +62,17 @@ export const getHeatNumber = (heatId: number, heats: Heat[]): string => {
 };
 
 /**
+ * Get the heat year given the heat ID.
+ * @param {number} heatId - The heat ID.
+ * @param {Array} heats - The list of heats.
+ * @returns {string} The heat year.
+ */
+export const getHeatYear = (heatId: number, heats: Heat[]): string => {
+  const heat = heats.find((h: Heat) => h.id === heatId);
+  return heat ? heat.date.split("-")[0] : "";
+}
+
+/**
  * Gets the team name given the team ID.
  * @param {number} teamId - The team ID.
  * @param {Array} teams - The list of teams.
