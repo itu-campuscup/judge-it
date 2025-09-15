@@ -70,7 +70,7 @@ export const getHeatNumber = (heatId: number, heats: Heat[]): string => {
 export const getHeatYear = (heatId: number, heats: Heat[]): string => {
   const heat = heats.find((h: Heat) => h.id === heatId);
   return heat ? heat.date.split("-")[0] : "";
-}
+};
 
 /**
  * Gets the team name given the team ID.
