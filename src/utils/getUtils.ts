@@ -15,7 +15,6 @@ import {
 } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
-import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
 
 /**
  * Gets the player name given the player ID.
