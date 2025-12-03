@@ -2,11 +2,11 @@
 
 ## Supported Versions
 
-Judge IT V1.0.0 has been released! We actively support the current stable version with security updates.
+Judge IT v2025.0.0 has been released! We actively support the current stable version with security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| Version   | Supported          |
+| --------- | ------------------ |
+| v2025.0.x | :white_check_mark: |
 
 ## Reporting a Vulnerability
 

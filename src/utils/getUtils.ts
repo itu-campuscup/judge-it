@@ -15,7 +15,6 @@ import {
 } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
 import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
-import { t } from "node_modules/framer-motion/dist/types.d-CtuPurYT";
 
 /**
  * Gets the player name given the player ID.
@@ -59,6 +58,17 @@ export const getPlayerNameWithTeam = (
 export const getHeatNumber = (heatId: number, heats: Heat[]): string => {
   const heat = heats.find((h: Heat) => h.id === heatId);
   return heat ? heat.heat.toString() : "";
+};
+
+/**
+ * Get the heat year given the heat ID.
+ * @param {number} heatId - The heat ID.
+ * @param {Array} heats - The list of heats.
+ * @returns {string} The heat year.
+ */
+export const getHeatYear = (heatId: number, heats: Heat[]): string => {
+  const heat = heats.find((h: Heat) => h.id === heatId);
+  return heat ? heat.date.split("-")[0] : "";
 };
 
 /**
