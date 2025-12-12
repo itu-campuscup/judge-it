@@ -16,7 +16,7 @@
     "@shadcn/ui": "^0.0.4",
     "@supabase/supabase-js": "^2.86.1",
     "framer-motion": "^12.23.25",
-    "next": "16.0.7",
+    "next": "16.1.0-canary.19",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "recharts": "^3.5.1",
