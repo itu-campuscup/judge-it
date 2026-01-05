@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bun cli.ts build",
+  "buildCommand": "bun run next build",
   "installCommand": "bun install --frozen-lockfile",
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
