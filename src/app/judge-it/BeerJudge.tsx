@@ -64,7 +64,18 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
           alert.setOpen(true);
           alert.setSeverity("error");
           alert.setText("Unknown time type");
-          console.error("Unknown time type");
+          alert.setContext({
+            operation: "render_time_type_buttons",
+            location: "BeerJudge.timeTypeButtons.text",
+            metadata: {
+              unknownTimeType: name,
+              availableTimeTypes: [
+                TIME_TYPE_SAIL,
+                TIME_TYPE_BEER,
+                TIME_TYPE_SPIN,
+              ],
+            },
+          });
           return "";
         };
 
@@ -97,6 +108,15 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("No current heat found");
+      alert.setContext({
+        operation: "record_time",
+        location: "BeerJudge.handleTimeTypeClick",
+        metadata: {
+          timeTypeId,
+          selectedTeam,
+          latestPlayer,
+        },
+      });
       return;
     }
 
@@ -116,15 +136,36 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(err);
-      console.error(err);
+      alert.setContext({
+        operation: "record_time",
+        location: "BeerJudge.handleTimeTypeClick",
+        metadata: {
+          step: "insert_time_log",
+          teamId: selectedTeam,
+          playerId: latestPlayer,
+          timeTypeId,
+          heatId: currentHeat.id,
+          errorCode: error.code,
+        },
+      });
       return;
     }
+    const timeTypeName =
+      timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown";
     alert.setOpen(true);
     alert.setSeverity("success");
-    alert.setText(
-      "Inserted log of type: " +
-        (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown")
-    );
+    alert.setText(`Inserted log of type: ${timeTypeName}`);
+    alert.setContext({
+      operation: "record_time",
+      location: "BeerJudge.handleTimeTypeClick",
+      metadata: {
+        teamId: selectedTeam,
+        playerId: latestPlayer,
+        timeTypeId,
+        timeTypeName,
+        heatId: currentHeat.id,
+      },
+    });
   };
   /**
    * Validate inputs before sending to the database
@@ -145,7 +186,15 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(errorTxt);
-      console.error(errorTxt);
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "BeerJudge.validateInputs",
+        metadata: {
+          selectedTeam,
+          latestPlayer,
+          timeTypesCount: timeTypes.length,
+        },
+      });
       return false;
     }
 

@@ -28,6 +28,14 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("No active teams found");
+      alert.setContext({
+        operation: "load_teams",
+        location: "TeamSelect.useEffect",
+        metadata: {
+          totalTeams: teams.length,
+          activeTeams: 0,
+        },
+      });
     }
   }, [teams, activeTeams, alert]);
 

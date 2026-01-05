@@ -52,12 +52,23 @@ const Spinner: React.FC<SpinnerProps> = ({
   );
   const spinnerTypeId = spinnerType ? spinnerType.id : null;
 
-  const logsForHeatsSortByTime =
-    spinnerTypeId !== null
-      ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, spinnerTypeId)
-      : [];
-  const spinTimes = calculateTimes(logsForHeatsSortByTime);
-  const topSpinTimes = removeDuplicateTimeEntries(spinTimes);
+  const logsForHeatsSortByTime = useMemo(
+    () =>
+      spinnerTypeId !== null
+        ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, spinnerTypeId)
+        : [],
+    [timeLogs, heats, selectedYear, spinnerTypeId]
+  );
+
+  const spinTimes = useMemo(
+    () => calculateTimes(logsForHeatsSortByTime),
+    [logsForHeatsSortByTime]
+  );
+
+  const topSpinTimes = useMemo(
+    () => removeDuplicateTimeEntries(spinTimes),
+    [spinTimes]
+  );
 
   useEffect((): void => {
     if (
@@ -68,7 +79,10 @@ const Spinner: React.FC<SpinnerProps> = ({
     }
   }, [topSpinTimes]);
 
-  const rpmData = generateRPMData(topSpinTimes, players, teams, heats);
+  const rpmData = useMemo(
+    () => generateRPMData(topSpinTimes, players, teams, heats),
+    [topSpinTimes, players, teams, heats]
+  );
 
   let processedRankingData = useMemo((): ProcessedRankingData[] => {
     if (spinnerTypeId === null || rpmData.length === 0) return [];

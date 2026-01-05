@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Typography, Box, Avatar, Paper } from "@mui/material";
 import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
 import {
@@ -95,21 +95,22 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
     return () => clearInterval(timer);
   }, [raceStartTime, raceFinished]);
 
+  // Memoize expensive filtering operations
+  const currentHeatTimeLogs = useMemo(
+    () =>
+      currentHeat?.id ? filterTimeLogsByHeatId(timeLogs, currentHeat.id) : [],
+    [timeLogs, currentHeat?.id]
+  );
+
+  const allSailLogs = useMemo(
+    () => filterTimeLogsByTimeType(currentHeatTimeLogs, sailTypeId),
+    [currentHeatTimeLogs, sailTypeId]
+  );
+
   useEffect(() => {
     if (!currentHeat?.id) return;
 
     const processHeatData = () => {
-      const currentHeatTimeLogs = filterTimeLogsByHeatId(
-        timeLogs,
-        currentHeat.id
-      );
-
-      // Only work with sail logs - ignore beer and spin completely
-      const allSailLogs = filterTimeLogsByTimeType(
-        currentHeatTimeLogs,
-        sailTypeId
-      );
-
       // Check if any team has reached 16 sail logs
       const teamIds = [...new Set(allSailLogs.map((log) => log.team_id))];
       let raceComplete = false;

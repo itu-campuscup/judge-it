@@ -1,0 +1,228 @@
+/**
+ * Centralized Logging Utility
+ *
+ * OpenTelemetry-based logging with:
+ * - JSON-formatted output
+ * - User context injection
+ * - Endpoint-level logging (only roots log)
+ * - Error propagation pattern
+ * - Structured data
+ */
+
+import { User } from "@supabase/supabase-js";
+import { Result, isErr, AppError } from "./result";
+
+export interface LogContext {
+  userId?: string;
+  userEmail?: string;
+  sessionId?: string;
+  endpoint: string;
+  operation: string;
+  [key: string]: any;
+}
+
+export interface LogData {
+  timestamp: string;
+  level: "info" | "error" | "warn" | "debug";
+  endpoint: string;
+  operation: string;
+  user?: {
+    id: string;
+    email?: string;
+  };
+  duration?: number;
+  data?: Record<string, any>;
+  error?: {
+    message: string;
+    code?: string;
+    stack?: string;
+    context?: Record<string, any>;
+  };
+}
+
+/**
+ * Logger class for endpoint-level logging
+ */
+export class Logger {
+  private endpoint: string;
+  private user: User | null;
+  private startTime: number;
+
+  constructor(endpoint: string, user: User | null = null) {
+    this.endpoint = endpoint;
+    this.user = user;
+    this.startTime = Date.now();
+  }
+
+  /**
+   * Set user context for this logger
+   */
+  setUser(user: User | null): void {
+    this.user = user;
+  }
+
+  /**
+   * Log operation success
+   */
+  info(operation: string, data?: Record<string, any>): void {
+    this.log("info", operation, data);
+  }
+
+  /**
+   * Log operation error
+   */
+  error(
+    operation: string,
+    error: Error | AppError,
+    data?: Record<string, any>
+  ): void {
+    const errorData =
+      error instanceof AppError
+        ? error.toJSON()
+        : {
+            message: error.message,
+            stack: error.stack,
+          };
+
+    // Include error chain if available for full propagation context
+    const logData: Record<string, any> = {
+      ...data,
+      error: errorData,
+    };
+
+    // If error has a chain, add summary for quick scanning
+    if (error instanceof AppError) {
+      const jsonError = error.toJSON();
+      if (jsonError.errorChain) {
+        logData.errorChainSummary = jsonError.errorChain
+          .map((e: any) => `${e.location || "unknown"}: ${e.message}`)
+          .join(" → ");
+      }
+    }
+
+    this.log("error", operation, logData);
+  }
+
+  /**
+   * Log operation warning
+   */
+  warn(operation: string, data?: Record<string, any>): void {
+    this.log("warn", operation, data);
+  }
+
+  /**
+   * Log operation debug info
+   */
+  debug(operation: string, data?: Record<string, any>): void {
+    this.log("debug", operation, data);
+  }
+
+  /**
+   * Core logging method - outputs JSON
+   */
+  private log(
+    level: LogData["level"],
+    operation: string,
+    data?: Record<string, any>
+  ): void {
+    const logData: LogData = {
+      timestamp: new Date().toISOString(),
+      level,
+      endpoint: this.endpoint,
+      operation,
+      duration: Date.now() - this.startTime,
+    };
+
+    // Add user context if available
+    if (this.user) {
+      logData.user = {
+        id: this.user.id,
+        email: this.user.email,
+      };
+    }
+
+    // Add additional data
+    if (data) {
+      if (data.error) {
+        logData.error = data.error;
+        delete data.error;
+      }
+      if (Object.keys(data).length > 0) {
+        logData.data = data;
+      }
+    }
+
+    // Output as JSON
+    console.log(JSON.stringify(logData));
+  }
+}
+
+/**
+ * Create a traced operation with automatic logging
+ * This should be used at the endpoint level
+ */
+export async function traceEndpoint<T>(
+  endpoint: string,
+  operation: string,
+  user: User | null,
+  fn: (logger: Logger) => Promise<Result<T, Error>>
+): Promise<Result<T, Error>> {
+  const logger = new Logger(endpoint, user);
+  const startTime = Date.now();
+
+  try {
+    // Execute operation
+    const result = await fn(logger);
+
+    // Log based on result
+    if (isErr(result)) {
+      logger.error(operation, result.error, {
+        duration: Date.now() - startTime,
+      });
+    } else {
+      logger.info(operation, {
+        success: true,
+        duration: Date.now() - startTime,
+      });
+    }
+
+    return result;
+  } catch (error) {
+    const appError = error instanceof Error ? error : new Error(String(error));
+
+    logger.error(operation, appError, {
+      duration: Date.now() - startTime,
+    });
+
+    throw error;
+  }
+}
+
+/**
+ * Create a simple logger for a specific endpoint
+ */
+export function createLogger(
+  endpoint: string,
+  user: User | null = null
+): Logger {
+  return new Logger(endpoint, user);
+}
+
+/**
+ * Helper to log Result at endpoint level
+ */
+export function logResult<T>(
+  logger: Logger,
+  operation: string,
+  result: Result<T, Error>,
+  additionalData?: Record<string, any>
+): void {
+  if (isErr(result)) {
+    logger.error(operation, result.error, additionalData);
+  } else {
+    logger.info(operation, {
+      ...additionalData,
+      success: true,
+    });
+  }
+}

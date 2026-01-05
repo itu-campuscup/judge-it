@@ -71,6 +71,15 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Error updating current heat: " + updateError.message);
+      alert.setContext({
+        operation: "create_new_heat",
+        location: "MainJudge.createAndSetNewHeat",
+        metadata: {
+          step: "update_current_heat",
+          nextHeatNumber,
+          errorCode: updateError.code,
+        },
+      });
       return null;
     }
 
@@ -85,6 +94,15 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Error creating new heat: " + createError.message);
+      alert.setContext({
+        operation: "create_new_heat",
+        location: "MainJudge.createAndSetNewHeat",
+        metadata: {
+          step: "insert_new_heat",
+          nextHeatNumber,
+          errorCode: createError.code,
+        },
+      });
       return null;
     }
 
@@ -110,6 +128,14 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Sailing time type not found");
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          availableTimeTypes: time_types.map((t) => t.time_eng),
+          searchingFor: TIME_TYPE_SAIL,
+        },
+      });
       return;
     }
 
@@ -132,11 +158,32 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(err);
-      console.error(err);
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          step: "insert_time_logs",
+          parentTeam,
+          parentPlayer,
+          selectedTeamId,
+          selectedPlayer,
+          heatId: newHeat.id,
+          errorCode: error.code,
+        },
+      });
     } else {
       alert.setOpen(true);
       alert.setSeverity("success");
       alert.setText(`Heat ${newHeat.heat} started! Global timer running.`);
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          heatNumber: newHeat.heat,
+          parentTeam,
+          selectedTeamId,
+        },
+      });
 
       // Update next heat number for the button
       const updatedNextHeat = await getNextHeatNumber();
@@ -152,21 +199,46 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing team in the top");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: { missingField: "parentTeam" },
+      });
       return false;
     } else if (!parentPlayer) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing player in the top");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: { missingField: "parentPlayer", parentTeam },
+      });
       return false;
     } else if (!selectedTeamId) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing selected team in the bottom");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: { missingField: "selectedTeamId", parentTeam, parentPlayer },
+      });
       return false;
     } else if (!selectedPlayer) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing selected player in the bottom");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: {
+          missingField: "selectedPlayer",
+          parentTeam,
+          parentPlayer,
+          selectedTeamId,
+        },
+      });
       return false;
     }
     return true;

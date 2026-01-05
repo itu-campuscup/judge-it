@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FormControl, TextField, Button } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import { supabase } from "@/SupabaseClient";
 import { HEATS_TABLE } from "@/utils/constants";
-import type { Heat } from "@/types";
+import type { Heat, AlertContext } from "@/types";
 
 interface SetHeatProps {
   user: any;
@@ -16,16 +16,23 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
     "error"
   );
   const [alertText, setAlertText] = useState<string>("");
+  const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [heatNumber, setHeatNumber] = useState<string>("");
 
   const getCurYear = (): number => {
     return new Date().getFullYear();
   };
 
+  const thisYearsHeats = useMemo(
+    () =>
+      heats.filter(
+        (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear()
+      ),
+    [heats]
+  );
+
   const getThisYearsHeats = (): Heat[] => {
-    return heats.filter(
-      (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear()
-    );
+    return thisYearsHeats;
   };
 
   const hasHeatBeenUsed = (heatNumber: number): boolean => {
@@ -54,7 +61,14 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "set_heat",
+        location: "SetHeat.setNotCurrentHeat",
+        metadata: {
+          step: "update_current_heat_to_false",
+          errorCode: error.code,
+        },
+      });
       return "error";
     }
   };
@@ -70,7 +84,15 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "set_heat",
+        location: "SetHeat.createHeat",
+        metadata: {
+          step: "insert_new_heat",
+          heatNumber,
+          errorCode: error.code,
+        },
+      });
       return "error";
     }
   };
@@ -87,7 +109,15 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "set_heat",
+        location: "SetHeat.updateHeat",
+        metadata: {
+          step: "update_heat_to_current",
+          heatNumber,
+          errorCode: error.code,
+        },
+      });
       return "error";
     }
   };
@@ -124,6 +154,14 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
     setAlertOpen(true);
     setAlertSeverity("success");
     setAlertText(`Heat ${heatNumber} set`);
+    setAlertContext({
+      operation: "set_heat",
+      location: "SetHeat.handleSetHeat",
+      metadata: {
+        heatNumber,
+        wasReused: hasHeatBeenUsed(heatNumber),
+      },
+    });
   };
 
   return (
@@ -133,6 +171,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
         text={alertText}
         open={alertOpen}
         setOpen={setAlertOpen}
+        context={alertContext}
       />
       <FormControl fullWidth margin="normal" variant="filled">
         <TextField

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   FormControl,
   Typography,
@@ -33,15 +33,17 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   selectPlayerString,
   setSelectPlayerString,
 }) => {
+  const calculatedTeamPlayers = useMemo(() => {
+    if (!selectedTeamId) return [];
+    const teamPlayerIds = getTeamPlayerIds(selectedTeamId, teams);
+    return teamPlayerIds
+      .map((id) => getPlayer(id, players))
+      .filter((player): player is Player => player !== undefined);
+  }, [selectedTeamId, teams, players]);
+
   useEffect(() => {
-    if (selectedTeamId) {
-      const teamPlayerIds = getTeamPlayerIds(selectedTeamId, teams);
-      const teamPlayers = teamPlayerIds
-        .map((id) => getPlayer(id, players))
-        .filter((player): player is Player => player !== undefined);
-      setTeamPlayers(teamPlayers);
-    }
-  }, [teams, selectedTeamId, players, setTeamPlayers]);
+    setTeamPlayers(calculatedTeamPlayers);
+  }, [calculatedTeamPlayers, setTeamPlayers]);
 
   useEffect(() => {
     if (teamPlayers.length === 0) {

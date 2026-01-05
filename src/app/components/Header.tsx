@@ -24,7 +24,6 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 
   const handleLogout = async (): Promise<void> => {
     const { error } = await supabase.auth.signOut();
-    if (error) console.error("Error logging out:", error.message);
   };
 
   return (
@@ -92,4 +91,4 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);

@@ -15,7 +15,14 @@ import {
   TIME_LOGS_TABLE,
   TIME_TYPE_SAIL,
 } from "@/utils/constants";
-import type { Team, Player, TimeType, TimeLog, Heat } from "@/types";
+import type {
+  Team,
+  Player,
+  TimeType,
+  TimeLog,
+  Heat,
+  AlertContext,
+} from "@/types";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
@@ -39,6 +46,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     "error"
   );
   const [alertText, setAlertText] = useState<string>("");
+  const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
   const playerName = getPlayerName(selectedPlayer?.id || 0, players);
 
@@ -61,6 +69,15 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText("Missing player ID or current heat");
+      setAlertContext({
+        operation: "start_stop_timer",
+        location: "ParticipantsJudge.handleStartStop",
+        metadata: {
+          missingField: !playerId ? "playerId" : "currentHeat",
+          selectedTeamId: selectedTeam?.id,
+          selectedPlayerId: selectedPlayer?.id,
+        },
+      });
       return;
     }
 
@@ -69,6 +86,14 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText("Could not find sailing time type");
+      setAlertContext({
+        operation: "start_stop_timer",
+        location: "ParticipantsJudge.handleStartStop",
+        metadata: {
+          searchingFor: TIME_TYPE_SAIL,
+          availableTimeTypes: timeTypes.map((t) => t.time_eng),
+        },
+      });
       return;
     }
 
@@ -91,7 +116,18 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "start_stop_timer",
+        location: "ParticipantsJudge.handleStartStop",
+        metadata: {
+          step: "insert_time_logs",
+          teamId: selectedTeam?.id,
+          prevPlayerId,
+          currentPlayerId: playerId,
+          heatId: currentHeat.id,
+          errorCode: error.code,
+        },
+      });
       return;
     }
     setAlertOpen(true);
@@ -100,6 +136,17 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       "Inserted log of type: " +
         (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown")
     );
+    setAlertContext({
+      operation: "start_stop_timer",
+      location: "ParticipantsJudge.handleStartStop",
+      metadata: {
+        teamId: selectedTeam?.id,
+        prevPlayerId,
+        currentPlayerId: playerId,
+        heatId: currentHeat.id,
+        timeType: TIME_TYPE_SAIL,
+      },
+    });
   };
 
   return (

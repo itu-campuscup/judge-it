@@ -8,7 +8,7 @@ import {
   getTimeTypeSail,
   getTimeTypeSpinner,
 } from "@/utils/getUtils";
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   filterTimeLogsByPlayerId,
   filterTimeLogsByTimeType,
@@ -50,39 +50,60 @@ const Teams: React.FC<TeamsProps> = ({
   const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>("");
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>("");
 
-  const handleTeamChange = (
-    e:
-      | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-      | (Event & { target: { value: string; name: string } }),
-    teamNumber: number
-  ) => {
-    if (teamNumber === 1) {
-      setSelectedTeam1Id(e.target.value);
-    } else if (teamNumber === 2) {
-      setSelectedTeam2Id(e.target.value);
-    }
-  };
+  const handleTeamChange = useCallback(
+    (
+      e:
+        | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+        | (Event & { target: { value: string; name: string } }),
+      teamNumber: number
+    ) => {
+      if (teamNumber === 1) {
+        setSelectedTeam1Id(e.target.value);
+      } else if (teamNumber === 2) {
+        setSelectedTeam2Id(e.target.value);
+      }
+    },
+    []
+  );
 
   const beerTypeId = getTimeTypeBeer(timeTypes)?.id || 0;
   const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || 0;
   const sailTypeId = getTimeTypeSail(timeTypes)?.id || 0;
 
-  const team1Players = getTeamPlayerIds(selectedTeam1Id, teams);
-  const team2Players = getTeamPlayerIds(selectedTeam2Id, teams);
-
-  const team1LogsSortedByHeatAndTime: TimeLog[][] = team1Players.map(
-    (playerId: number) => {
-      const logsFilteredByPlayer = filterTimeLogsByPlayerId(timeLogs, playerId);
-      const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
-      return sortTimeLogsByHeat(sortedByTime);
-    }
+  const team1Players = useMemo(
+    () => getTeamPlayerIds(selectedTeam1Id, teams),
+    [selectedTeam1Id, teams]
   );
-  const team2LogsSortedByHeatAndTime: TimeLog[][] = team2Players.map(
-    (playerId: number) => {
-      const logsFilteredByPlayer = filterTimeLogsByPlayerId(timeLogs, playerId);
-      const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
-      return sortTimeLogsByHeat(sortedByTime);
-    }
+
+  const team2Players = useMemo(
+    () => getTeamPlayerIds(selectedTeam2Id, teams),
+    [selectedTeam2Id, teams]
+  );
+
+  const team1LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
+    () =>
+      team1Players.map((playerId: number) => {
+        const logsFilteredByPlayer = filterTimeLogsByPlayerId(
+          timeLogs,
+          playerId
+        );
+        const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
+        return sortTimeLogsByHeat(sortedByTime);
+      }),
+    [team1Players, timeLogs]
+  );
+
+  const team2LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
+    () =>
+      team2Players.map((playerId: number) => {
+        const logsFilteredByPlayer = filterTimeLogsByPlayerId(
+          timeLogs,
+          playerId
+        );
+        const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
+        return sortTimeLogsByHeat(sortedByTime);
+      }),
+    [team2Players, timeLogs]
   );
 
   const filterPlayerLogsByType = (logs: TimeLog[][], typeId: number) =>

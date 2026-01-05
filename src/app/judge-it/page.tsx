@@ -163,6 +163,7 @@ function Judge(): React.ReactElement {
         text={alert.text}
         open={alert.open}
         setOpen={alert.setOpen}
+        context={alert.context}
       />
     </Container>
   );

@@ -99,6 +99,14 @@ export interface SortFilterOptions {
   ascending?: boolean;
 }
 
+// Alert context type (used across AlertComponent and judge-it components)
+export interface AlertContext {
+  operation?: string;      // What operation was being performed
+  location?: string;        // Where in the code this alert came from
+  metadata?: Record<string, any>; // Additional context
+  error?: Error;           // Original error object if available
+}
+
 export interface VisualizationData {
   labels: string[];
   datasets: {

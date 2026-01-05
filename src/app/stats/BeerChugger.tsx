@@ -51,12 +51,23 @@ const BeerChugger: React.FC<BeerChuggerProps> = ({
   };
   const beerTypeId = getTimeTypeId(TIME_TYPE_BEER, timeTypes);
 
-  const logsForHeatsSortByTime =
-    beerTypeId !== null
-      ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, beerTypeId)
-      : [];
-  const chugTimes = calculateTimes(logsForHeatsSortByTime);
-  const topChugTimes = removeDuplicateTimeEntries(chugTimes);
+  const logsForHeatsSortByTime = useMemo(
+    () =>
+      beerTypeId !== null
+        ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, beerTypeId)
+        : [],
+    [timeLogs, heats, selectedYear, beerTypeId]
+  );
+
+  const chugTimes = useMemo(
+    () => calculateTimes(logsForHeatsSortByTime),
+    [logsForHeatsSortByTime]
+  );
+
+  const topChugTimes = useMemo(
+    () => removeDuplicateTimeEntries(chugTimes),
+    [chugTimes]
+  );
 
   useEffect((): void => {
     if (
@@ -67,11 +78,9 @@ const BeerChugger: React.FC<BeerChuggerProps> = ({
     }
   }, [topChugTimes]);
 
-  const initialBarData = generateRankableData(
-    topChugTimes,
-    players,
-    teams,
-    heats
+  const initialBarData = useMemo(
+    () => generateRankableData(topChugTimes, players, teams, heats),
+    [topChugTimes, players, teams, heats]
   );
 
   let processedRankingData = useMemo((): ProcessedRankingData[] => {

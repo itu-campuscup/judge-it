@@ -38,7 +38,6 @@ function Home() {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
     }
   };
 
@@ -94,7 +93,7 @@ function Home() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              🏆 Welcome, {user.email?.split("@")[0] || 'User'}!
+              🏆 Welcome, {user.email?.split("@")[0] || "User"}!
             </Typography>
             <Typography
               variant="h5"
