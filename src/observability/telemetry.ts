@@ -1,32 +1,26 @@
 /**
- * OpenTelemetry Configuration
+ * Telemetry Setup
  *
- * Simplified setup for client-side logging
- * Full OpenTelemetry is disabled for Next.js client-side compatibility
+ * Currently uses simple JSON logging via console.log
+ * Can be extended later for server-side instrumentation
  */
 
-// Configure basic setup
 let isInitialized = false;
 
-export function initializeOpenTelemetry(): void {
+/**
+ * Initialize telemetry (currently a no-op for client-side)
+ */
+export function initializeTelemetry(): void {
   if (isInitialized) {
-    return; // Already initialized
+    return;
   }
 
-  // For client-side, we'll use simple console logging
-  // OpenTelemetry SDK is better suited for server-side/Node.js environments
   isInitialized = true;
-  console.log("Logging system initialized");
 }
 
-export async function shutdownOpenTelemetry(): Promise<void> {
-  if (isInitialized) {
-    console.log("Logging system shut down");
-    isInitialized = false;
-  }
-}
-
-// Initialize on module load (client-side safe)
-if (typeof window === "undefined") {
-  initializeOpenTelemetry();
+/**
+ * Shutdown telemetry gracefully
+ */
+export async function shutdownTelemetry(): Promise<void> {
+  isInitialized = false;
 }
