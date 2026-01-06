@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.info("cleanup", { message: "Auth listener unsubscribed" });
       };
     }
-  }, [user, logger]);
+  }, [user]); // Logger is memoized with user, so we only need user as dependency
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 

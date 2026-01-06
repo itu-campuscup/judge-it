@@ -353,7 +353,7 @@ export const useFetchData = (): UseFetchDataReturn => {
         });
       }
     };
-  }, [user, logger]); // Logger is memoized with user, preventing infinite loop
+  }, [user]); // Logger is memoized with user, preventing infinite loop
 
   return {
     players,
