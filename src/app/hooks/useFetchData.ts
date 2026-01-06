@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/SupabaseClient";
 import {
   HEATS_TABLE,
@@ -62,8 +62,13 @@ export const useFetchData = (): UseFetchDataReturn => {
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
 
-  // Create logger for this endpoint
-  const logger = createLogger("useFetchData", user);
+  // Create logger for this endpoint - create once, update user context as needed
+  const logger = useMemo(() => createLogger("useFetchData"), []);
+
+  // Update logger's user context when user changes
+  useEffect(() => {
+    logger.setUser(user);
+  }, [user, logger]);
 
   useEffect(() => {
     // Helper to fetch data and return Result
@@ -353,7 +358,7 @@ export const useFetchData = (): UseFetchDataReturn => {
         });
       }
     };
-  }, [user]); // Add user dependency
+  }, [logger]); // Only depends on logger which is created once
 
   return {
     players,

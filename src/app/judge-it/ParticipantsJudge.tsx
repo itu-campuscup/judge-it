@@ -155,6 +155,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
         open={alertOpen}
         severity={alertSeverity}
         text={alertText}
+        context={alertContext}
         setOpen={setAlertOpen}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
