@@ -46,6 +46,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     "error"
   );
   const [alertText, setAlertText] = useState<string>("");
+  const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
   const playerName = getPlayerName(selectedPlayer?.id || 0, players);
 
