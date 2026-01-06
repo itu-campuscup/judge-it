@@ -27,8 +27,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
-  // Create logger that updates when user changes
-  const logger = useMemo(() => createLogger("AuthProvider", user), [user]);
+  // Create logger once - will update user context as needed
+  const logger = useMemo(() => createLogger("AuthProvider"), []);
+
+  // Update logger's user context when user changes
+  useEffect(() => {
+    logger.setUser(user);
+  }, [user, logger]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -104,8 +109,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.info("cleanup", { message: "Auth listener unsubscribed" });
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount - auth listener handles user changes, logger captured for logging
+  }, [logger]); // Only depends on logger which is created once
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 

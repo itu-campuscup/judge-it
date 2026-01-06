@@ -62,8 +62,13 @@ export const useFetchData = (): UseFetchDataReturn => {
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
 
-  // Create logger for this endpoint - memoize to prevent recreating on every render
-  const logger = useMemo(() => createLogger("useFetchData", user), [user]);
+  // Create logger for this endpoint - create once, update user context as needed
+  const logger = useMemo(() => createLogger("useFetchData"), []);
+
+  // Update logger's user context when user changes
+  useEffect(() => {
+    logger.setUser(user);
+  }, [user, logger]);
 
   useEffect(() => {
     // Helper to fetch data and return Result
@@ -353,8 +358,7 @@ export const useFetchData = (): UseFetchDataReturn => {
         });
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount - logger is captured but we don't want to refetch when user changes
+  }, [logger]); // Only depends on logger which is created once
 
   return {
     players,
