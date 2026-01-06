@@ -353,7 +353,8 @@ export const useFetchData = (): UseFetchDataReturn => {
         });
       }
     };
-  }, [user]); // Logger is memoized with user, preventing infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - logger is captured but we don't want to refetch when user changes
 
   return {
     players,

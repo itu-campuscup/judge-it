@@ -104,7 +104,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.info("cleanup", { message: "Auth listener unsubscribed" });
       };
     }
-  }, [user]); // Logger is memoized with user, so we only need user as dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - auth listener handles user changes, logger captured for logging
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 
