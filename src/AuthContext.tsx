@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.info("cleanup", { message: "Auth listener unsubscribed" });
       };
     }
-  }, [logger]);
+  }, [user, logger]);
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 

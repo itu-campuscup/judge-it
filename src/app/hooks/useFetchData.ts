@@ -353,7 +353,7 @@ export const useFetchData = (): UseFetchDataReturn => {
         });
       }
     };
-  }, [logger]); // Add logger dependency instead of user to prevent infinite loop
+  }, [user, logger]); // Logger is memoized with user, preventing infinite loop
 
   return {
     players,
