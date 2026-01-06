@@ -26,7 +26,9 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const logger = createLogger("AuthProvider", user);
+  
+  // Create logger that updates when user changes
+  const logger = useMemo(() => createLogger("AuthProvider", user), [user]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -40,9 +42,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (error) {
             logger.error(
               "get_session",
-              new AppError("Failed to get session", "AUTH_SESSION_ERROR", {
-                error: error.message,
-              }, error, "AuthProvider.getSession")
+              new AppError(
+                "Failed to get session",
+                "AUTH_SESSION_ERROR",
+                { error: error.message },
+                error,
+                "AuthProvider.getSession"
+              )
             );
           } else {
             setUser(session?.user ?? null);
@@ -54,9 +60,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setLoading(false);
         } catch (error) {
           const appError =
-            error instanceof Error
+            error instanceof AppError
               ? error
-              : new Error("Unknown session error");
+              : error instanceof Error
+              ? new AppError(
+                  "Unknown session error",
+                  "AUTH_SESSION_ERROR",
+                  {},
+                  error,
+                  "AuthProvider.getSession"
+                )
+              : new AppError(
+                  "Unknown session error",
+                  "AUTH_SESSION_ERROR",
+                  { error: String(error) },
+                  undefined,
+                  "AuthProvider.getSession"
+                );
           logger.error("get_session", appError);
           setLoading(false);
         }
@@ -84,7 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.info("cleanup", { message: "Auth listener unsubscribed" });
       };
     }
-  }, []);
+  }, [logger]);
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 

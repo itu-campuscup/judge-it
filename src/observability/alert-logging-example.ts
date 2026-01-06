@@ -14,16 +14,17 @@ import { supabase } from "@/SupabaseClient";
 
 // Before (no context):
 // ----------------------
-const handleOldWay = async (alert: any) => {
-  alert.setOpen(true);
-  alert.setSeverity("error");
-  alert.setText("Failed to save data");
-  // ❌ No logging, no context, hard to debug
-};
+// Example of old pattern without context (not recommended)
+// const handleOldWay = async (alert: any) => {
+//   alert.setOpen(true);
+//   alert.setSeverity("error");
+//   alert.setText("Failed to save data");
+//   // ❌ No logging, no context, hard to debug
+// };
 
 // After (with context):
 // ---------------------
-const handleNewWay = async (alert: any, userId: string, teamId: number) => {
+export const handleNewWay = async (alert: any, userId: string, teamId: number) => {
   alert.setOpen(true);
   alert.setSeverity("error");
   alert.setText("Failed to save data");
@@ -43,7 +44,7 @@ const handleNewWay = async (alert: any, userId: string, teamId: number) => {
 // EXAMPLE 1: Database Error with Context
 // ============================================================================
 
-const handleDatabaseInsert = async (
+export const handleDatabaseInsert = async (
   alert: any,
   data: { team_id: number; player_id: number }
 ) => {
@@ -83,7 +84,7 @@ const handleDatabaseInsert = async (
 
 // Resulting log (shown in console):
 // {
-//   "timestamp": "2024-01-10T12:34:56.789Z",
+//   "timestamp": "2026-01-10T12:34:56.789Z",
 //   "level": "error",
 //   "component": "AlertComponent",
 //   "user": { "id": "user-123", "email": "judge@example.com" },
@@ -102,7 +103,7 @@ const handleDatabaseInsert = async (
 // EXAMPLE 2: Validation Error
 // ============================================================================
 
-const validateInputs = (
+export const validateInputs = (
   alert: any,
   selectedTeam: number | null,
   selectedPlayer: number | null
@@ -144,7 +145,7 @@ const validateInputs = (
 // EXAMPLE 3: Multi-step Operation with Context Tracking
 // ============================================================================
 
-const handleComplexOperation = async (
+export const handleComplexOperation = async (
   alert: any,
   heatNumber: number,
   teamId: number
@@ -212,7 +213,7 @@ const handleComplexOperation = async (
 // EXAMPLE 4: Warning (not error)
 // ============================================================================
 
-const handleWarning = (alert: any, availableTeams: number) => {
+export const handleWarning = (alert: any, availableTeams: number) => {
   if (availableTeams === 0) {
     alert.setOpen(true);
     alert.setSeverity("warning");

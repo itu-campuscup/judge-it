@@ -51,6 +51,8 @@ export function useBasicEndpoint(user: User | null) {
       throw error;
     }
   };
+
+  return { performOperation };
 }
 
 // ============================================================================
