@@ -148,7 +148,11 @@ export interface TimeLogDetail {
   timeTypeId: number;
   formattedTime?: string;
   time?: string;
+  duration?: number;
 }
+
+// Alias for backwards compatibility with visualization utils
+export type TimeEntry = TimeLogDetail;
 
 export interface YearSelectorResult {
   selectedYear: number;

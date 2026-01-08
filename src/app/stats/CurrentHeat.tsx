@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Typography, Box, Avatar } from "@mui/material";
-import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
+import { Heat, Player, Team, TimeLog, TimeType, AlertObject } from "@/types";
 import {
   getCurrentHeat,
   getTeamPlayer,
@@ -13,7 +13,7 @@ import {
   filterTimeLogsByTimeType,
   sortTimeLogsByTime,
 } from "@/utils/sortFilterUtils";
-import { Heat, Player, Team, TimeLog, TimeType, AlertObject } from "@/types";
+import { timeToMilli, formatTime, calcTimeDifference } from "@/utils/timeUtils";
 
 interface CurrentHeatProps {
   timeLogs: TimeLog[];
@@ -51,7 +51,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
 
   useEffect(() => {
     const loadCurrentHeat = async () => {
-      const heat = await getCurrentHeat(alert);
+      const heat = await getCurrentHeat(alert || undefined);
       if (heat) {
         setCurrentHeat(heat);
       }

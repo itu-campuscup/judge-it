@@ -176,8 +176,8 @@ export class Logger {
 
     // Add additional data
     if (data) {
-      if (data.error) {
-        logData.error = data.error;
+      if (data.error && typeof data.error === "object") {
+        logData.error = data.error as LogData["error"];
         delete data.error;
       }
       if (Object.keys(data).length > 0) {

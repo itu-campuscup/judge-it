@@ -111,7 +111,6 @@ function Judge(): React.ReactElement {
               setTeamPlayers={setTeamPlayers}
               selectPlayerString={selectPlayerString}
               setSelectPlayerString={setSelectPlayerString}
-              alert={alert}
             />
           </Box>
         )}
