@@ -274,7 +274,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         setTeamPlayers={setTeamPlayers}
         selectPlayerString={selectPlayerString}
         setSelectPlayerString={setSelectPlayerString}
-        alert={alert}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
         <Button
