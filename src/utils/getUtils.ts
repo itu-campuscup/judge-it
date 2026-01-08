@@ -188,6 +188,14 @@ export const getCurrentHeat = async (alert?: any): Promise<Heat | null> => {
     alert.setOpen(true);
     alert.setSeverity("error");
     alert.setText(err);
+    alert.setContext({
+      operation: "fetch_current_heat",
+      location: "getUtils.getCurrentHeat",
+      metadata: {
+        errorCode: error.code,
+        step: "fetch_current_heat",
+      },
+    });
   }
   return data?.[0] || null;
 };

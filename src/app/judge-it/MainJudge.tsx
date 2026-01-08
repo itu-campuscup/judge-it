@@ -251,6 +251,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         text={alert.text}
         open={alert.open}
         setOpen={alert.setOpen}
+        context={alert.context}
       />
       {/**
        * Show team selection as a dropdown

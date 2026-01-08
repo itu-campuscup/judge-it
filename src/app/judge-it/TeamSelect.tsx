@@ -26,7 +26,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
   useEffect(() => {
     if (activeTeams.length === 0 && alert) {
       alert.setOpen(true);
-      alert.setSeverity("error");
+      alert.setSeverity("warning");
       alert.setText("No active teams found");
       alert.setContext({
         operation: "load_teams",
