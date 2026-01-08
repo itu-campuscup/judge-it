@@ -70,7 +70,7 @@ jobs:
           else
             echo "Formatting changes detected, committing..."
             git add -A
-            git commit -m "chore: format code with ESLint [skip ci]"
+            git commit -m "Format code with ESLint [skip ci]"
             git push
           fi
 
@@ -79,22 +79,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const message = `## ❌ Auto-lint Failed
-
-ESLint found issues that cannot be automatically fixed. 
-
-**To fix these issues locally:**
-
-\`\`\`bash
-bunx eslint --fix .
-\`\`\`
-
-This will show you all the errors and warnings. Address them by:
-- Removing unused imports and variables
-- Fixing type issues (replace \`any\` with proper types)
-- Addressing empty blocks and other errors
-
-Once fixed, commit and push your changes.`;
+            const message = `## ❌ Auto-lint Failed\n\nESLint found issues that cannot be automatically fixed.\n\n**To fix these issues locally:**\n\n\`\`\`bash\nbunx eslint --fix .\n\`\`\`\n\nThis will show you all the errors and warnings. Address them by:\n- Removing unused imports and variables\n- Fixing type issues (replace \`any\` with proper types)\n- Addressing empty blocks and other errors\n\nOnce fixed, commit and push your changes.`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
