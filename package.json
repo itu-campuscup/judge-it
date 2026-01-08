@@ -1,6 +1,7 @@
 {
   "name": "judge-it",
   "version": "2026.0.1",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "bun cli.ts dev",
@@ -40,9 +41,15 @@
     "@types/node": "^24.10.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@eslint/js": "^9.0.0",
+    "@next/eslint-plugin-next": "^16.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.0.7",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.0.0",
+    "typescript-eslint": "^7.0.0",
     "svelte-preprocess": "^6.0.3",
     "typescript": "^5.9.3"
   }

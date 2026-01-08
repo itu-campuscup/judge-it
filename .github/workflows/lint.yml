@@ -39,7 +39,8 @@ jobs:
           echo "Linting changed files:"
           echo "$CHANGED_FILES"
 
-          bunx next lint --fix $CHANGED_FILES
+          # Use ESLint directly with --fix flag
+          bunx eslint --fix $CHANGED_FILES
 
       - name: Commit and push fixes if any
         if: github.event_name == 'push'
@@ -53,7 +54,7 @@ jobs:
           else
             echo "Formatting changes detected, committing..."
             git add -A
-            git commit -m "Format code with ESLint"
+            git commit -m "chore: format code with ESLint [skip ci]"
             git push
           fi
 
