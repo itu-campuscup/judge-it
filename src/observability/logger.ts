@@ -118,7 +118,7 @@ export class Logger {
   }
 
   /**
-   * Core logging method - outputs JSON
+   * Core logging method - outputs JSON to console and API endpoint
    */
   private log(
     level: LogData["level"],
@@ -152,8 +152,22 @@ export class Logger {
       }
     }
 
-    // Output as JSON
-    console.log(JSON.stringify(logData));
+    const jsonLog = JSON.stringify(logData);
+
+    // Output to browser console
+    console.log(jsonLog);
+
+    // Send to server-side logging endpoint so it appears in Vercel logs
+    if (typeof window !== "undefined") {
+      // Client-side: send to API endpoint
+      fetch("/api/logs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: jsonLog,
+      }).catch(() => {
+        // Silently fail - don't break the app if logging fails
+      });
+    }
   }
 }
 
