@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   };
 
   const handleLogout = async (): Promise<void> => {
-    const { error } = await supabase.auth.signOut();
+    await supabase.auth.signOut();
   };
 
   return (

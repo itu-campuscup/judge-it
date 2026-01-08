@@ -10,27 +10,24 @@ import {
   TIME_LOGS_TABLE,
   HEATS_TABLE,
 } from "@/utils/constants";
-import type { Team, Player, TimeType, Heat } from "@/types";
+import type { Team, Player, TimeType, Heat, AlertObject } from "@/types";
 
 interface MainJudgeProps {
-  user: any;
   parentTeam: number | null;
   parentPlayer: number | null;
   teams: Team[];
   players: Player[];
   time_types: TimeType[];
-  heats: Heat[]; // Add heats prop
-  alert: any;
+  heats: Heat[];
+  alert: AlertObject;
 }
 
 const MainJudge: React.FC<MainJudgeProps> = ({
-  user,
   parentTeam,
   parentPlayer,
   teams,
   players,
   time_types,
-  heats, // Add heats prop
   alert,
 }) => {
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
@@ -139,7 +136,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       return;
     }
 
-    const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
+    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: parentTeam,
         player_id: parentPlayer,

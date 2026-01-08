@@ -14,7 +14,15 @@ import {
   splitTimeLogsPerHeat,
 } from "./sortFilterUtils";
 import { supabase } from "@/SupabaseClient";
-import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
+import type {
+  Player,
+  Heat,
+  Team,
+  TimeType,
+  TimeLog,
+  AlertObject,
+  TimeEntry,
+} from "@/types";
 
 /**
  * Gets the player name given the player ID.
@@ -24,7 +32,7 @@ import type { Player, Heat, Team, TimeType, TimeLog } from "@/types";
  */
 export const getPlayerName = (
   playerId: number | string,
-  players: Player[]
+  players: Player[],
 ): string => {
   if (typeof playerId !== "number") playerId = parseInt(playerId);
   const player = players.find((p) => p.id === playerId);
@@ -41,7 +49,7 @@ export const getPlayerName = (
 export const getPlayerNameWithTeam = (
   playerId: number | string,
   players: Player[],
-  teams: Team[]
+  teams: Team[],
 ): string => {
   if (typeof playerId !== "number") playerId = parseInt(playerId);
   const player = players.find((p) => p.id === playerId);
@@ -90,7 +98,7 @@ export const getTeamName = (teamId: number, teams: Team[]): string => {
  */
 export const getPlayerImageUrl = (
   playerId: number,
-  players: Player[]
+  players: Player[],
 ): string => {
   const player = players.find((p: Player) => p.id === playerId);
   return player?.image_url || "";
@@ -124,7 +132,7 @@ export const getActiveTeams = (teams: Team[]): Team[] => {
  */
 export const getPlayer = (
   playerId: number,
-  players: Player[]
+  players: Player[],
 ): Player | undefined => {
   return players.find((p: Player) => p.id === playerId);
 };
@@ -137,16 +145,16 @@ export const getPlayer = (
  */
 export const getTeamPlayerIds = (
   teamId: number | string,
-  teams: Team[]
+  teams: Team[],
 ): number[] => {
-  const team = teams.filter((t: Team) => t.id === Number(teamId))[0];
+  const team = teams.filter((t) => t.id === Number(teamId))[0];
   if (!team) return [];
   return [
     team.player_1_id,
     team.player_2_id,
     team.player_3_id,
     team.player_4_id,
-  ].filter((id) => id !== null && id !== undefined) as number[];
+  ].filter((id): id is number => id !== null && id !== undefined);
 };
 
 /**
@@ -159,7 +167,7 @@ export const getTeamPlayerIds = (
 export const getTeamPlayer = (
   teamId: number | string,
   teams: Team[],
-  players: Player[]
+  players: Player[],
 ): Player[] => {
   const playerIds = getTeamPlayerIds(teamId, teams);
 
@@ -173,7 +181,9 @@ export const getTeamPlayer = (
  * @param {Object} alert - The alert object to set error messages (optional).
  * @returns {Promise<Heat|null>} The current heat or null if not found.
  */
-export const getCurrentHeat = async (alert?: any): Promise<Heat | null> => {
+export const getCurrentHeat = async (
+  alert?: AlertObject,
+): Promise<Heat | null> => {
   const { data, error } = await supabase
     .from(HEATS_TABLE)
     .select("*")
@@ -210,13 +220,13 @@ export const getCurrentHeat = async (alert?: any): Promise<Heat | null> => {
 export const getPrevPlayerId = (
   teamId: number,
   heat: Heat,
-  timeLogs: TimeLog[]
+  timeLogs: TimeLog[],
 ): number | string => {
   const prevNotFound = '"No previous player"';
   if (!teamId || !heat || !timeLogs) return prevNotFound;
 
   const logs = timeLogs.filter(
-    (e: TimeLog) => e.team_id == teamId && e.heat_id == heat.id
+    (e: TimeLog) => e.team_id == teamId && e.heat_id == heat.id,
   );
   const sortedByTimeDesc = logs.sort((a: TimeLog, b: TimeLog) => {
     const aTime = a.time || "";
@@ -241,7 +251,7 @@ export const getPrevPlayerId = (
  */
 export const getTimeType = (
   timeTypeString: string,
-  timeTypes: TimeType[]
+  timeTypes: TimeType[],
 ): TimeType | undefined => {
   return timeTypes.find((e: TimeType) => e.time_eng === timeTypeString);
 };
@@ -252,7 +262,7 @@ export const getTimeType = (
  * @returns {Object|undefined} The time type object for beer or undefined if not found.
  */
 export const getTimeTypeBeer = (
-  timeTypes: TimeType[]
+  timeTypes: TimeType[],
 ): TimeType | undefined => {
   return getTimeType(TIME_TYPE_BEER, timeTypes);
 };
@@ -263,7 +273,7 @@ export const getTimeTypeBeer = (
  * @returns {Object|undefined} The time type object for spin or undefined if not found.
  */
 export const getTimeTypeSpinner = (
-  timeTypes: TimeType[]
+  timeTypes: TimeType[],
 ): TimeType | undefined => {
   return getTimeType(TIME_TYPE_SPIN, timeTypes);
 };
@@ -274,7 +284,7 @@ export const getTimeTypeSpinner = (
  * @returns {Object|undefined} The time type object for sail or undefined if not found.
  */
 export const getTimeTypeSail = (
-  timeTypes: TimeType[]
+  timeTypes: TimeType[],
 ): TimeType | undefined => {
   return getTimeType(TIME_TYPE_SAIL, timeTypes);
 };
@@ -287,7 +297,7 @@ export const getTimeTypeSail = (
  */
 export const getTimeTypeId = (
   timeTypeString: string,
-  timeTypes: TimeType[]
+  timeTypes: TimeType[],
 ): number | null => {
   return getTimeType(timeTypeString, timeTypes)?.id || null;
 };
@@ -297,10 +307,10 @@ export const getTimeTypeId = (
  * @param {Array} timeLogs - The list of time logs. It should be sorted by heat and time as well as only contain a single contestant.
  * @return {Object|null} The best time object or null if multiple contestants are present or no valid time is found.
  */
-export const getBestIntraHeatTime = (timeLogs: TimeLog[]): any => {
+export const getBestIntraHeatTime = (timeLogs: TimeLog[]): TimeEntry | null => {
   const splitTimeLogs = splitTimeLogsPerHeat(timeLogs);
 
-  var bestTime = { duration: 10 ** 1000 }; // Equivalent to Infinity
+  let bestTime = { duration: 10 ** 1000 }; // Equivalent to Infinity
 
   splitTimeLogs.forEach((heatTimes) => {
     const times = calculateTimes(heatTimes);
@@ -322,7 +332,7 @@ export const getBestIntraHeatTime = (timeLogs: TimeLog[]): any => {
  */
 export const getPlayerFunFact = (
   playerId: number,
-  players: Player[]
+  players: Player[],
 ): string | null => {
   const player = players.find((p: Player) => p.id === playerId);
   return player?.fun_fact || null;
@@ -336,14 +346,14 @@ export const getPlayerFunFact = (
  */
 export const getPlayerTeam = (
   playerId: number | string,
-  teams: Team[]
+  teams: Team[],
 ): Team | null => {
   const team = teams.find(
     (t: Team) =>
       t.player_1_id === playerId ||
       t.player_2_id === playerId ||
       t.player_3_id === playerId ||
-      t.player_4_id === playerId
+      t.player_4_id === playerId,
   );
   return team ? team : null;
 };
@@ -359,7 +369,7 @@ export const getPlayerTeam = (
 export const getPlayerImageWithFallback = (
   playerId: number,
   players: Player[],
-  teams: Team[]
+  teams: Team[],
 ): string => {
   const player = players.find((p: Player) => p.id === playerId);
 
@@ -381,7 +391,7 @@ export const getPlayerImageWithFallback = (
  */
 export const getPlayerIdGivenTeamAndTimeLogs = (
   teamId: number,
-  timeLogs: TimeLog[]
+  timeLogs: TimeLog[],
 ): number | null => {
   const teamLogs = filterTimeLogsByTeamId(timeLogs, teamId);
   const recentLogs = sortTimeLogsByTime(teamLogs);

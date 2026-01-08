@@ -206,7 +206,7 @@ if (isErr(result)) {
 }
 ```
 
-**For detailed logging documentation, see [../LOGGING.md](../LOGGING.md)**
+**For more logging examples and patterns, see the sections above on "Logging & Observability", "Log Output Destinations", and "Debugging Tips"**
 
 ### Judge-it Components Logging
 
@@ -214,7 +214,8 @@ Judge-it components use a **centralized logging pattern** via `AlertComponent`:
 
 1. **AlertComponent** automatically logs all errors and warnings when displayed
 2. Components pass optional `context` for rich debugging information
-3. The `alert` object from `useFetchData` provides `setContext()` method
+3. The `alert` object from `useFetchData` provides the `AlertObject` interface (defined in `types/index.ts`)
+4. **No duplicate interface definitions needed** - `AlertObject` is globally defined and imported where needed
 
 **Example:**
 
@@ -287,7 +288,7 @@ const handleOperation = async () => {
 ### Localhost
 
 1. **Browser Console**: All logs appear in DevTools Console (press F12)
-2. **Terminal**: Logs also appear in your Next.js dev server terminal via the `/judge-it/api/logs` endpoint
+2. **Terminal**: Logs also appear in your Next.js dev server terminal via the `/api/logs` endpoint
 3. **Structured JSON format**: Makes filtering and searching easy
 
 Example browser console output:
@@ -311,10 +312,10 @@ Example browser console output:
 
 ### Vercel (Production)
 
-1. **Server Logs**: All logs are sent to `/judge-it/api/logs` endpoint
+1. **Server Logs**: All logs are sent to `/api/logs` endpoint from the client
 2. **Console output**: The server-side endpoint outputs logs via `console.log()`
-3. **Vercel Dashboard**: Logs appear in your Vercel project's logs section
-4. **HTTP Status Codes**: Logs return appropriate status codes:
+3. **Vercel Dashboard**: Logs appear in your Vercel project's Function Logs section
+4. **HTTP Status Codes**: Logs return appropriate status codes based on severity:
    - `200` - info/debug logs
    - `206` - warning logs  
    - `400` - error logs

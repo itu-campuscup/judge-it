@@ -82,7 +82,7 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
               severity === "error" ? "USER_ERROR" : "USER_WARNING",
               context?.metadata || {},
               undefined,
-              location
+              location,
             );
 
         if (severity === "error") {
@@ -157,7 +157,9 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
                 break;
             }
           }
-        } catch (_) {}
+        } catch (vibrationError) {
+          console.error("Vibration error", vibrationError);
+        }
       };
 
       playSound();

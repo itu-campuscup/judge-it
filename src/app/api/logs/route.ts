@@ -1,7 +1,7 @@
 /**
  * API endpoint to receive and log events from the client
  * Outputs logs to server console so they appear in Vercel logs
- * 
+ *
  * Returns HTTP status code matching the log level:
  * - info: 200
  * - warn: 206

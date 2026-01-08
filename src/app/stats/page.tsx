@@ -45,14 +45,14 @@ function Stats() {
       teams,
       heats,
     }),
-    [timeLogs, players, timeTypes, teams, heats]
+    [timeLogs, players, timeTypes, teams, heats],
   );
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       const key = e.key;
       const statConfig = STATS_CONFIG.find(
-        (stat) => stat.number.toString() === key
+        (stat) => stat.number.toString() === key,
       );
 
       if (statConfig) {

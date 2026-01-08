@@ -82,7 +82,7 @@ export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
  */
 export function map<T, U, E>(
   result: Result<T, E>,
-  fn: (value: T) => U
+  fn: (value: T) => U,
 ): Result<U, E> {
   if (isOk(result)) {
     return ok(fn(result.value));
@@ -95,7 +95,7 @@ export function map<T, U, E>(
  */
 export function mapErr<T, E, F>(
   result: Result<T, E>,
-  fn: (error: E) => F
+  fn: (error: E) => F,
 ): Result<T, F> {
   if (isErr(result)) {
     return err(fn(result.error));
@@ -107,7 +107,7 @@ export function mapErr<T, E, F>(
  * Convert Promise to Result
  */
 export async function fromPromise<T>(
-  promise: Promise<T>
+  promise: Promise<T>,
 ): Promise<Result<T, Error>> {
   try {
     const value = await promise;
@@ -126,7 +126,10 @@ export function wrapError(
   message: string,
   code: string,
   location: string,
-  context?: Record<string, any>
+  context?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >,
 ): AppError {
   return new AppError(message, code, context, error, location);
 }
@@ -139,7 +142,10 @@ export function propagateError<E extends Error>(
   message: string,
   code: string,
   location: string,
-  additionalContext?: Record<string, any>
+  additionalContext?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >,
 ): AppError {
   return wrapError(result.error, message, code, location, additionalContext);
 }
@@ -154,9 +160,12 @@ export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly context?: Record<string, any>,
+    public readonly context?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
     causedBy?: Error,
-    location?: string
+    location?: string,
   ) {
     super(message);
     this.name = "AppError";
@@ -171,13 +180,19 @@ export class AppError extends Error {
     message: string;
     code?: string;
     location?: string;
-    context?: Record<string, any>;
+    context?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >;
   }> {
     const chain: Array<{
       message: string;
       code?: string;
       location?: string;
-      context?: Record<string, any>;
+      context?: Record<
+        string,
+        string | number | boolean | object | null | undefined
+      >;
     }> = [];
 
     chain.push({

@@ -6,14 +6,13 @@ import { HEATS_TABLE } from "@/utils/constants";
 import type { Heat, AlertContext } from "@/types";
 
 interface SetHeatProps {
-  user: any;
   heats: Heat[];
 }
 
-const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
+const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
-    "error"
+    "error",
   );
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
@@ -26,9 +25,9 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
   const thisYearsHeats = useMemo(
     () =>
       heats.filter(
-        (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear()
+        (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear(),
       ),
-    [heats]
+    [heats],
   );
 
   const getThisYearsHeats = (): Heat[] => {
@@ -74,7 +73,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
   };
 
   const createHeat = async (
-    heatNumber: number
+    heatNumber: number,
   ): Promise<string | undefined> => {
     const { error } = await supabase
       .from(HEATS_TABLE)
@@ -98,7 +97,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
   };
 
   const updateHeat = async (
-    heatNumber: number
+    heatNumber: number,
   ): Promise<string | undefined> => {
     const { error } = await supabase
       .from(HEATS_TABLE)
@@ -127,7 +126,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
     if (hasHeatBeenUsed(heatNumber)) {
       const nextNaturalHeat = getNextNaturalHeat();
       const confirmReuse = window.confirm(
-        `Click OK if you sure you want to reuse heat ${heatNumber}.\nThe natural heat progression would be to use ${nextNaturalHeat} now.`
+        `Click OK if you sure you want to reuse heat ${heatNumber}.\nThe natural heat progression would be to use ${nextNaturalHeat} now.`,
       );
       if (!confirmReuse) {
         return;

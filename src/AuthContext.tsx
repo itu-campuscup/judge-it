@@ -26,7 +26,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   // Create logger once - will update user context as needed
   const logger = useMemo(() => createLogger("AuthProvider"), []);
 
@@ -52,8 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 "AUTH_SESSION_ERROR",
                 { error: error.message },
                 error,
-                "AuthProvider.getSession"
-              )
+                "AuthProvider.getSession",
+              ),
             );
           } else {
             setUser(session?.user ?? null);
@@ -68,20 +68,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             error instanceof AppError
               ? error
               : error instanceof Error
-              ? new AppError(
-                  "Unknown session error",
-                  "AUTH_SESSION_ERROR",
-                  {},
-                  error,
-                  "AuthProvider.getSession"
-                )
-              : new AppError(
-                  "Unknown session error",
-                  "AUTH_SESSION_ERROR",
-                  { error: String(error) },
-                  undefined,
-                  "AuthProvider.getSession"
-                );
+                ? new AppError(
+                    "Unknown session error",
+                    "AUTH_SESSION_ERROR",
+                    {},
+                    error,
+                    "AuthProvider.getSession",
+                  )
+                : new AppError(
+                    "Unknown session error",
+                    "AUTH_SESSION_ERROR",
+                    { error: String(error) },
+                    undefined,
+                    "AuthProvider.getSession",
+                  );
           logger.error("get_session", appError);
           setLoading(false);
         }
@@ -101,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             userId: newUser?.id,
             userEmail: newUser?.email,
           });
-        }
+        },
       );
 
       return () => {
@@ -113,11 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

@@ -74,7 +74,7 @@ export const useFetchData = (): UseFetchDataReturn => {
     // Helper to fetch data and return Result
     const fetchTable = async <T>(
       tableName: string,
-      setter: (data: T[]) => void
+      setter: (data: T[]) => void,
     ): Promise<Result<T[], Error>> => {
       try {
         const { data, error } = await supabase.from(tableName).select("*");
@@ -85,8 +85,8 @@ export const useFetchData = (): UseFetchDataReturn => {
               "FETCH_ERROR",
               { table: tableName, error: error.message },
               undefined,
-              `fetchTable(${tableName})` // Location for error chain
-            )
+              `fetchTable(${tableName})`, // Location for error chain
+            ),
           );
         }
         setter(data || []);
@@ -100,8 +100,8 @@ export const useFetchData = (): UseFetchDataReturn => {
             `Exception in fetchTable`,
             "FETCH_EXCEPTION",
             `fetchTable(${tableName})`,
-            { table: tableName }
-          )
+            { table: tableName },
+          ),
         );
       }
     };
@@ -159,8 +159,8 @@ export const useFetchData = (): UseFetchDataReturn => {
               "FETCH_REJECTED",
               { error: result.reason },
               result.reason instanceof Error ? result.reason : undefined,
-              `fetchAllData.${tableNames[index]}`
-            )
+              `fetchAllData.${tableNames[index]}`,
+            ),
           );
         }
       });
@@ -192,7 +192,7 @@ export const useFetchData = (): UseFetchDataReturn => {
     fetchAllData();
 
     // Set up a single multiplexed channel for all real-time updates
-    let channel: any = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const setupListeners = async () => {
       try {
@@ -216,7 +216,7 @@ export const useFetchData = (): UseFetchDataReturn => {
                   recordsCount: result.value.length,
                 });
               }
-            }
+            },
           )
           .on(
             "postgres_changes",
@@ -234,7 +234,7 @@ export const useFetchData = (): UseFetchDataReturn => {
                   eventType: payload.eventType,
                 });
               }
-            }
+            },
           )
           .on(
             "postgres_changes",
@@ -252,7 +252,7 @@ export const useFetchData = (): UseFetchDataReturn => {
                   eventType: payload.eventType,
                 });
               }
-            }
+            },
           )
           .on(
             "postgres_changes",
@@ -270,7 +270,7 @@ export const useFetchData = (): UseFetchDataReturn => {
                   eventType: payload.eventType,
                 });
               }
-            }
+            },
           )
           .on(
             "postgres_changes",
@@ -288,7 +288,7 @@ export const useFetchData = (): UseFetchDataReturn => {
                   eventType: payload.eventType,
                 });
               }
-            }
+            },
           )
           .subscribe((status) => {
             if (status === "SUBSCRIBED") {
@@ -305,7 +305,7 @@ export const useFetchData = (): UseFetchDataReturn => {
             } else if (status === "CHANNEL_ERROR") {
               logger.error(
                 "realtime_subscription",
-                new AppError("Real-time subscription error", "REALTIME_ERROR")
+                new AppError("Real-time subscription error", "REALTIME_ERROR"),
               );
               setAlertOpen(true);
               setAlertSeverity("warning");
@@ -315,8 +315,8 @@ export const useFetchData = (): UseFetchDataReturn => {
                 "realtime_subscription",
                 new AppError(
                   "Real-time subscription timed out",
-                  "REALTIME_TIMEOUT"
-                )
+                  "REALTIME_TIMEOUT",
+                ),
               );
             }
           });
@@ -330,14 +330,14 @@ export const useFetchData = (): UseFetchDataReturn => {
                   originalError: error.message,
                 },
                 error,
-                "setupListeners"
+                "setupListeners",
               )
             : new AppError(
                 "Unknown setup error",
                 "SETUP_ERROR",
                 undefined,
                 undefined,
-                "setupListeners"
+                "setupListeners",
               );
 
         logger.error("setup_listeners", appError);

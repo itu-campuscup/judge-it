@@ -57,7 +57,7 @@ export interface TimeLog {
 export interface ChartData {
   name: string;
   value: number;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface StatsData {
@@ -79,8 +79,10 @@ export interface ThemeContextType {
   toggleDarkMode: () => void;
 }
 
+import { User } from "@supabase/supabase-js";
+
 export interface AuthContextType {
-  user: any; // Replace with actual Supabase user type
+  user: User | null;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -99,12 +101,22 @@ export interface SortFilterOptions {
   ascending?: boolean;
 }
 
+export interface AlertObject {
+  setOpen: (open: boolean) => void;
+  setSeverity: (severity: "success" | "error" | "warning" | "info") => void;
+  setText: (text: string) => void;
+  setContext?: (context: AlertContext) => void;
+}
+
 // Alert context type (used across AlertComponent and judge-it components)
 export interface AlertContext {
-  operation?: string;      // What operation was being performed
-  location?: string;        // Where in the code this alert came from
-  metadata?: Record<string, any>; // Additional context
-  error?: Error;           // Original error object if available
+  operation?: string; // What operation was being performed
+  location?: string; // Where in the code this alert came from
+  metadata?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >; // Additional context
+  error?: Error; // Original error object if available
 }
 
 export interface VisualizationData {
@@ -125,6 +137,15 @@ export interface FetchDataResult<T> {
   refetch: () => void;
 }
 
+export interface TimeLogDetail {
+  playerId: number;
+  teamId: number;
+  heatId: number;
+  timeTypeId: number;
+  formattedTime?: string;
+  time?: string;
+}
+
 export interface YearSelectorResult {
   selectedYear: number;
   availableYears: number[];
@@ -139,8 +160,11 @@ export interface AnimationProps {
 }
 
 // Error types
-export interface AppError {
+export interface AppErrorInterface {
   message: string;
   code?: string;
-  details?: any;
+  details?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >;
 }

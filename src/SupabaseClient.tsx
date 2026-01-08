@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error(
     "Missing Supabase configuration. " +
       "For development: Run 'bun run setup' to configure credentials. " +
-      "For production: Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set."
+      "For production: Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.",
   );
 }
 

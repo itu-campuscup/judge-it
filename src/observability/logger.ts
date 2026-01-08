@@ -18,7 +18,7 @@ export interface LogContext {
   sessionId?: string;
   endpoint: string;
   operation: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface LogData {
@@ -31,12 +31,15 @@ export interface LogData {
     email?: string;
   };
   duration?: number;
-  data?: Record<string, any>;
+  data?: Record<string, string | number | boolean | object | null | undefined>;
   error?: {
     message: string;
     code?: string;
     stack?: string;
-    context?: Record<string, any>;
+    context?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >;
   };
 }
 
@@ -64,7 +67,13 @@ export class Logger {
   /**
    * Log operation success
    */
-  info(operation: string, data?: Record<string, any>): void {
+  info(
+    operation: string,
+    data?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
+  ): void {
     this.log("info", operation, data);
   }
 
@@ -74,7 +83,10 @@ export class Logger {
   error(
     operation: string,
     error: Error | AppError,
-    data?: Record<string, any>
+    data?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
   ): void {
     const errorData =
       error instanceof AppError
@@ -85,7 +97,10 @@ export class Logger {
           };
 
     // Include error chain if available for full propagation context
-    const logData: Record<string, any> = {
+    const logData: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    > = {
       ...data,
       error: errorData,
     };
@@ -95,7 +110,10 @@ export class Logger {
       const jsonError = error.toJSON();
       if (jsonError.errorChain) {
         logData.errorChainSummary = jsonError.errorChain
-          .map((e: any) => `${e.location || "unknown"}: ${e.message}`)
+          .map(
+            (e: { location?: string; message: string }) =>
+              `${e.location || "unknown"}: ${e.message}`,
+          )
           .join(" → ");
       }
     }
@@ -106,14 +124,26 @@ export class Logger {
   /**
    * Log operation warning
    */
-  warn(operation: string, data?: Record<string, any>): void {
+  warn(
+    operation: string,
+    data?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
+  ): void {
     this.log("warn", operation, data);
   }
 
   /**
    * Log operation debug info
    */
-  debug(operation: string, data?: Record<string, any>): void {
+  debug(
+    operation: string,
+    data?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
+  ): void {
     this.log("debug", operation, data);
   }
 
@@ -123,7 +153,10 @@ export class Logger {
   private log(
     level: LogData["level"],
     operation: string,
-    data?: Record<string, any>
+    data?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
   ): void {
     const logData: LogData = {
       timestamp: new Date().toISOString(),
@@ -179,7 +212,7 @@ export async function traceEndpoint<T>(
   endpoint: string,
   operation: string,
   user: User | null,
-  fn: (logger: Logger) => Promise<Result<T, Error>>
+  fn: (logger: Logger) => Promise<Result<T, Error>>,
 ): Promise<Result<T, Error>> {
   const logger = new Logger(endpoint, user);
   const startTime = Date.now();
@@ -214,13 +247,13 @@ export async function traceEndpoint<T>(
 
 /**
  * Create a simple logger for a specific endpoint
- * 
+ *
  * @param endpoint - Name of the component/hook (e.g., "BeerChugger", "BeerJudge")
  * @param user - Authenticated user context
  */
 export function createLogger(
   endpoint: string,
-  user: User | null = null
+  user: User | null = null,
 ): Logger {
   return new Logger(endpoint, user);
 }
@@ -232,7 +265,10 @@ export function logResult<T>(
   logger: Logger,
   operation: string,
   result: Result<T, Error>,
-  additionalData?: Record<string, any>
+  additionalData?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >,
 ): void {
   if (isErr(result)) {
     logger.error(operation, result.error, additionalData);

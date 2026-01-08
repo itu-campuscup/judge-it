@@ -10,11 +10,7 @@ import {
   getPrevPlayerId,
   getTimeType,
 } from "@/utils/getUtils";
-import {
-  HEATS_TABLE,
-  TIME_LOGS_TABLE,
-  TIME_TYPE_SAIL,
-} from "@/utils/constants";
+import { TIME_LOGS_TABLE, TIME_TYPE_SAIL } from "@/utils/constants";
 import type {
   Team,
   Player,
@@ -22,6 +18,7 @@ import type {
   TimeLog,
   Heat,
   AlertContext,
+  AlertObject,
 } from "@/types";
 
 interface ParticipantsJudgeProps {
@@ -30,7 +27,7 @@ interface ParticipantsJudgeProps {
   timeTypes?: TimeType[];
   players?: Player[];
   timeLogs?: TimeLog[];
-  alert: any;
+  alert: AlertObject;
 }
 
 const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
@@ -43,7 +40,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
 }) => {
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
-    "error"
+    "error",
   );
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
@@ -97,7 +94,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       return;
     }
 
-    const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
+    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: selectedTeam?.id,
         player_id: prevPlayerId,
@@ -134,7 +131,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     setAlertSeverity("success");
     setAlertText(
       "Inserted log of type: " +
-        (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown")
+        (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown"),
     );
     setAlertContext({
       operation: "start_stop_timer",

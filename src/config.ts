@@ -34,7 +34,7 @@ const isCI = (): boolean => {
  */
 const getOrPrompt = async (
   envKey: string,
-  envSuffix: string = ""
+  envSuffix: string = "",
 ): Promise<string | null> => {
   const storageKey = envKey + envSuffix;
 
@@ -77,7 +77,10 @@ const getOrPrompt = async (
           console.log(`[INFO]\t Saved ${storageKey} to keychain`);
           return entered;
         } catch (err) {
-          console.warn(`[WARN]\t Could not save ${storageKey} to keychain:`, err);
+          console.warn(
+            `[WARN]\t Could not save ${storageKey} to keychain:`,
+            err,
+          );
           return entered;
         }
       }
@@ -95,7 +98,7 @@ const getOrPrompt = async (
  * @param env - Optional environment suffix (e.g., 'PROD' for production credentials)
  */
 export const readSupabaseConfig = async (
-  env?: string
+  env?: string,
 ): Promise<SupabaseConfig> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
   const url = await getOrPrompt("NEXT_PUBLIC_SUPABASE_URL", envSuffix);
@@ -103,7 +106,7 @@ export const readSupabaseConfig = async (
 
   if (!url || !anonKey) {
     throw new Error(
-      "Missing required Supabase configuration. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      "Missing required Supabase configuration. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY",
     );
   }
 

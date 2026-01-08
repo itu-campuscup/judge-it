@@ -56,17 +56,17 @@ const Sailing: React.FC<SailingProps> = ({
       sailingTypeId !== null
         ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, sailingTypeId)
         : [],
-    [timeLogs, heats, selectedYear, sailingTypeId]
+    [timeLogs, heats, selectedYear, sailingTypeId],
   );
 
   const sailTimes = useMemo(
     () => calculateTimes(logsForHeatsSortByTime),
-    [logsForHeatsSortByTime]
+    [logsForHeatsSortByTime],
   );
 
   const topTimes = useMemo(
     () => removeDuplicateTimeEntries(sailTimes),
-    [sailTimes]
+    [sailTimes],
   );
 
   useEffect((): void => {
@@ -77,10 +77,10 @@ const Sailing: React.FC<SailingProps> = ({
 
   const sailData = useMemo(
     () => generateRankableData(topTimes, players, teams, heats),
-    [topTimes, players, teams, heats]
+    [topTimes, players, teams, heats],
   );
 
-  let processedRankingData = useMemo((): ProcessedRankingData[] => {
+  const processedRankingData = useMemo((): ProcessedRankingData[] => {
     if (sailingTypeId === null || sailData.length === 0) return [];
 
     const bestTime = sailData[0].time;

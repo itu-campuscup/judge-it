@@ -33,7 +33,7 @@ async function dev() {
   } catch (error) {
     console.error("[ERROR]\t Failed to start:", error);
     console.error(
-      "[INFO]\t Credentials will be prompted on next run if needed."
+      "[INFO]\t Credentials will be prompted on next run if needed.",
     );
     process.exit(1);
   }
@@ -110,16 +110,16 @@ switch (command) {
     console.log("Judge-It Development CLI\n");
     console.log("Usage:");
     console.log(
-      "  bun cli.ts dev [--prod]           - Start dev server (prompts for credentials if needed)"
+      "  bun cli.ts dev [--prod]           - Start dev server (prompts for credentials if needed)",
     );
     console.log("  bun cli.ts build [--prod]         - Build for production");
     console.log(
-      "  bun cli.ts secrets:view [--prod]  - View stored credentials"
+      "  bun cli.ts secrets:view [--prod]  - View stored credentials",
     );
     console.log("  bun cli.ts secrets:clear [--prod] - Clear credentials");
     console.log("\nFlags:");
     console.log(
-      "  --prod  Use production credentials (stored separately from dev)"
+      "  --prod  Use production credentials (stored separately from dev)",
     );
     break;
 }

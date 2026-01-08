@@ -21,12 +21,20 @@ const escapeCSVValue = (value: string | number): string => {
   return stringValue;
 };
 
+interface TimeLogEntry {
+  formattedTime?: string;
+  playerId: number;
+  teamId: number;
+  heatId: number;
+  time?: string;
+}
+
 export const downloadCSV = (
-  data: any[],
+  data: TimeLogEntry[],
   players: Player[],
   teams: Team[],
   heats: Heat[],
-  fileName: string
+  fileName: string,
 ) => {
   // Use the data as-is if it's already processed, otherwise process it
   const processedData =
@@ -55,7 +63,7 @@ export const downloadCSV = (
         escapeCSVValue(row.team),
         escapeCSVValue(row.heat),
         escapeCSVValue(row.heatYear),
-      ].join(",")
+      ].join(","),
     ),
   ];
 
