@@ -159,7 +159,7 @@ export class Logger {
 
     // Send to server-side logging endpoint so it appears in Vercel logs
     if (typeof window !== "undefined") {
-      // Client-side: send to API endpoint
+      // Client-side: send to centralized API endpoint
       fetch("/api/logs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -214,6 +214,9 @@ export async function traceEndpoint<T>(
 
 /**
  * Create a simple logger for a specific endpoint
+ * 
+ * @param endpoint - Name of the component/hook (e.g., "BeerChugger", "BeerJudge")
+ * @param user - Authenticated user context
  */
 export function createLogger(
   endpoint: string,

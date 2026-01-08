@@ -280,7 +280,92 @@ const handleOperation = async () => {
 - 📍 **Full context**: Operation, location, and metadata for debugging
 - 🎨 **Consistent**: All judge-it errors follow same pattern
 
-**For detailed logging documentation, see [../LOGGING.md](../LOGGING.md)**
+**For detailed logging documentation**, see the sections below on **Logging & Observability**, **Log Output Destinations**, and **Debugging Tips**.
+
+## 📋 Log Output Destinations
+
+### Localhost
+
+1. **Browser Console**: All logs appear in DevTools Console (press F12)
+2. **Terminal**: Logs also appear in your Next.js dev server terminal via the `/judge-it/api/logs` endpoint
+3. **Structured JSON format**: Makes filtering and searching easy
+
+Example browser console output:
+```json
+{
+  "timestamp": "2026-01-08T13:34:51.920Z",
+  "level": "info",
+  "endpoint": "AuthProvider",
+  "operation": "get_session",
+  "duration": 50,
+  "user": {
+    "id": "31462f15-01d6-40a7-8c66-706a0eca3013",
+    "email": "user@example.com"
+  },
+  "data": {
+    "authenticated": true,
+    "userId": "31462f15-01d6-40a7-8c66-706a0eca3013"
+  }
+}
+```
+
+### Vercel (Production)
+
+1. **Server Logs**: All logs are sent to `/judge-it/api/logs` endpoint
+2. **Console output**: The server-side endpoint outputs logs via `console.log()`
+3. **Vercel Dashboard**: Logs appear in your Vercel project's logs section
+4. **HTTP Status Codes**: Logs return appropriate status codes:
+   - `200` - info/debug logs
+   - `206` - warning logs  
+   - `400` - error logs
+
+Example Vercel log output:
+```
+{"timestamp":"2026-01-08T13:34:51.920Z","level":"info","endpoint":"AlertComponent",...}
+{"timestamp":"2026-01-08T13:34:52.661Z","level":"error","endpoint":"useFetchData",...}
+```
+
+## 🐛 Debugging Logs
+
+### Finding Logs
+
+**Localhost:**
+1. Open browser DevTools (F12)
+2. Go to Console tab
+3. Filter by `"level":"error"` to see only errors
+4. Copy JSON and paste into a JSON viewer for clarity
+
+**Vercel:**
+1. Go to your Vercel project dashboard
+2. Navigate to Deployments → Function Logs
+3. Look for JSON log lines mixed with request logs
+4. Click on a request to see full details
+
+### Common Log Fields to Search
+
+- `"level":"error"` - Only error logs
+- `"endpoint":"AlertComponent"` - Logs from specific component
+- `"operation":"record_time"` - Logs for specific operation
+- `"user":{"id":"..."` - Logs from specific user
+
+### Example: Finding a User's Errors
+
+```json
+// Search for this combination
+{
+  "level": "error",
+  "user": { "id": "abc123" }
+}
+```
+
+## 📈 Log Monitoring
+
+Set up monitoring for:
+
+1. **Error Rate**: Track `"level":"error"` logs over time
+2. **Response Times**: Monitor `"duration"` field
+3. **Failed Operations**: Search by `"operation"` + `"level":"error"`
+4. **User Issues**: Filter by specific `user.id`
 
 ## 📊 Database Schema
 
@@ -424,6 +509,5 @@ The `--prod` flag allows separate production credentials stored with `_PROD` suf
 
 **Questions?** 
 - Setup: [CONTRIBUTING.md](../CONTRIBUTING.md)
-- Logging: [LOGGING.md](../LOGGING.md) 
-- Performance: [OPTIMIZATIONS.md](../OPTIMIZATIONS.md)
+- Logging: See sections above on "Logging & Observability", "Log Output Destinations", and "Debugging Logs"
 - Or ask the CampusCup team!
