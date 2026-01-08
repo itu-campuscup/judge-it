@@ -9,6 +9,9 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -24,23 +27,31 @@ jobs:
 
       - name: Run ESLint on changed files
         run: |
-          # Get list of changed TypeScript/JavaScript files
+          # Get list of changed TypeScript/JavaScript files that still exist
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(ts|tsx|js|jsx)$' || true)
           else
             CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD | grep -E '\.(ts|tsx|js|jsx)$' || true)
           fi
 
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No TypeScript/JavaScript files changed"
+          # Filter out files that don't exist (deleted files)
+          EXISTING_FILES=""
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              EXISTING_FILES="$EXISTING_FILES $file"
+            fi
+          done
+
+          if [ -z "$EXISTING_FILES" ]; then
+            echo "No TypeScript/JavaScript files to lint"
             exit 0
           fi
 
           echo "Linting changed files:"
-          echo "$CHANGED_FILES"
+          echo "$EXISTING_FILES"
 
           # Use ESLint directly with --fix flag
-          bunx eslint --fix $CHANGED_FILES
+          bunx eslint --fix $EXISTING_FILES
 
       - name: Commit and push fixes if any
         if: github.event_name == 'push'
