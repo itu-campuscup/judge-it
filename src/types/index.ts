@@ -102,10 +102,14 @@ export interface SortFilterOptions {
 }
 
 export interface AlertObject {
+  open: boolean;
+  severity: "success" | "error" | "warning" | "info";
+  text: string;
+  context?: AlertContext;
   setOpen: (open: boolean) => void;
   setSeverity: (severity: "success" | "error" | "warning" | "info") => void;
   setText: (text: string) => void;
-  setContext: (context: AlertContext) => void;
+  setContext: (context: AlertContext | undefined) => void;
 }
 
 // Alert context type (used across AlertComponent and judge-it components)
