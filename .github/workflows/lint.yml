@@ -50,11 +50,16 @@ jobs:
           echo "Linting changed files:"
           echo "$EXISTING_FILES"
 
-          # Use ESLint directly with --fix flag
+          # Use ESLint directly with --fix flag and capture exit code
+          set +e
           bunx eslint --fix $EXISTING_FILES
+          ESLINT_EXIT_CODE=$?
+          set -e
+
+          echo "ESLINT_EXIT_CODE=$ESLINT_EXIT_CODE" >> $GITHUB_ENV
 
       - name: Commit and push fixes if any
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.ESLINT_EXIT_CODE == '0'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -69,8 +74,43 @@ jobs:
             git push
           fi
 
+      - name: Comment on PR with lint errors
+        if: github.event_name == 'pull_request' && env.ESLINT_EXIT_CODE != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `## ❌ Auto-lint Failed
+
+ESLint found issues that cannot be automatically fixed. 
+
+**To fix these issues locally:**
+
+\`\`\`bash
+bunx eslint --fix .
+\`\`\`
+
+This will show you all the errors and warnings. Address them by:
+- Removing unused imports and variables
+- Fixing type issues (replace \`any\` with proper types)
+- Addressing empty blocks and other errors
+
+Once fixed, commit and push your changes.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Fail if ESLint errors exist
+        if: env.ESLINT_EXIT_CODE != '0'
+        run: |
+          echo "ESLint found errors that need to be fixed manually"
+          exit 1
+
       - name: Comment on PR if fixes applied
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && env.ESLINT_EXIT_CODE == '0'
         uses: actions/github-script@v7
         with:
           script: |
