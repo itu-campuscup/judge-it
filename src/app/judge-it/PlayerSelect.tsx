@@ -7,7 +7,7 @@ import {
   Radio,
 } from "@mui/material";
 import { getTeamPlayerIds, getPlayer } from "@/utils/getUtils";
-import type { Team, Player, AlertObject } from "@/types";
+import type { Team, Player } from "@/types";
 
 interface PlayerSelectProps {
   teams: Team[];
@@ -19,7 +19,6 @@ interface PlayerSelectProps {
   setTeamPlayers: (players: Player[]) => void;
   selectPlayerString: string;
   setSelectPlayerString: (value: string) => void;
-  alert?: AlertObject;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({

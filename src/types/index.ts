@@ -105,7 +105,7 @@ export interface AlertObject {
   setOpen: (open: boolean) => void;
   setSeverity: (severity: "success" | "error" | "warning" | "info") => void;
   setText: (text: string) => void;
-  setContext?: (context: AlertContext) => void;
+  setContext: (context: AlertContext) => void;
 }
 
 // Alert context type (used across AlertComponent and judge-it components)
