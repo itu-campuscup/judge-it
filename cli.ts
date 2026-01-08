@@ -79,10 +79,10 @@ async function viewSecrets() {
           value.substring(0, 10) + "..." + value.substring(value.length - 4);
         console.log(`[INFO]\t ${storageKey}: ${masked}`);
       } else {
-        console.log(`[ERROR]\t ${storageKey}: Not found`);
+        console.error(`[ERROR]\t ${storageKey}: Not found`);
       }
     } catch {
-      console.log(`[ERROR]\t ${storageKey}: Not found`);
+      console.error(`[ERROR]\t ${storageKey}: Not found`);
     }
   }
 }
