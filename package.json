@@ -1,6 +1,6 @@
 {
   "name": "judge-it",
-  "version": "2026.0.1",
+  "version": "2026.0.0",
   "type": "module",
   "private": true,
   "scripts": {
