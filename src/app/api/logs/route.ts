@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const logData = await request.json();
 
     // Output to server console - this will appear in Vercel logs
-    console.log(JSON.stringify(logData));
+    console.log(JSON.stringify(logData, null, 2));
 
     // Return appropriate HTTP status code based on log level
     const statusCode = getStatusCodeForLevel(logData.level);

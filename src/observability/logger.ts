@@ -185,8 +185,8 @@ export class Logger {
       }
     }
 
-    // Output structured log object (Vercel will automatically format as JSON)
-    console.log(logData);
+    // Output formatted JSON for better readability in Vercel logs
+    console.log(JSON.stringify(logData, null, 2));
 
     // Send to server-side logging endpoint so it appears in Vercel logs
     if (typeof window !== "undefined") {
