@@ -100,6 +100,7 @@ const BeerChugger: React.FC<BeerChuggerProps> = ({
       }
       return {
         ...item,
+        heatNumber: Number(item.heatNumber),
         actualTime,
         displayLabel,
       };

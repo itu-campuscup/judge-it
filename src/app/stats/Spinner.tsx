@@ -101,6 +101,7 @@ const Spinner: React.FC<SpinnerProps> = ({
       }
       return {
         ...spinnerData,
+        heatNumber: Number(spinnerData.heatNumber),
         displayRpmLabel,
       };
     });

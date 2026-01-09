@@ -58,7 +58,7 @@ export const downloadCSV = (
     headers.join(","),
     ...deref.map((row) =>
       [
-        escapeCSVValue(row.formattedTime),
+        escapeCSVValue(row.formattedTime ?? ""),
         escapeCSVValue(row.player),
         escapeCSVValue(row.team),
         escapeCSVValue(row.heat),

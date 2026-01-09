@@ -310,18 +310,22 @@ export const getTimeTypeId = (
 export const getBestIntraHeatTime = (timeLogs: TimeLog[]): TimeEntry | null => {
   const splitTimeLogs = splitTimeLogsPerHeat(timeLogs);
 
-  let bestTime = { duration: 10 ** 1000 }; // Equivalent to Infinity
+  let bestTime: TimeEntry | null = null;
 
   splitTimeLogs.forEach((heatTimes) => {
     const times = calculateTimes(heatTimes);
     const topTime = removeDuplicateTimeEntries(times)[0]; // As a single contestant, we can just take the first time
 
-    if (topTime && topTime.duration && topTime.duration < bestTime.duration) {
+    if (
+      topTime &&
+      topTime.duration &&
+      (!bestTime || topTime.duration < (bestTime.duration ?? Infinity))
+    ) {
       bestTime = topTime;
     }
   });
 
-  return bestTime.duration < 10 ** 1000 ? bestTime : null;
+  return bestTime;
 };
 
 /**

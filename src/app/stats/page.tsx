@@ -81,7 +81,7 @@ function Stats() {
       case "Teams":
         return <Teams {...commonProps} />;
       case "Heat":
-        return <CurrentHeat alert={undefined} {...commonProps} />;
+        return <CurrentHeat alert={alert} {...commonProps} />;
       default:
         return null;
     }

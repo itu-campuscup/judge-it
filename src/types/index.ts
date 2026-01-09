@@ -145,7 +145,7 @@ export interface TimeLogDetail {
   playerId: number;
   teamId: number;
   heatId: number;
-  timeTypeId: number;
+  timeTypeId?: number;
   formattedTime?: string;
   time?: string;
   duration?: number;

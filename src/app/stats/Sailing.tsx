@@ -97,6 +97,7 @@ const Sailing: React.FC<SailingProps> = ({
       }
       return {
         ...item,
+        heatNumber: Number(item.heatNumber),
         actualTime,
         displayLabel,
       };

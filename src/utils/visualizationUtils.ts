@@ -16,7 +16,7 @@ import {
   getPlayerImageWithFallback,
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
-import type { TimeLog, Heat, Player, Team, TimeEntry } from "../types";
+import type { TimeLog, Heat, Player, Team } from "../types";
 
 /**
  * Filters and sorts time logs for a given year and time type.
@@ -45,9 +45,12 @@ export const filterAndSortTimeLogs = (
 interface TimeEntry {
   playerId: number;
   teamId: number;
-  timeSeconds: number;
+  heatId: number;
+  timeSeconds?: number;
   startTime?: string;
   endTime?: string;
+  formattedTime?: string;
+  duration?: number;
 }
 
 /**
@@ -81,7 +84,7 @@ export const calculateTimes = (
     const formattedTime = formatTime(duration);
     times.push({ playerId, heatId, teamId, formattedTime, duration });
   }
-  return times.sort((a, b) => a.duration - b.duration);
+  return times.sort((a, b) => (a.duration ?? 0) - (b.duration ?? 0));
 };
 
 /**
@@ -180,7 +183,7 @@ export const generateRankableData = (
   heatNumber: string;
 }> => {
   return topTimes.map((time) => ({
-    time: time.duration,
+    time: time.duration ?? 0,
     imageUrl: getPlayerImageWithFallback(time.playerId, players, teams),
     playerName: getPlayerName(time.playerId, players),
     teamName: getTeamName(time.teamId, teams),
@@ -211,7 +214,7 @@ export const generateRPMData = (
 }> => {
   const chartData = generateRankableData(topTimes, players, teams, heats);
   return chartData.map((data) => {
-    const rpm = calcRPM(data.time, REVOLUTIONS);
+    const rpm = Number(calcRPM(data.time, REVOLUTIONS));
     return {
       ...data,
       rpm: rpm,
