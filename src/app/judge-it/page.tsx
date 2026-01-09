@@ -123,7 +123,6 @@ function Judge(): React.ReactElement {
          */}
         {judgeType === MAIN_JUDGE && (
           <MainJudge
-            user={user}
             parentTeam={selectedTeamId ? Number(selectedTeamId) : null}
             parentPlayer={selectedPlayer ? Number(selectedPlayer) : null}
             teams={teams}
