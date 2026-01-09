@@ -10,27 +10,24 @@ import {
   TIME_LOGS_TABLE,
   HEATS_TABLE,
 } from "@/utils/constants";
-import type { Team, Player, TimeType, Heat } from "@/types";
+import type { Team, Player, TimeType, Heat, AlertObject } from "@/types";
 
 interface MainJudgeProps {
-  user: any;
   parentTeam: number | null;
   parentPlayer: number | null;
   teams: Team[];
   players: Player[];
   time_types: TimeType[];
-  heats: Heat[]; // Add heats prop
-  alert: any;
+  heats: Heat[];
+  alert: AlertObject;
 }
 
 const MainJudge: React.FC<MainJudgeProps> = ({
-  user,
   parentTeam,
   parentPlayer,
   teams,
   players,
   time_types,
-  heats, // Add heats prop
   alert,
 }) => {
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
@@ -71,6 +68,15 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Error updating current heat: " + updateError.message);
+      alert.setContext({
+        operation: "create_new_heat",
+        location: "MainJudge.createAndSetNewHeat",
+        metadata: {
+          step: "update_current_heat",
+          nextHeatNumber,
+          errorCode: updateError.code,
+        },
+      });
       return null;
     }
 
@@ -85,6 +91,15 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Error creating new heat: " + createError.message);
+      alert.setContext({
+        operation: "create_new_heat",
+        location: "MainJudge.createAndSetNewHeat",
+        metadata: {
+          step: "insert_new_heat",
+          nextHeatNumber,
+          errorCode: createError.code,
+        },
+      });
       return null;
     }
 
@@ -110,10 +125,18 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Sailing time type not found");
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          availableTimeTypes: time_types.map((t) => t.time_eng),
+          searchingFor: TIME_TYPE_SAIL,
+        },
+      });
       return;
     }
 
-    const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
+    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: parentTeam,
         player_id: parentPlayer,
@@ -132,11 +155,32 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(err);
-      console.error(err);
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          step: "insert_time_logs",
+          parentTeam,
+          parentPlayer,
+          selectedTeamId,
+          selectedPlayer,
+          heatId: newHeat.id,
+          errorCode: error.code,
+        },
+      });
     } else {
       alert.setOpen(true);
       alert.setSeverity("success");
       alert.setText(`Heat ${newHeat.heat} started! Global timer running.`);
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          heatNumber: newHeat.heat,
+          parentTeam,
+          selectedTeamId,
+        },
+      });
 
       // Update next heat number for the button
       const updatedNextHeat = await getNextHeatNumber();
@@ -152,21 +196,46 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing team in the top");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: { missingField: "parentTeam" },
+      });
       return false;
     } else if (!parentPlayer) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing player in the top");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: { missingField: "parentPlayer", parentTeam },
+      });
       return false;
     } else if (!selectedTeamId) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing selected team in the bottom");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: { missingField: "selectedTeamId", parentTeam, parentPlayer },
+      });
       return false;
     } else if (!selectedPlayer) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing selected player in the bottom");
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "MainJudge.checkInputs",
+        metadata: {
+          missingField: "selectedPlayer",
+          parentTeam,
+          parentPlayer,
+          selectedTeamId,
+        },
+      });
       return false;
     }
     return true;
@@ -179,6 +248,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         text={alert.text}
         open={alert.open}
         setOpen={alert.setOpen}
+        context={alert.context}
       />
       {/**
        * Show team selection as a dropdown
@@ -204,7 +274,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         setTeamPlayers={setTeamPlayers}
         selectPlayerString={selectPlayerString}
         setSelectPlayerString={setSelectPlayerString}
-        alert={alert}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
         <Button

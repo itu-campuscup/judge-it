@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Typography, Box, Avatar, Paper } from "@mui/material";
-import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
+import React, { useState, useEffect, useMemo } from "react";
+import { Typography, Box, Avatar } from "@mui/material";
+import { Heat, Player, Team, TimeLog, TimeType, AlertObject } from "@/types";
 import {
   getCurrentHeat,
   getTeamPlayer,
@@ -21,7 +21,7 @@ interface CurrentHeatProps {
   teams: Team[];
   heats: Heat[];
   timeTypes: TimeType[];
-  alert: any | null;
+  alert: AlertObject | null;
 }
 
 interface TeamData {
@@ -51,7 +51,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
 
   useEffect(() => {
     const loadCurrentHeat = async () => {
-      const heat = await getCurrentHeat(alert);
+      const heat = await getCurrentHeat(alert || undefined);
       if (heat) {
         setCurrentHeat(heat);
       }
@@ -95,21 +95,22 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
     return () => clearInterval(timer);
   }, [raceStartTime, raceFinished]);
 
+  // Memoize expensive filtering operations
+  const currentHeatTimeLogs = useMemo(
+    () =>
+      currentHeat?.id ? filterTimeLogsByHeatId(timeLogs, currentHeat.id) : [],
+    [timeLogs, currentHeat?.id],
+  );
+
+  const allSailLogs = useMemo(
+    () => filterTimeLogsByTimeType(currentHeatTimeLogs, sailTypeId),
+    [currentHeatTimeLogs, sailTypeId],
+  );
+
   useEffect(() => {
     if (!currentHeat?.id) return;
 
     const processHeatData = () => {
-      const currentHeatTimeLogs = filterTimeLogsByHeatId(
-        timeLogs,
-        currentHeat.id
-      );
-
-      // Only work with sail logs - ignore beer and spin completely
-      const allSailLogs = filterTimeLogsByTimeType(
-        currentHeatTimeLogs,
-        sailTypeId
-      );
-
       // Check if any team has reached 16 sail logs
       const teamIds = [...new Set(allSailLogs.map((log) => log.team_id))];
       let raceComplete = false;
@@ -118,7 +119,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
       for (const teamId of teamIds) {
         if (typeof teamId === "number") {
           const teamSailLogs = allSailLogs.filter(
-            (log) => log.team_id === teamId
+            (log) => log.team_id === teamId,
           );
           if (teamSailLogs.length >= 16) {
             raceComplete = true;
@@ -137,7 +138,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
       let finalTime: string | null = null;
       if (raceComplete && winningTeamId) {
         const winningSailLogs = allSailLogs.filter(
-          (log) => log.team_id === winningTeamId
+          (log) => log.team_id === winningTeamId,
         );
         if (winningSailLogs.length >= 16) {
           const sortedWinningSailLogs = sortTimeLogsByTime(winningSailLogs);
@@ -147,7 +148,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
           if (firstSailLog?.time && sixteenthSailLog?.time) {
             const elapsedMs = calcTimeDifference(
               firstSailLog.time,
-              sixteenthSailLog.time
+              sixteenthSailLog.time,
             );
             const formatted = formatTime(elapsedMs);
             const parts = formatted.split(":");
@@ -175,7 +176,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
 
           // Get only sail logs for this team
           const teamSailLogs = allSailLogs.filter(
-            (log) => log.team_id === teamId
+            (log) => log.team_id === teamId,
           );
           const sailCount = teamSailLogs.length;
 
@@ -244,19 +245,19 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
     // Get all sail logs for the current heat
     const currentHeatTimeLogs = filterTimeLogsByHeatId(
       timeLogs,
-      currentHeat.id
+      currentHeat.id,
     );
     const allSailLogs = filterTimeLogsByTimeType(
       currentHeatTimeLogs,
-      sailTypeId
+      sailTypeId,
     );
 
     // Check if either team has 16+ sail logs
     const team1SailLogs = allSailLogs.filter(
-      (log) => log.team_id === team1.teamId
+      (log) => log.team_id === team1.teamId,
     );
     const team2SailLogs = allSailLogs.filter(
-      (log) => log.team_id === team2.teamId
+      (log) => log.team_id === team2.teamId,
     );
 
     // If either team has 16+ logs, determine who got their 16th log first

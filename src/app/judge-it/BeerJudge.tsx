@@ -5,7 +5,6 @@ import { Button, Stack } from "@mui/material";
 import {
   getPlayerName,
   getCurrentHeat,
-  getPlayer,
   getPlayerIdGivenTeamAndTimeLogs,
 } from "@/utils/getUtils";
 import {
@@ -14,14 +13,14 @@ import {
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type { Player, TimeLog, TimeType } from "@/types";
+import type { Player, TimeLog, TimeType, AlertObject } from "@/types";
 
 interface BeerJudgeProps {
   players: Player[];
   selectedTeam: number | null;
   timeTypes: TimeType[];
   timeLogs: TimeLog[];
-  alert: any;
+  alert: AlertObject;
 }
 
 const BeerJudge: React.FC<BeerJudgeProps> = ({
@@ -46,7 +45,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
    */
   const timeTypeButtons = useCallback(
     () =>
-      timeTypes.map((timeType: TimeType) => {
+      timeTypes.map((timeType) => {
         const sailingText = `${"Start/Stop "}${playerName} ${
           timeType.time_eng
         } ⛵`;
@@ -64,7 +63,18 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
           alert.setOpen(true);
           alert.setSeverity("error");
           alert.setText("Unknown time type");
-          console.error("Unknown time type");
+          alert.setContext({
+            operation: "render_time_type_buttons",
+            location: "BeerJudge.timeTypeButtons.text",
+            metadata: {
+              unknownTimeType: name,
+              availableTimeTypes: [
+                TIME_TYPE_SAIL,
+                TIME_TYPE_BEER,
+                TIME_TYPE_SPIN,
+              ],
+            },
+          });
           return "";
         };
 
@@ -86,7 +96,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
           </Button>
         );
       }),
-    [timeTypes, playerName]
+    [timeTypes, playerName],
   );
   /**
    * Handle button click to start/stop the timers to send a row to the db
@@ -97,13 +107,22 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("No current heat found");
+      alert.setContext({
+        operation: "record_time",
+        location: "BeerJudge.handleTimeTypeClick",
+        metadata: {
+          timeTypeId,
+          selectedTeam,
+          latestPlayer,
+        },
+      });
       return;
     }
 
     const isValid = validateInputs();
     if (!isValid) return;
 
-    const { data, error } = await supabase.from(TIME_LOGS_TABLE).insert([
+    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
       {
         team_id: selectedTeam,
         player_id: latestPlayer,
@@ -116,15 +135,36 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(err);
-      console.error(err);
+      alert.setContext({
+        operation: "record_time",
+        location: "BeerJudge.handleTimeTypeClick",
+        metadata: {
+          step: "insert_time_log",
+          teamId: selectedTeam,
+          playerId: latestPlayer,
+          timeTypeId,
+          heatId: currentHeat.id,
+          errorCode: error.code,
+        },
+      });
       return;
     }
+    const timeTypeName =
+      timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown";
     alert.setOpen(true);
     alert.setSeverity("success");
-    alert.setText(
-      "Inserted log of type: " +
-        (timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown")
-    );
+    alert.setText(`Inserted log of type: ${timeTypeName}`);
+    alert.setContext({
+      operation: "record_time",
+      location: "BeerJudge.handleTimeTypeClick",
+      metadata: {
+        teamId: selectedTeam,
+        playerId: latestPlayer,
+        timeTypeId,
+        timeTypeName,
+        heatId: currentHeat.id,
+      },
+    });
   };
   /**
    * Validate inputs before sending to the database
@@ -145,7 +185,15 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(errorTxt);
-      console.error(errorTxt);
+      alert.setContext({
+        operation: "validate_inputs",
+        location: "BeerJudge.validateInputs",
+        metadata: {
+          selectedTeam,
+          latestPlayer,
+          timeTypesCount: timeTypes.length,
+        },
+      });
       return false;
     }
 

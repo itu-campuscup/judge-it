@@ -26,7 +26,7 @@ export const timeToMilli = (time: string): number => {
  */
 export const milliToSecs = (
   time: number,
-  fixed: undefined | number
+  fixed: undefined | number,
 ): number | string => {
   const actualTime = time / 1000;
   if (fixed === -1 || fixed === undefined) {
@@ -61,7 +61,7 @@ export const formatTime = (time: number): string => {
   const milliseconds = Math.floor((ct % 1) * 1000);
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
     2,
-    "0"
+    "0",
   )}:${String(milliseconds).padStart(3, "0")}`;
 };
 
@@ -73,7 +73,7 @@ export const formatTime = (time: number): string => {
  */
 export const calcTimeDifference = (
   startTime: string,
-  endTime: string
+  endTime: string,
 ): number => {
   const start = timeToMilli(startTime);
   const end = timeToMilli(endTime);

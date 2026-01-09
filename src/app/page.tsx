@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/SupabaseClient";
 import { useAuth } from "@/AuthContext";
@@ -38,7 +37,6 @@ function Home() {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
     }
   };
 
@@ -94,7 +92,7 @@ function Home() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              🏆 Welcome, {user.email?.split("@")[0] || 'User'}!
+              🏆 Welcome, {user.email?.split("@")[0] || "User"}!
             </Typography>
             <Typography
               variant="h5"

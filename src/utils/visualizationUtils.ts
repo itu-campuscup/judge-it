@@ -10,15 +10,13 @@ import {
   getPlayerName,
   getHeatNumber,
   getTeamName,
-  getPlayerImageUrl,
   getPlayerFunFact,
-  getPlayer,
   getTeamImageUrl,
   getPlayerNameWithTeam,
   getPlayerImageWithFallback,
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
-import type { TimeLog, Heat, Player, TimeTypeKey, Team } from "../types";
+import type { TimeLog, Heat, Player, Team } from "../types";
 
 /**
  * Filters and sorts time logs for a given year and time type.
@@ -27,28 +25,41 @@ export const filterAndSortTimeLogs = (
   timeLogs: TimeLog[],
   heats: Heat[],
   selectedYear: number,
-  timeTypeId: number
+  timeTypeId: number,
 ): TimeLog[] => {
   const heatsInYear = heats.filter(
-    (heat) => new Date(heat.date).getFullYear() === selectedYear
+    (heat) => new Date(heat.date).getFullYear() === selectedYear,
   );
   const logsForHeats = [];
-  for (let heat of heatsInYear) {
+  for (const heat of heatsInYear) {
     const filteredTimeLogs = timeLogs.filter(
-      (tl) => tl.heat_id === heat.id && tl.time_type_id === timeTypeId
+      (tl) => tl.heat_id === heat.id && tl.time_type_id === timeTypeId,
     );
     logsForHeats.push(...filteredTimeLogs);
   }
   return logsForHeats.sort(
-    (a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || "")
+    (a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || ""),
   );
 };
+
+interface TimeEntry {
+  playerId: number;
+  teamId: number;
+  heatId: number;
+  timeSeconds?: number;
+  startTime?: string;
+  endTime?: string;
+  formattedTime?: string;
+  duration?: number;
+}
 
 /**
  * Calculates the chug or sail times for the given logs.
  */
-export const calculateTimes = (logsForHeatsSortByTime: TimeLog[]) => {
-  const times: any[] = [];
+export const calculateTimes = (
+  logsForHeatsSortByTime: TimeLog[],
+): TimeEntry[] => {
+  const times: TimeEntry[] = [];
   const endTimeIds = new Set<number>();
   for (let i = 0; i < logsForHeatsSortByTime.length; i++) {
     if (endTimeIds.has(i)) {
@@ -64,7 +75,7 @@ export const calculateTimes = (logsForHeatsSortByTime: TimeLog[]) => {
       heatId,
       i,
       logsForHeatsSortByTime,
-      endTimeIds
+      endTimeIds,
     );
     if (endTime === null) {
       continue;
@@ -73,7 +84,7 @@ export const calculateTimes = (logsForHeatsSortByTime: TimeLog[]) => {
     const formattedTime = formatTime(duration);
     times.push({ playerId, heatId, teamId, formattedTime, duration });
   }
-  return times.sort((a, b) => a.duration - b.duration);
+  return times.sort((a, b) => (a.duration ?? 0) - (b.duration ?? 0));
 };
 
 /**
@@ -81,7 +92,9 @@ export const calculateTimes = (logsForHeatsSortByTime: TimeLog[]) => {
  * @param {Array} timeEntries - The list of filtered time entries.
  * @returns {Array} The list of time entries without duplicates.
  */
-export const removeDuplicateTimeEntriesAll = (timeEntries: any[]): any[] => {
+export const removeDuplicateTimeEntriesAll = (
+  timeEntries: TimeEntry[],
+): TimeEntry[] => {
   const playerIds = new Set();
   const filteredEntries = [];
   for (const entry of timeEntries) {
@@ -100,7 +113,9 @@ export const removeDuplicateTimeEntriesAll = (timeEntries: any[]): any[] => {
  * @param {Array} timeEntries - The list of filtered time entries.
  * @returns {Array} The list of time entries without duplicates.
  */
-export const removeDuplicateTimeEntries = (timeEntries: any[]): any[] => {
+export const removeDuplicateTimeEntries = (
+  timeEntries: TimeEntry[],
+): TimeEntry[] => {
   const playerIds = new Set();
   const filteredEntries = [];
   for (const entry of timeEntries) {
@@ -131,7 +146,7 @@ export const getEndTime = (
   heatId: number,
   startIdx: number,
   logsForHeatsSortByTime: TimeLog[],
-  endTimeIds: Set<number>
+  endTimeIds: Set<number>,
 ): string | null => {
   for (let i = startIdx + 1; i < logsForHeatsSortByTime.length; i++) {
     const curLog = logsForHeatsSortByTime[i];
@@ -156,13 +171,19 @@ export const getEndTime = (
  * @returns {Array} The bar chart data.
  */
 export const generateRankableData = (
-  topTimes: any[],
+  topTimes: TimeEntry[],
   players: Player[],
-  teams: any[],
-  heats: Heat[]
-): any[] => {
-  return topTimes.map((time: any) => ({
-    time: time.duration,
+  teams: Team[],
+  heats: Heat[],
+): Array<{
+  time: number;
+  imageUrl: string;
+  playerName: string;
+  teamName: string;
+  heatNumber: string;
+}> => {
+  return topTimes.map((time) => ({
+    time: time.duration ?? 0,
     imageUrl: getPlayerImageWithFallback(time.playerId, players, teams),
     playerName: getPlayerName(time.playerId, players),
     teamName: getTeamName(time.teamId, teams),
@@ -179,14 +200,21 @@ export const generateRankableData = (
  * @returns {Array} The chart data with RPM.
  */
 export const generateRPMData = (
-  topTimes: any[],
+  topTimes: TimeEntry[],
   players: Player[],
-  teams: any[],
-  heats: Heat[]
-): any[] => {
+  teams: Team[],
+  heats: Heat[],
+): Array<{
+  time: number;
+  imageUrl: string;
+  playerName: string;
+  teamName: string;
+  heatNumber: string;
+  rpm: number;
+}> => {
   const chartData = generateRankableData(topTimes, players, teams, heats);
-  return chartData.map((data: any) => {
-    const rpm = calcRPM(data.time, REVOLUTIONS);
+  return chartData.map((data) => {
+    const rpm = Number(calcRPM(data.time, REVOLUTIONS));
     return {
       ...data,
       rpm: rpm,
@@ -210,7 +238,7 @@ export const generateRadarChartData = (
   players: Player[],
   teams: Team[],
   timeTypes: string[],
-  isPlayer: boolean = true
+  isPlayer: boolean = true,
 ) => {
   const name = isPlayer
     ? getPlayerNameWithTeam(playerOrTeamId, players, teams)
@@ -223,7 +251,7 @@ export const generateRadarChartData = (
   const timeToPercentage = (
     time: number,
     minTime: number,
-    maxTime: number
+    maxTime: number,
   ): number => {
     if (time <= 0) return 0;
     if (time <= minTime) return 100;
@@ -240,7 +268,7 @@ export const generateRadarChartData = (
     const timeInSeconds = milliToSecs(time, -1);
     if (typeof timeInSeconds !== "number") {
       console.error(
-        `Invalid time for ${timeType}: ${timeInSeconds}. Expected a number.`
+        `Invalid time for ${timeType}: ${timeInSeconds}. Expected a number.`,
       );
       return {
         subject: timeType,

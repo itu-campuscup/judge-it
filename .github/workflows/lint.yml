@@ -1,0 +1,114 @@
+name: Lint and Format
+
+on:
+  push:
+    branches: [main, develop, "Feat/**"]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run ESLint on changed files
+        run: |
+          # Get list of changed TypeScript/JavaScript files that still exist
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(ts|tsx|js|jsx)$' || true)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD | grep -E '\.(ts|tsx|js|jsx)$' || true)
+          fi
+
+          # Filter out files that don't exist (deleted files)
+          EXISTING_FILES=""
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              EXISTING_FILES="$EXISTING_FILES $file"
+            fi
+          done
+
+          if [ -z "$EXISTING_FILES" ]; then
+            echo "No TypeScript/JavaScript files to lint"
+            exit 0
+          fi
+
+          echo "Linting changed files:"
+          echo "$EXISTING_FILES"
+
+          # Use ESLint directly with --fix flag and capture exit code
+          set +e
+          bunx eslint --fix $EXISTING_FILES
+          ESLINT_EXIT_CODE=$?
+          set -e
+
+          echo "ESLINT_EXIT_CODE=$ESLINT_EXIT_CODE" >> $GITHUB_ENV
+
+      - name: Commit and push fixes if any
+        if: github.event_name == 'push' && env.ESLINT_EXIT_CODE == '0'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Check if there are changes
+          if git diff --quiet; then
+            echo "No formatting changes needed"
+          else
+            echo "Formatting changes detected, committing..."
+            git add -A
+            git commit -m "Format code with ESLint [skip ci]"
+            git push
+          fi
+
+      - name: Comment on PR with lint errors
+        if: github.event_name == 'pull_request' && env.ESLINT_EXIT_CODE != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `## ❌ Auto-lint Failed\n\nESLint found issues that cannot be automatically fixed.\n\n**To fix these issues locally:**\n\n\`\`\`bash\nbunx eslint --fix .\n\`\`\`\n\nThis will show you all the errors and warnings. Address them by:\n- Removing unused imports and variables\n- Fixing type issues (replace \`any\` with proper types)\n- Addressing empty blocks and other errors\n\nOnce fixed, commit and push your changes.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Fail if ESLint errors exist
+        if: env.ESLINT_EXIT_CODE != '0'
+        run: |
+          echo "ESLint found errors that need to be fixed manually"
+          exit 1
+
+      - name: Comment on PR if fixes applied
+        if: github.event_name == 'pull_request' && env.ESLINT_EXIT_CODE == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+
+            try {
+              execSync('git diff --quiet');
+            } catch (error) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: 'ESLint formatting has been applied to your code. Please review and pull the latest changes.'
+              });
+            }

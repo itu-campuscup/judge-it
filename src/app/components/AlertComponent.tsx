@@ -1,11 +1,16 @@
 import { useEffect, useRef } from "react";
 import { Alert, Snackbar } from "@mui/material";
+import { createLogger, AppError } from "@/observability";
+import { useAuth } from "@/AuthContext";
+import type { AlertContext } from "@/types";
 
 interface AlertComponentProps {
   severity: "success" | "error" | "warning" | "info";
   text: string;
   open: boolean;
   setOpen: (open: boolean) => void;
+  // Optional context for better error tracking
+  context?: AlertContext;
 }
 
 const AlertComponent: React.FC<AlertComponentProps> = ({
@@ -13,8 +18,11 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
   text,
   open,
   setOpen,
+  context,
 }) => {
+  const { user } = useAuth();
   const audioRef = useRef<{ [key: string]: HTMLAudioElement | null }>({});
+  const logger = createLogger("AlertComponent", user);
 
   // Load audio files once
   useEffect(() => {
@@ -62,6 +70,43 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
 
   useEffect(() => {
     if (open) {
+      // Log errors and warnings automatically
+      if (severity === "error" || severity === "warning") {
+        const operation = context?.operation || "user_alert";
+        const location = context?.location || "AlertComponent";
+
+        const error = context?.error
+          ? context.error
+          : new AppError(
+              text,
+              severity === "error" ? "USER_ERROR" : "USER_WARNING",
+              context?.metadata || {},
+              undefined,
+              location,
+            );
+
+        if (severity === "error") {
+          logger.error(operation, error, {
+            alertText: text,
+            userVisible: true,
+            ...context?.metadata,
+          });
+        } else {
+          logger.warn(operation, {
+            message: text,
+            userVisible: true,
+            ...context?.metadata,
+          });
+        }
+      } else if (severity === "success" && context?.operation) {
+        // Optionally log successful operations if context provided
+        logger.info(context.operation, {
+          message: text,
+          userVisible: true,
+          ...context?.metadata,
+        });
+      }
+
       const playSound = async () => {
         try {
           let audio: HTMLAudioElement | null;
@@ -112,7 +157,9 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
                 break;
             }
           }
-        } catch (_) {}
+        } catch (vibrationError) {
+          console.error("Vibration error", vibrationError);
+        }
       };
 
       playSound();

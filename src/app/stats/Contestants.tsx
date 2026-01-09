@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Typography,
   FormControl,
@@ -8,7 +8,6 @@ import {
   Select,
   MenuItem,
   Box,
-  Avatar,
 } from "@mui/material";
 import {
   TIME_TYPE_BEER,
@@ -46,65 +45,73 @@ const Contestants: React.FC<ContestantsProps> = ({
   players = [],
   timeTypes = [],
   teams = [],
-  heats = [],
 }) => {
   const [selectedPlayer1Id, setSelectedPlayer1Id] = useState<string>("");
   const [selectedPlayer2Id, setSelectedPlayer2Id] = useState<string>("");
 
-  const handlePlayerChange = (
-    e:
-      | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-      | (Event & { target: { value: string; name: string } }),
-    playerNumber: number
-  ) => {
-    if (playerNumber === 1) {
-      setSelectedPlayer1Id(e.target.value);
-    } else if (playerNumber === 2) {
-      setSelectedPlayer2Id(e.target.value);
-    }
-  };
+  const handlePlayerChange = useCallback(
+    (
+      e:
+        | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+        | (Event & { target: { value: string; name: string } }),
+      playerNumber: number,
+    ) => {
+      if (playerNumber === 1) {
+        setSelectedPlayer1Id(e.target.value);
+      } else if (playerNumber === 2) {
+        setSelectedPlayer2Id(e.target.value);
+      }
+    },
+    [],
+  );
+
   const beerTypeId = getTimeTypeBeer(timeTypes)?.id || 0;
   const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || 0;
   const sailTypeId = getTimeTypeSail(timeTypes)?.id || 0;
-  const logsFilteredByPlayer1 = filterTimeLogsByPlayerId(
-    timeLogs,
-    Number(selectedPlayer1Id)
-  );
-  const logsFilteredByPlayer2 = filterTimeLogsByPlayerId(
-    timeLogs,
-    Number(selectedPlayer2Id)
+
+  const logsFilteredByPlayer1 = useMemo(
+    () => filterTimeLogsByPlayerId(timeLogs, Number(selectedPlayer1Id)),
+    [timeLogs, selectedPlayer1Id],
   );
 
-  const player1logsSortedByHeatAndTime = sortTimeLogsByHeat(
-    sortTimeLogsByTime(logsFilteredByPlayer1)
+  const logsFilteredByPlayer2 = useMemo(
+    () => filterTimeLogsByPlayerId(timeLogs, Number(selectedPlayer2Id)),
+    [timeLogs, selectedPlayer2Id],
   );
-  const player2logsSortedByHeatAndTime = sortTimeLogsByHeat(
-    sortTimeLogsByTime(logsFilteredByPlayer2)
+
+  const player1logsSortedByHeatAndTime = useMemo(
+    () => sortTimeLogsByHeat(sortTimeLogsByTime(logsFilteredByPlayer1)),
+    [logsFilteredByPlayer1],
+  );
+
+  const player2logsSortedByHeatAndTime = useMemo(
+    () => sortTimeLogsByHeat(sortTimeLogsByTime(logsFilteredByPlayer2)),
+    [logsFilteredByPlayer2],
   );
 
   const player1BeerLogs = filterTimeLogsByTimeType(
     player1logsSortedByHeatAndTime,
-    beerTypeId
+    beerTypeId,
   );
   const player1SpinnerLogs = filterTimeLogsByTimeType(
     player1logsSortedByHeatAndTime,
-    spinnerTypeId
+    spinnerTypeId,
   );
   const player1SailLogs = filterTimeLogsByTimeType(
     player1logsSortedByHeatAndTime,
-    sailTypeId
+    sailTypeId,
   );
   const player2BeerLogs = filterTimeLogsByTimeType(
     player2logsSortedByHeatAndTime,
-    beerTypeId
+    beerTypeId,
   );
   const player2SpinnerLogs = filterTimeLogsByTimeType(
     player2logsSortedByHeatAndTime,
-    spinnerTypeId
+    spinnerTypeId,
   );
   const player2SailLogs = filterTimeLogsByTimeType(
     player2logsSortedByHeatAndTime,
-    sailTypeId
+    sailTypeId,
   );
 
   const player1BestTimes = {
@@ -123,7 +130,7 @@ const Contestants: React.FC<ContestantsProps> = ({
     player1BestTimes,
     players,
     teams,
-    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
+    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
   );
 
   const player2ChartData = generateRadarChartData(
@@ -131,7 +138,7 @@ const Contestants: React.FC<ContestantsProps> = ({
     player2BestTimes,
     players,
     teams,
-    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL]
+    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
   );
 
   return (

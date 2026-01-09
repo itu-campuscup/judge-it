@@ -69,9 +69,17 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 
 ## 🏃‍➡️ Getting Started
 
-> **ℹ️ Note:** This project primarily uses [Bun](https://bun.sh/) as package manager and runtime - but it should be possible to use [npm](https://www.npmjs.com/), [yarn](https://yarnpkg.com/), or [pnpm](https://pnpm.io/) as well.
+> **⚠️ Important:** This project requires [Bun](https://bun.sh/) as the package manager and runtime.
 
-To get started with the project, please read the [Getting Started](./CONTRIBUTING.md#getting-started) section in the [CONTRIBUTING](./CONTRIBUTING.md) file.
+```bash
+# 1. Install dependencies
+bun install
+
+# 2. Start development server
+bun dev
+```
+
+For detailed setup and contribution guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## ⚡ Database
 

@@ -51,12 +51,23 @@ const Sailing: React.FC<SailingProps> = ({
   const sailingType = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL);
   const sailingTypeId = sailingType ? sailingType.id : null;
 
-  const logsForHeatsSortByTime =
-    sailingTypeId !== null
-      ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, sailingTypeId)
-      : [];
-  const sailTimes = calculateTimes(logsForHeatsSortByTime);
-  const topTimes = removeDuplicateTimeEntries(sailTimes);
+  const logsForHeatsSortByTime = useMemo(
+    () =>
+      sailingTypeId !== null
+        ? filterAndSortTimeLogs(timeLogs, heats, selectedYear, sailingTypeId)
+        : [],
+    [timeLogs, heats, selectedYear, sailingTypeId],
+  );
+
+  const sailTimes = useMemo(
+    () => calculateTimes(logsForHeatsSortByTime),
+    [logsForHeatsSortByTime],
+  );
+
+  const topTimes = useMemo(
+    () => removeDuplicateTimeEntries(sailTimes),
+    [sailTimes],
+  );
 
   useEffect((): void => {
     if (window.location.search.includes("export=true") && topTimes.length > 0) {
@@ -64,9 +75,12 @@ const Sailing: React.FC<SailingProps> = ({
     }
   }, [topTimes]);
 
-  const sailData = generateRankableData(topTimes, players, teams, heats);
+  const sailData = useMemo(
+    () => generateRankableData(topTimes, players, teams, heats),
+    [topTimes, players, teams, heats],
+  );
 
-  let processedRankingData = useMemo((): ProcessedRankingData[] => {
+  const processedRankingData = useMemo((): ProcessedRankingData[] => {
     if (sailingTypeId === null || sailData.length === 0) return [];
 
     const bestTime = sailData[0].time;
@@ -83,6 +97,7 @@ const Sailing: React.FC<SailingProps> = ({
       }
       return {
         ...item,
+        heatNumber: Number(item.heatNumber),
         actualTime,
         displayLabel,
       };
