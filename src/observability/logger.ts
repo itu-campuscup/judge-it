@@ -185,10 +185,8 @@ export class Logger {
       }
     }
 
-    const jsonLog = JSON.stringify(logData);
-
-    // Output to browser console
-    console.log(jsonLog);
+    // Output structured log object (Vercel will automatically format as JSON)
+    console.log(logData);
 
     // Send to server-side logging endpoint so it appears in Vercel logs
     if (typeof window !== "undefined") {
@@ -196,7 +194,7 @@ export class Logger {
       fetch("/api/logs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: jsonLog,
+        body: JSON.stringify(logData),
       }).catch(() => {
         // Silently fail - don't break the app if logging fails
       });
