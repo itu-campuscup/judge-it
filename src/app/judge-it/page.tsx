@@ -111,7 +111,6 @@ function Judge(): React.ReactElement {
               setTeamPlayers={setTeamPlayers}
               selectPlayerString={selectPlayerString}
               setSelectPlayerString={setSelectPlayerString}
-              alert={alert}
             />
           </Box>
         )}
@@ -124,7 +123,6 @@ function Judge(): React.ReactElement {
          */}
         {judgeType === MAIN_JUDGE && (
           <MainJudge
-            user={user}
             parentTeam={selectedTeamId ? Number(selectedTeamId) : null}
             parentPlayer={selectedPlayer ? Number(selectedPlayer) : null}
             teams={teams}
@@ -163,6 +161,7 @@ function Judge(): React.ReactElement {
         text={alert.text}
         open={alert.open}
         setOpen={alert.setOpen}
+        context={alert.context}
       />
     </Container>
   );

@@ -9,7 +9,7 @@ import type { TimeLog } from "@/types";
  */
 export const filterTimeLogsByPlayerId = (
   timeLogs: TimeLog[],
-  playerId: number
+  playerId: number,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.player_id === playerId);
 };
@@ -22,7 +22,7 @@ export const filterTimeLogsByPlayerId = (
  */
 export const filterTimeLogsByTeamId = (
   timeLogs: TimeLog[],
-  teamId: number
+  teamId: number,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.team_id === teamId);
 };
@@ -44,7 +44,7 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
   return timeLogs.sort(
     (a: TimeLog, b: TimeLog) =>
-      timeToMilli(a.time || "") - timeToMilli(b.time || "")
+      timeToMilli(a.time || "") - timeToMilli(b.time || ""),
   );
 };
 
@@ -56,7 +56,7 @@ export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
  */
 export const filterTimeLogsByTimeType = (
   timeLogs: TimeLog[],
-  timeTypeId: number
+  timeTypeId: number,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.time_type_id === timeTypeId);
 };
@@ -94,7 +94,7 @@ export const splitTimeLogsPerHeat = (timeLogs: TimeLog[]): TimeLog[][] => {
  */
 export const filterTimeLogsByHeatId = (
   timeLogs: TimeLog[],
-  heatId: number
+  heatId: number,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.heat_id === heatId);
 };

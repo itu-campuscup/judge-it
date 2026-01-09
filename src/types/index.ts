@@ -57,7 +57,7 @@ export interface TimeLog {
 export interface ChartData {
   name: string;
   value: number;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface StatsData {
@@ -79,8 +79,10 @@ export interface ThemeContextType {
   toggleDarkMode: () => void;
 }
 
+import { User } from "@supabase/supabase-js";
+
 export interface AuthContextType {
-  user: any; // Replace with actual Supabase user type
+  user: User | null;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -97,6 +99,28 @@ export interface SortFilterOptions {
   sortBy: "time" | "name" | "team";
   filterBy?: string;
   ascending?: boolean;
+}
+
+export interface AlertObject {
+  open: boolean;
+  severity: "success" | "error" | "warning" | "info";
+  text: string;
+  context?: AlertContext;
+  setOpen: (open: boolean) => void;
+  setSeverity: (severity: "success" | "error" | "warning" | "info") => void;
+  setText: (text: string) => void;
+  setContext: (context: AlertContext | undefined) => void;
+}
+
+// Alert context type (used across AlertComponent and judge-it components)
+export interface AlertContext {
+  operation?: string; // What operation was being performed
+  location?: string; // Where in the code this alert came from
+  metadata?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >; // Additional context
+  error?: Error; // Original error object if available
 }
 
 export interface VisualizationData {
@@ -117,6 +141,19 @@ export interface FetchDataResult<T> {
   refetch: () => void;
 }
 
+export interface TimeLogDetail {
+  playerId: number;
+  teamId: number;
+  heatId: number;
+  timeTypeId?: number;
+  formattedTime?: string;
+  time?: string;
+  duration?: number;
+}
+
+// Alias for backwards compatibility with visualization utils
+export type TimeEntry = TimeLogDetail;
+
 export interface YearSelectorResult {
   selectedYear: number;
   availableYears: number[];
@@ -131,8 +168,11 @@ export interface AnimationProps {
 }
 
 // Error types
-export interface AppError {
+export interface AppErrorInterface {
   message: string;
   code?: string;
-  details?: any;
+  details?: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >;
 }

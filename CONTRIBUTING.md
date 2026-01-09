@@ -143,8 +143,17 @@ If you are part of the CampusCup team please follow the steps below to get start
 
 #### Getting Started
 
+**Requirements:**
+- [Bun](https://bun.sh/) 1.0 or higher (required)
+- Access to CampusCup Supabase organization
+
+**Installation:**
 1. Clone the repository
 2. `cd` into the project directory
+3. Install dependencies:
+   ```bash
+   bun install
+   ```
 
 #### Connecting to Supabase
 
@@ -159,16 +168,24 @@ Once you have access do the following in the Supabase dashboard:
 3. Click on `Data API`
 4. Copy the `URL`
 5. Click on `API Key` in the sidebar
-7. Copy the `anon public` key
-8. Create a `.env.local` file in the root of the project
-9. Add the following lines to the `.env.local` file:
+6. Copy the `anon public` key
 
-    ```env
-    NEXT_PUBLIC_SUPABASE_URL=<url>
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon public key>
-    ```
+**Start the development server:**
+```bash
+bun dev
+```
 
-10. Save the file
+On first run, you'll be prompted to enter:
+- `NEXT_PUBLIC_SUPABASE_URL` - paste the URL from step 4
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - paste the anon public key from step 6
+
+Your credentials are now stored securely in your system keychain and will be automatically loaded on future runs.
+
+**Managing credentials:**
+```bash
+bun run secrets:view   # View stored credentials (masked)
+bun run secrets:clear  # Clear credentials to reconfigure
+```
 
 You now have access to the Supabase database.
 
@@ -201,17 +218,16 @@ You should now have an account you can use for when starting up the web app.
 > This is the user you should have created during the [Creating a user for the Web App](#creating-a-user-for-the-web-app) step.
 
 1. Create a new branch for your feature or bug fix
-2. Install the dependencies using `bun install`, `npm install`, `yarn install`, or `pnpm install`
-3. Start the development server using `bun run dev`, `npm run dev`, `yarn dev`, or `pnpm dev`
+2. Start the development server using `bun dev`
     - This will start the server on [http://localhost:3000](http://localhost:3000)
-4. Make your changes and test them in the development server
-5. Commit your changes with a clear and descriptive commit message
+3. Make your changes and test them in the development server
+4. Commit your changes with a clear and descriptive commit message
     - Use the [commit message styleguide](#commit-messages) to write your commit message
-6. Push your changes
-7. Create a pull request to the main branch of the repository
+5. Push your changes
+6. Create a pull request to the main branch of the repository
     - Request a review from the CampusCup team
     - Add a description of your changes and why they are needed
-8. Wait for the CampusCup team to review your changes and merge them into the main branch
+7. Wait for the CampusCup team to review your changes and merge them into the main branch
 
 > **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
 > Please add youself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.

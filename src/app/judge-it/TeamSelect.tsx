@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { getActiveTeams } from "@/utils/getUtils";
-import type { Team } from "@/types";
+import type { Team, AlertObject } from "@/types";
 
 interface TeamSelectProps {
   selectedTeamId: string;
   setSelectedTeam: (value: string) => void;
   teams: Team[];
-  alert?: any;
+  alert?: AlertObject;
 }
 
 /**
@@ -26,8 +26,16 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
   useEffect(() => {
     if (activeTeams.length === 0 && alert) {
       alert.setOpen(true);
-      alert.setSeverity("error");
+      alert.setSeverity("warning");
       alert.setText("No active teams found");
+      alert.setContext({
+        operation: "load_teams",
+        location: "TeamSelect.useEffect",
+        metadata: {
+          totalTeams: teams.length,
+          activeTeams: 0,
+        },
+      });
     }
   }, [teams, activeTeams, alert]);
 

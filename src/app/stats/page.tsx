@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Typography, AppBar, Toolbar, Paper, Box, Button } from "@mui/material";
 import Header from "../components/Header";
 import BeerChugger from "./BeerChugger";
@@ -36,11 +36,23 @@ function Stats() {
   const [selectedStat, setSelectedStat] = useState<SelectedStat>("BeerChugger");
   const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
 
+  // Memoize props object to prevent unnecessary re-renders of stat components
+  const commonProps = useMemo(
+    () => ({
+      timeLogs,
+      players,
+      timeTypes,
+      teams,
+      heats,
+    }),
+    [timeLogs, players, timeTypes, teams, heats],
+  );
+
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       const key = e.key;
       const statConfig = STATS_CONFIG.find(
-        (stat) => stat.number.toString() === key
+        (stat) => stat.number.toString() === key,
       );
 
       if (statConfig) {
@@ -57,13 +69,6 @@ function Stats() {
   }
 
   const renderSelectedStat = () => {
-    const commonProps = {
-      timeLogs,
-      players,
-      timeTypes,
-      teams,
-      heats,
-    };
     switch (selectedStat) {
       case "BeerChugger":
         return <BeerChugger {...commonProps} />;
@@ -76,7 +81,7 @@ function Stats() {
       case "Teams":
         return <Teams {...commonProps} />;
       case "Heat":
-        return <CurrentHeat alert={undefined} {...commonProps} />;
+        return <CurrentHeat alert={alert} {...commonProps} />;
       default:
         return null;
     }

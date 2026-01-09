@@ -1,31 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { FormControl, TextField, Button } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import { supabase } from "@/SupabaseClient";
 import { HEATS_TABLE } from "@/utils/constants";
-import type { Heat } from "@/types";
+import type { Heat, AlertContext } from "@/types";
 
 interface SetHeatProps {
-  user: any;
   heats: Heat[];
 }
 
-const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
+const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
-    "error"
+    "error",
   );
   const [alertText, setAlertText] = useState<string>("");
+  const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [heatNumber, setHeatNumber] = useState<string>("");
 
   const getCurYear = (): number => {
     return new Date().getFullYear();
   };
 
+  const thisYearsHeats = useMemo(
+    () =>
+      heats.filter(
+        (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear(),
+      ),
+    [heats],
+  );
+
   const getThisYearsHeats = (): Heat[] => {
-    return heats.filter(
-      (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear()
-    );
+    return thisYearsHeats;
   };
 
   const hasHeatBeenUsed = (heatNumber: number): boolean => {
@@ -54,13 +60,20 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "set_heat",
+        location: "SetHeat.setNotCurrentHeat",
+        metadata: {
+          step: "update_current_heat_to_false",
+          errorCode: error.code,
+        },
+      });
       return "error";
     }
   };
 
   const createHeat = async (
-    heatNumber: number
+    heatNumber: number,
   ): Promise<string | undefined> => {
     const { error } = await supabase
       .from(HEATS_TABLE)
@@ -70,13 +83,21 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "set_heat",
+        location: "SetHeat.createHeat",
+        metadata: {
+          step: "insert_new_heat",
+          heatNumber,
+          errorCode: error.code,
+        },
+      });
       return "error";
     }
   };
 
   const updateHeat = async (
-    heatNumber: number
+    heatNumber: number,
   ): Promise<string | undefined> => {
     const { error } = await supabase
       .from(HEATS_TABLE)
@@ -87,7 +108,15 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
-      console.error(err);
+      setAlertContext({
+        operation: "set_heat",
+        location: "SetHeat.updateHeat",
+        metadata: {
+          step: "update_heat_to_current",
+          heatNumber,
+          errorCode: error.code,
+        },
+      });
       return "error";
     }
   };
@@ -97,7 +126,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
     if (hasHeatBeenUsed(heatNumber)) {
       const nextNaturalHeat = getNextNaturalHeat();
       const confirmReuse = window.confirm(
-        `Click OK if you sure you want to reuse heat ${heatNumber}.\nThe natural heat progression would be to use ${nextNaturalHeat} now.`
+        `Click OK if you sure you want to reuse heat ${heatNumber}.\nThe natural heat progression would be to use ${nextNaturalHeat} now.`,
       );
       if (!confirmReuse) {
         return;
@@ -124,6 +153,14 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
     setAlertOpen(true);
     setAlertSeverity("success");
     setAlertText(`Heat ${heatNumber} set`);
+    setAlertContext({
+      operation: "set_heat",
+      location: "SetHeat.handleSetHeat",
+      metadata: {
+        heatNumber,
+        wasReused: hasHeatBeenUsed(heatNumber),
+      },
+    });
   };
 
   return (
@@ -133,6 +170,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ user, heats = [] }) => {
         text={alertText}
         open={alertOpen}
         setOpen={setAlertOpen}
+        context={alertContext}
       />
       <FormControl fullWidth margin="normal" variant="filled">
         <TextField

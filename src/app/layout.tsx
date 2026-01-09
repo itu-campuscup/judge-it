@@ -20,7 +20,10 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning
+      >
         <ThemeRegistry options={{ key: "mui" }}>
           <AuthProvider>{children}</AuthProvider>
         </ThemeRegistry>
