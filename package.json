@@ -27,7 +27,7 @@
     "@eslint/eslintrc": "^3.3.3",
     "@melt-ui/pp": "^0.3.2",
     "@melt-ui/svelte": "^0.86.6",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.6",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.1",
