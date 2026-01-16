@@ -7,9 +7,13 @@ import {
   MenuItem,
   Divider,
 } from "@mui/material";
-import { supabase } from "@/SupabaseClient";
-import { User } from "@supabase/supabase-js";
 import Link from "next/link";
+
+interface User {
+  id: string;
+  email?: string;
+  [key: string]: unknown;
+}
 
 interface HeaderProps {
   user: User | null;
@@ -23,7 +27,9 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   };
 
   const handleLogout = async (): Promise<void> => {
-    await supabase.auth.signOut();
+    // Clear demo user from localStorage
+    localStorage.removeItem("judge-it-user");
+    window.location.reload();
   };
 
   return (

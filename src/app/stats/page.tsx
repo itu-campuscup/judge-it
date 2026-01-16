@@ -11,7 +11,7 @@ import Teams from "./Teams";
 import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
-import useFetchData from "../hooks/useFetchData";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import CurrentHeat from "./CurrentHeat";
 
 type SelectedStat =
@@ -34,7 +34,8 @@ const STATS_CONFIG = [
 function Stats() {
   const { user } = useAuth();
   const [selectedStat, setSelectedStat] = useState<SelectedStat>("BeerChugger");
-  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
+  const { players, heats, teams, timeTypes, timeLogs, alert } =
+    useFetchDataConvex();
 
   // Memoize props object to prevent unnecessary re-renders of stat components
   const commonProps = useMemo(

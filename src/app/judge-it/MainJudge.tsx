@@ -2,15 +2,14 @@ import React, { useState, useEffect } from "react";
 import TeamSelect from "./TeamSelect";
 import PlayerSelect from "./PlayerSelect";
 import { Button, Stack } from "@mui/material";
-import { supabase } from "@/SupabaseClient";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
 import { getCurrentHeat } from "@/utils/getUtils";
-import {
-  TIME_TYPE_SAIL,
-  TIME_LOGS_TABLE,
-  HEATS_TABLE,
-} from "@/utils/constants";
+import { convexIdToNumber } from "@/utils/convexHelpers";
+import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type { Team, Player, TimeType, Heat, AlertObject } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface MainJudgeProps {
   parentTeam: number | null;
@@ -28,8 +27,13 @@ const MainJudge: React.FC<MainJudgeProps> = ({
   teams,
   players,
   time_types,
+  heats,
   alert,
 }) => {
+  const createTimeLog = useMutation(api.mutations.createTimeLog);
+  const createHeat = useMutation(api.mutations.createHeat);
+  const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
+
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
@@ -50,7 +54,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
    * Get the next heat number based on current heat
    */
   const getNextHeatNumber = async (): Promise<number> => {
-    const currentHeatData = await getCurrentHeat(alert);
+    const currentHeatData = getCurrentHeat(heats, alert);
     return currentHeatData ? currentHeatData.heat + 1 : 1;
   };
 
@@ -58,52 +62,39 @@ const MainJudge: React.FC<MainJudgeProps> = ({
    * Create and set a new heat as current
    */
   const createAndSetNewHeat = async (): Promise<Heat | null> => {
-    // Set all existing heats to not current
-    const { error: updateError } = await supabase
-      .from(HEATS_TABLE)
-      .update({ is_current: false })
-      .eq("is_current", true);
+    try {
+      // Create new heat and set as current (setCurrentHeat will unset others automatically)
+      const newHeatId = await createHeat({
+        name: `Heat ${nextHeatNumber}`,
+        heat: nextHeatNumber,
+        date: new Date().toISOString().split("T")[0],
+        is_current: false,
+      });
 
-    if (updateError) {
+      // Set as current (this automatically unsets other heats)
+      await setCurrentHeat({ id: newHeatId as Id<"heats"> });
+
+      // Return the new heat object
+      return {
+        id: convexIdToNumber(newHeatId as Id<"heats">),
+        heat: nextHeatNumber,
+        date: new Date().toISOString().split("T")[0],
+        is_current: true,
+      };
+    } catch (error) {
       alert.setOpen(true);
       alert.setSeverity("error");
-      alert.setText("Error updating current heat: " + updateError.message);
+      alert.setText("Error creating new heat: " + (error as Error).message);
       alert.setContext({
         operation: "create_new_heat",
         location: "MainJudge.createAndSetNewHeat",
         metadata: {
-          step: "update_current_heat",
+          step: "create_heat",
           nextHeatNumber,
-          errorCode: updateError.code,
         },
       });
       return null;
     }
-
-    // Create new heat
-    const { data: newHeat, error: createError } = await supabase
-      .from(HEATS_TABLE)
-      .insert([{ heat: nextHeatNumber, is_current: true }])
-      .select()
-      .single();
-
-    if (createError) {
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText("Error creating new heat: " + createError.message);
-      alert.setContext({
-        operation: "create_new_heat",
-        location: "MainJudge.createAndSetNewHeat",
-        metadata: {
-          step: "insert_new_heat",
-          nextHeatNumber,
-          errorCode: createError.code,
-        },
-      });
-      return null;
-    }
-
-    return newHeat;
   };
 
   /**
@@ -136,39 +127,33 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       return;
     }
 
-    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
-      {
-        team_id: parentTeam,
-        player_id: parentPlayer,
-        time_type_id: sailTimeType.id,
-        heat_id: newHeat.id,
-      },
-      {
-        team_id: parseInt(selectedTeamId),
-        player_id: parseInt(selectedPlayer),
-        time_type_id: sailTimeType.id,
-        heat_id: newHeat.id,
-      },
-    ]);
-    if (error) {
-      const err = "Error starting global timer: " + error.message;
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText(err);
-      alert.setContext({
-        operation: "global_start_timer",
-        location: "MainJudge.handleGlobalStart",
-        metadata: {
-          step: "insert_time_logs",
-          parentTeam,
-          parentPlayer,
-          selectedTeamId,
-          selectedPlayer,
-          heatId: newHeat.id,
-          errorCode: error.code,
-        },
+    try {
+      // Get current time
+      const now = new Date();
+      const timeSeconds =
+        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
+
+      // Insert both time logs
+      await createTimeLog({
+        team_id: parentTeam as unknown as Id<"teams"> | undefined,
+        player_id: parentPlayer as unknown as Id<"players">,
+        time_type_id: sailTimeType.id as unknown as Id<"time_types">,
+        heat_id: newHeat.id as unknown as Id<"heats">,
+        time_seconds: timeSeconds,
+        time: timeString,
       });
-    } else {
+
+      await createTimeLog({
+        team_id: selectedTeamId as unknown as Id<"teams"> | undefined,
+        player_id: selectedPlayer as unknown as Id<"players">,
+        time_type_id: sailTimeType.id as unknown as Id<"time_types">,
+        heat_id: newHeat.id as unknown as Id<"heats">,
+        time_seconds: timeSeconds,
+        time: timeString,
+      });
+
+      // Success - show confirmation
       alert.setOpen(true);
       alert.setSeverity("success");
       alert.setText(`Heat ${newHeat.heat} started! Global timer running.`);
@@ -185,6 +170,23 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       // Update next heat number for the button
       const updatedNextHeat = await getNextHeatNumber();
       setNextHeatNumber(updatedNextHeat);
+    } catch (error) {
+      const err = "Error starting global timer: " + (error as Error).message;
+      alert.setOpen(true);
+      alert.setSeverity("error");
+      alert.setText(err);
+      alert.setContext({
+        operation: "global_start_timer",
+        location: "MainJudge.handleGlobalStart",
+        metadata: {
+          step: "insert_time_logs",
+          parentTeam,
+          parentPlayer,
+          selectedTeamId,
+          selectedPlayer,
+          heatId: newHeat.id,
+        },
+      });
     }
   };
   /**

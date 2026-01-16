@@ -1,9 +1,4 @@
-import {
-  HEATS_TABLE,
-  TIME_TYPE_BEER,
-  TIME_TYPE_SAIL,
-  TIME_TYPE_SPIN,
-} from "./constants";
+import { TIME_TYPE_BEER, TIME_TYPE_SAIL, TIME_TYPE_SPIN } from "./constants";
 import {
   calculateTimes,
   removeDuplicateTimeEntries,
@@ -13,7 +8,6 @@ import {
   sortTimeLogsByTime,
   splitTimeLogsPerHeat,
 } from "./sortFilterUtils";
-import { supabase } from "@/SupabaseClient";
 import type {
   Player,
   Heat,
@@ -178,36 +172,37 @@ export const getTeamPlayer = (
 
 /**
  * Get current heat
+ * Note: With Convex, you should use the getCurrentHeat query directly.
+ * This is a helper function for backwards compatibility.
+ * @param {Heat[]} heats - The list of heats.
  * @param {Object} alert - The alert object to set error messages (optional).
- * @returns {Promise<Heat|null>} The current heat or null if not found.
+ * @returns {Heat|null} The current heat or null if not found.
  */
-export const getCurrentHeat = async (
+export const getCurrentHeat = (
+  heats: Heat[],
   alert?: AlertObject,
-): Promise<Heat | null> => {
-  const { data, error } = await supabase
-    .from(HEATS_TABLE)
-    .select("*")
-    .eq("is_current", true);
+): Heat | null => {
+  const currentHeat = heats.find((h: Heat) => h.is_current);
 
-  if (error) {
-    const err = "Error fetching current heat: " + error.message;
-    console.error(err);
-    if (!alert) {
-      return data?.[0] || null;
+  if (!currentHeat) {
+    const err = "No current heat found";
+    console.warn(err);
+    if (alert) {
+      alert.setOpen(true);
+      alert.setSeverity("warning");
+      alert.setText(err);
+      alert.setContext({
+        operation: "find_current_heat",
+        location: "getUtils.getCurrentHeat",
+        metadata: {
+          step: "find_current_heat",
+          heatsCount: heats.length,
+        },
+      });
     }
-    alert.setOpen(true);
-    alert.setSeverity("error");
-    alert.setText(err);
-    alert.setContext({
-      operation: "fetch_current_heat",
-      location: "getUtils.getCurrentHeat",
-      metadata: {
-        errorCode: error.code,
-        step: "fetch_current_heat",
-      },
-    });
   }
-  return data?.[0] || null;
+
+  return currentHeat || null;
 };
 
 /**

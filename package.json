@@ -12,12 +12,15 @@
     "secrets:clear": "bun cli.ts secrets:clear"
   },
   "dependencies": {
+    "@auth/core": "0.37.0",
+    "@convex-dev/auth": "^0.0.90",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
     "@shadcn/ui": "^0.0.4",
-    "@supabase/supabase-js": "^2.89.0",
+    "convex": "^1.31.5",
+    "csv-parse": "^5.6.0",
     "framer-motion": "^12.23.26",
     "next": "16.1.0-canary.19",
     "react": "^19.2.3",

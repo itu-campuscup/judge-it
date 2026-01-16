@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/SupabaseClient";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Button, Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import {
@@ -10,7 +11,7 @@ import {
   getPrevPlayerId,
   getTimeType,
 } from "@/utils/getUtils";
-import { TIME_LOGS_TABLE, TIME_TYPE_SAIL } from "@/utils/constants";
+import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type {
   Team,
   Player,
@@ -20,10 +21,12 @@ import type {
   AlertContext,
   AlertObject,
 } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
   selectedPlayer: Player | null;
+  heats: Heat[];
   timeTypes?: TimeType[];
   players?: Player[];
   timeLogs?: TimeLog[];
@@ -33,11 +36,13 @@ interface ParticipantsJudgeProps {
 const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   selectedTeam,
   selectedPlayer,
+  heats,
   timeTypes = [],
   players = [],
   timeLogs = [],
   alert,
 }) => {
+  const createTimeLog = useMutation(api.mutations.createTimeLog);
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
     "error",
@@ -49,7 +54,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
 
   useEffect(() => {
     const loadCurrentHeat = async () => {
-      const some = await getCurrentHeat(alert);
+      const some = getCurrentHeat(heats, alert);
       setCurrentHeat(some);
     };
     loadCurrentHeat();
@@ -94,22 +99,35 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       return;
     }
 
-    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
-      {
-        team_id: selectedTeam?.id,
-        player_id: prevPlayerId,
-        time_type_id: timeTypeId,
-        heat_id: currentHeat.id,
-      },
-      {
-        team_id: selectedTeam?.id,
-        player_id: typeof playerId === "string" ? parseInt(playerId) : playerId,
-        time_type_id: timeTypeId,
-        heat_id: currentHeat.id,
-      },
-    ]);
-    if (error) {
-      const err = "Error inserting time log: " + error.message;
+    try {
+      // Get current time
+      const now = new Date();
+      const timeSeconds =
+        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
+
+      // Insert both time logs (stop previous player, start new player)
+      await createTimeLog({
+        team_id: selectedTeam?.id as Id<"teams"> | undefined,
+        player_id: prevPlayerId as Id<"players">,
+        time_type_id: timeTypeId as unknown as Id<"time_types">,
+        heat_id: currentHeat.id.toString() as Id<"heats">,
+        time_seconds: timeSeconds,
+        time: timeString,
+      });
+
+      await createTimeLog({
+        team_id: selectedTeam?.id as Id<"teams"> | undefined,
+        player_id: (typeof playerId === "string"
+          ? parseInt(playerId)
+          : playerId) as unknown as Id<"players">,
+        time_type_id: timeTypeId as unknown as Id<"time_types">,
+        heat_id: currentHeat.id as unknown as Id<"heats">,
+        time_seconds: timeSeconds,
+        time: timeString,
+      });
+    } catch (error) {
+      const err = "Error inserting time log: " + (error as Error).message;
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
@@ -122,7 +140,6 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
           prevPlayerId,
           currentPlayerId: playerId,
           heatId: currentHeat.id,
-          errorCode: error.code,
         },
       });
       return;

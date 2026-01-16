@@ -83,12 +83,25 @@ For detailed setup and contribution guidelines, see [Getting Started in CONTRIBU
 
 ## ⚡ Database
 
-This project uses [Supabase](https://supabase.com/) as a database.
-Thus no local database is needed.
+This project uses [Convex](https://convex.dev/) as a real-time database with automatic subscriptions.
+No local database setup is needed.
 
-### ⚡ Connecting to Supabase
+### Setting up Convex
 
-To set up Supabase for the project, please read the [Connecting to Supabase](./CONTRIBUTING.md#connecting-to-supabase) section in the [CONTRIBUTING](./CONTRIBUTING.md) file.
+To set up Convex for the project:
+
+1. **Initialize Convex** (if not already done):
+   ```bash
+   bunx convex dev
+   ```
+   This will create a Convex project and add `NEXT_PUBLIC_CONVEX_URL` to your `.env.local`
+
+2. **Import existing data** (if migrating):
+   ```bash
+   bun run scripts/importData.ts
+   ```
+
+For detailed migration information, see [CONVEX_MIGRATION.md](./CONVEX_MIGRATION.md).
 
 ## 🔺 Deploy on Vercel
 

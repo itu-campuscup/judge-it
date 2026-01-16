@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/AuthContext";
 import ThemeRegistry from "@/ThemeRegistry";
+import { ConvexClientProvider } from "@/ConvexClientProvider";
 import { ReactNode } from "react";
 
 const geistSans = Geist({
@@ -24,9 +25,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className={`${geistSans.variable} ${geistMono.variable}`}
         suppressHydrationWarning
       >
-        <ThemeRegistry options={{ key: "mui" }}>
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeRegistry>
+        <ConvexClientProvider>
+          <ThemeRegistry options={{ key: "mui" }}>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeRegistry>
+        </ConvexClientProvider>
       </body>
     </html>
   );

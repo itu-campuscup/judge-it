@@ -1,5 +1,11 @@
 // Global type definitions for Judge-It application
 
+// Auth types
+export interface User {
+  id: string;
+  email?: string;
+}
+
 // Database schema types
 export interface Team {
   id: number;
@@ -79,10 +85,12 @@ export interface ThemeContextType {
   toggleDarkMode: () => void;
 }
 
-import { User } from "@supabase/supabase-js";
-
 export interface AuthContextType {
-  user: User | null;
+  user: {
+    id: string;
+    email?: string;
+    [key: string]: unknown;
+  } | null;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;

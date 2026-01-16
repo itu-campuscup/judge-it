@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { FormControl, TextField, Button } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
-import { supabase } from "@/SupabaseClient";
-import { HEATS_TABLE } from "@/utils/constants";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import type { Heat, AlertContext } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface SetHeatProps {
   heats: Heat[];
@@ -17,6 +18,9 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [heatNumber, setHeatNumber] = useState<string>("");
+
+  const createHeatMutation = useMutation(api.mutations.createHeat);
+  const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
 
   const getCurYear = (): number => {
     return new Date().getFullYear();
@@ -51,12 +55,12 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   };
 
   const setNotCurrentHeat = async (): Promise<string | undefined> => {
-    const { error } = await supabase
-      .from(HEATS_TABLE)
-      .update({ is_current: false })
-      .eq("is_current", true);
-    if (error) {
-      const err = "Error updating current heat: " + error.message;
+    try {
+      // setCurrentHeat with null ID will unset all heats
+      // Actually we don't need this - setCurrentHeat mutation already unsets others
+      return undefined;
+    } catch (error) {
+      const err = "Error updating current heat: " + (error as Error).message;
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
@@ -65,7 +69,6 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
         location: "SetHeat.setNotCurrentHeat",
         metadata: {
           step: "update_current_heat_to_false",
-          errorCode: error.code,
         },
       });
       return "error";
@@ -75,11 +78,18 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   const createHeat = async (
     heatNumber: number,
   ): Promise<string | undefined> => {
-    const { error } = await supabase
-      .from(HEATS_TABLE)
-      .insert([{ heat: heatNumber, is_current: true }]);
-    if (error) {
-      const err = "Error creating heat: " + error.message;
+    try {
+      const newHeatId = await createHeatMutation({
+        name: `Heat ${heatNumber}`,
+        heat: heatNumber,
+        date: new Date().toISOString().split("T")[0],
+        is_current: false,
+      });
+      // Now set it as current
+      await setCurrentHeat({ id: newHeatId as Id<"heats"> });
+      return undefined;
+    } catch (error) {
+      const err = "Error creating heat: " + (error as Error).message;
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
@@ -89,7 +99,6 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
         metadata: {
           step: "insert_new_heat",
           heatNumber,
-          errorCode: error.code,
         },
       });
       return "error";
@@ -99,12 +108,17 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   const updateHeat = async (
     heatNumber: number,
   ): Promise<string | undefined> => {
-    const { error } = await supabase
-      .from(HEATS_TABLE)
-      .update({ is_current: true })
-      .eq("heat", heatNumber);
-    if (error) {
-      const err = "Error updating heat: " + error.message;
+    try {
+      // Find the heat by number
+      const heat = heats.find((h) => h.heat === heatNumber);
+      if (!heat) {
+        throw new Error(`Heat ${heatNumber} not found`);
+      }
+      // Set it as current (automatically unsets others)
+      await setCurrentHeat({ id: heat.id as unknown as Id<"heats"> });
+      return undefined;
+    } catch (error) {
+      const err = "Error updating heat: " + (error as Error).message;
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
@@ -114,7 +128,6 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
         metadata: {
           step: "update_heat_to_current",
           heatNumber,
-          errorCode: error.code,
         },
       });
       return "error";

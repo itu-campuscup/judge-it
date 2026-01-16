@@ -20,7 +20,7 @@ import ParticipantsJudge from "./ParticipantsJudge";
 import BeerJudge from "./BeerJudge";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
-import useFetchData from "../hooks/useFetchData";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 import type { Player } from "@/types";
 
@@ -32,7 +32,8 @@ function Judge(): React.ReactElement {
     useState<string>("Select player");
   const [judgeType, setJudgeType] = useState<string>("");
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
-  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
+  const { players, heats, teams, timeTypes, timeLogs, alert } =
+    useFetchDataConvex();
 
   if (!user) {
     return <NotLoggedIn />;
@@ -140,6 +141,7 @@ function Judge(): React.ReactElement {
             selectedPlayer={
               players.find((p) => p.id === Number(selectedPlayer)) || null
             }
+            heats={heats}
             timeTypes={timeTypes}
             players={players}
             timeLogs={timeLogs}
@@ -149,6 +151,7 @@ function Judge(): React.ReactElement {
         {judgeType === BEER_JUDGE && (
           <BeerJudge
             players={players}
+            heats={heats}
             timeLogs={timeLogs}
             selectedTeam={selectedTeamId ? Number(selectedTeamId) : null}
             timeTypes={timeTypes}

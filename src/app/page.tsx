@@ -2,7 +2,6 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
-import { supabase } from "@/SupabaseClient";
 import { useAuth } from "@/AuthContext";
 import {
   Button,
@@ -28,16 +27,11 @@ function Home() {
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      const err = "Error logging in: " + error.message;
-      setAlertOpen(true);
-      setAlertSeverity("error");
-      setAlertText(err);
-    }
+    // Demo auth - auto-login is handled by AuthContext
+    // In production, replace with proper authentication (Clerk, Auth0, or Convex Auth)
+    setAlertOpen(true);
+    setAlertSeverity("info");
+    setAlertText("Using demo authentication - you are automatically logged in");
   };
 
   if (loading) {

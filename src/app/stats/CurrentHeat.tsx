@@ -50,13 +50,10 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
   const sailTypeId = getTimeTypeSail(timeTypes)?.id || 0;
 
   useEffect(() => {
-    const loadCurrentHeat = async () => {
-      const heat = await getCurrentHeat(alert || undefined);
-      if (heat) {
-        setCurrentHeat(heat);
-      }
-    };
-    loadCurrentHeat();
+    const heat = getCurrentHeat(heats, alert || undefined);
+    if (heat) {
+      setCurrentHeat(heat);
+    }
   }, [heats, alert]);
 
   // Reset timer state when heat changes
