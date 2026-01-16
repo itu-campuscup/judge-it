@@ -79,7 +79,7 @@ bun install
 bun dev
 ```
 
-For detailed setup and contribution guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+For detailed setup and contribution guidelines, see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
 
 ## ⚡ Database
 
