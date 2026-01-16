@@ -26,8 +26,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the
-[judge-it Code of Conduct](https://github.com/itu-campuscup/judge-it/blob/main/CODE_OF_CONDUCT.md).
+This project and everyone participating in it is governed by the [judge-it Code of Conduct](./CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior
 to the [CampusCup email](mailto:contact@campuscup.dk) or contact the board directly.
 
