@@ -9,7 +9,7 @@
   <img alt="License" src="https://img.shields.io/github/license/itu-campuscup/judge-it" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white" />
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white" />
-  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white" />
+  <img alt="Convex" src="https://img.shields.io/badge/Convex-FF5733?logo=convex&logoColor=white" />
   <img alt="Material-UI" src="https://img.shields.io/badge/Material--UI-0081CB?logo=material-ui&logoColor=white" />
   <img alt="Bun" src="https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white" />
 </p>
@@ -94,14 +94,18 @@ To set up Convex for the project:
    ```bash
    bunx convex dev
    ```
-   This will create a Convex project and add `NEXT_PUBLIC_CONVEX_URL` to your `.env.local`
+   This will create a Convex project and the deployment URL will be stored securely in your system keychain via the CLI.
 
-2. **Import existing data** (if migrating):
+2. **Start development** - The CLI will prompt for credentials on first run:
+   ```bash
+   bun dev
+   ```
+   You'll be prompted to enter `NEXT_PUBLIC_CONVEX_URL` if not already stored.
+
+3. **Import existing data** (if migrating from Supabase):
    ```bash
    bun run scripts/importData.ts
    ```
-
-For detailed migration information, see [CONVEX_MIGRATION.md](./CONVEX_MIGRATION.md).
 
 ## 🔺 Deploy on Vercel
 

@@ -7,9 +7,13 @@ import { secrets } from "bun";
 
 const SECRET_SERVICE = "judge-it";
 
-interface SupabaseConfig {
+interface ConvexConfig {
   url: string;
-  anonKey: string;
+}
+
+interface ClerkConfig {
+  publishableKey: string;
+  secretKey: string;
 }
 
 /**
@@ -79,7 +83,7 @@ const getOrPrompt = async (
         } catch (err) {
           console.warn(
             `[WARN]\t Could not save ${storageKey} to keychain:`,
-            err,
+            err
           );
           return entered;
         }
@@ -93,27 +97,57 @@ const getOrPrompt = async (
 };
 
 /**
- * Read Supabase configuration
+ * Read Convex configuration
  * Returns the configuration or throws if required values are missing
  * @param env - Optional environment suffix (e.g., 'PROD' for production credentials)
  */
-export const readSupabaseConfig = async (
-  env?: string,
-): Promise<SupabaseConfig> => {
+export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
-  const url = await getOrPrompt("NEXT_PUBLIC_SUPABASE_URL", envSuffix);
-  const anonKey = await getOrPrompt("NEXT_PUBLIC_SUPABASE_ANON_KEY", envSuffix);
+  const url = await getOrPrompt("NEXT_PUBLIC_CONVEX_URL", envSuffix);
 
-  if (!url || !anonKey) {
+  if (!url) {
     throw new Error(
-      "Missing required Supabase configuration. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "Missing required Convex configuration. Please set NEXT_PUBLIC_CONVEX_URL"
     );
   }
 
   return {
     url,
-    anonKey,
   };
+};
+
+/**
+ * Read Clerk configuration
+ * Returns the configuration or throws if required values are missing
+ * @param env - Optional environment suffix (e.g., 'PROD' for production credentials)
+ */
+export const readClerkConfig = async (env?: string): Promise<ClerkConfig> => {
+  const envSuffix = env ? `_${env.toUpperCase()}` : "";
+  const publishableKey = await getOrPrompt(
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    envSuffix
+  );
+  const secretKey = await getOrPrompt("CLERK_SECRET_KEY", envSuffix);
+
+  if (!publishableKey || !secretKey) {
+    throw new Error(
+      "Missing required Clerk configuration. Please set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY"
+    );
+  }
+
+  return {
+    publishableKey,
+    secretKey,
+  };
+};
+
+/**
+ * Read all application configuration (Convex + Clerk)
+ */
+export const readAppConfig = async (env?: string) => {
+  const convex = await readConvexConfig(env);
+  const clerk = await readClerkConfig(env);
+  return { convex, clerk };
 };
 
 /**
@@ -126,11 +160,15 @@ export const clearStoredSecrets = async (env?: string): Promise<void> => {
   try {
     await secrets.delete({
       service: SECRET_SERVICE,
-      name: `NEXT_PUBLIC_SUPABASE_URL${envSuffix}`,
+      name: `NEXT_PUBLIC_CONVEX_URL${envSuffix}`,
     });
     await secrets.delete({
       service: SECRET_SERVICE,
-      name: `NEXT_PUBLIC_SUPABASE_ANON_KEY${envSuffix}`,
+      name: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY${envSuffix}`,
+    });
+    await secrets.delete({
+      service: SECRET_SERVICE,
+      name: `CLERK_SECRET_KEY${envSuffix}`,
     });
     const envLabel = env ? ` (${env.toUpperCase()})` : "";
     console.log(`✓ Cleared stored secrets${envLabel}`);

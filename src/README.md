@@ -10,7 +10,7 @@ This is a Next.js application providing real-time judging and statistics for com
 
 - Next.js 16 (App Router) + TypeScript
 - Material-UI for components
-- Supabase (PostgreSQL + Realtime WebSockets)
+- Convex (Real-time database with automatic subscriptions)
 - Bun (package manager & runtime - **required**)
 
 ### Directory Structure
@@ -38,25 +38,25 @@ src/
 
 ### Data Fetching & Real-Time Updates
 
-**⚠️ Important:** Use the existing `useFetchData` hook - **do NOT create new Supabase fetches or listeners in components**
+**⚠️ Important:** Use the existing `useFetchDataConvex` hook - **do NOT create new Convex queries in components**
 
 ```tsx
-import useFetchData from "../hooks/useFetchData";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 function MyComponent() {
-  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
-  // Data is automatically synchronized via WebSockets
+  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchDataConvex();
+  // Data is automatically synchronized via Convex subscriptions
 }
 ```
 
-The `useFetchData` hook:
+The `useFetchDataConvex` hook:
 
 - Fetches all data from 5 tables: `time_logs`, `players`, `heats`, `teams`, `time_types`
-- Sets up a **single multiplexed WebSocket channel** for all real-time updates
-- Automatically re-fetches when database changes occur
+- Sets up **automatic real-time subscriptions** via Convex's reactive queries
+- Automatically re-renders when database changes occur
 - Provides centralized error handling via `alert` object
 
-**Why one channel?** Multiple Supabase channels create unnecessary WebSocket connections. The current implementation uses one channel with multiple listeners for optimal performance.
+**Why centralized?** Convex provides efficient real-time updates through reactive queries. The hook consolidates all data fetching in one place for optimal performance.
 
 ### Utility Functions
 
@@ -82,7 +82,7 @@ const formatted = formatTime(duration);
 
 ### Authentication
 
-Authentication is handled globally via `AuthContext`:
+Authentication is handled via Clerk:
 
 ```tsx
 import { useAuth } from "@/AuthContext";
@@ -90,12 +90,17 @@ import { useAuth } from "@/AuthContext";
 function MyComponent() {
   const { user, loading } = useAuth();
 
-  if (!user) {
-    return <NotLoggedIn />;
-  }
+  if (loading) return <div>Loading...</div>;\n  if (!user) return <div>Not authenticated</div>;
+  
   // ... authenticated content
 }
 ```
+
+Clerk components available:
+- `<SignedIn>` - Renders children only when user is signed in
+- `<SignedOut>` - Renders children only when user is signed out
+- `<UserButton />` - Pre-built user menu with sign out
+- `<SignInButton />` and `<SignUpButton />` - Authentication triggers
 
 ### Logging & Observability
 
@@ -372,15 +377,15 @@ Set up monitoring for:
 
 ### Tables
 
-- **players**: `id`, `name`, `team_id`, `image_url`, `fun_fact`
-- **teams**: `id`, `name`, `color`, `image_url`
-- **heats**: `id`, `heat`, `date`, `is_current`
-- **time_types**: `id`, `time_eng`, `time_da` (types: BEER, SAIL, SPIN)
-- **time_logs**: `id`, `player_id`, `team_id`, `heat_id`, `time_type_id`, `time`, `created_at`
+- **players**: `id`, `name`, `image_url`, `fun_fact`
+- **teams**: `id`, `name`, `player_1_id`, `player_2_id`, `player_3_id`, `player_4_id`, `image_url`, `is_out`
+- **heats**: `id`, `name`, `heat`, `date`, `is_current`
+- **time_types**: `id`, `name`, `time_eng`, `description` (types: BEER, SAIL, SPIN)
+- **time_logs**: `id`, `player_id`, `team_id`, `heat_id`, `time_type_id`, `time_seconds`, `time`
 
 ### Relationships
 
-- `players.team_id` → `teams.id`
+- `teams.player_*_id` → `players.id` (4 player references per team)
 - `time_logs.player_id` → `players.id`
 - `time_logs.team_id` → `teams.id`
 - `time_logs.heat_id` → `heats.id`
@@ -404,10 +409,11 @@ Uses MUI's theming system (`ThemeRegistry.tsx`). Components should use:
 
 ### DO:
 
-- ✅ Use `useFetchData` for all data needs
+- ✅ Use `useFetchDataConvex` for all data needs
+- ✅ Use Convex mutations from `convex/mutations.ts` for writes
 - ✅ Use existing utility functions from `utils/`
 - ✅ Add JSDoc comments to new utility functions
-- ✅ Handle errors with the `alert` object from `useFetchData`
+- ✅ Handle errors with the `alert` object from `useFetchDataConvex`
 - ✅ Use TypeScript types from `types/index.ts`
 - ✅ Keep components focused and single-purpose
 - ✅ Use centralized logging (`createLogger`) instead of `console.log`
@@ -418,10 +424,10 @@ Uses MUI's theming system (`ThemeRegistry.tsx`). Components should use:
 
 ### DON'T:
 
-- ❌ Create new Supabase Realtime channels/listeners in components
+- ❌ Create new Convex queries/mutations directly in components
 - ❌ Duplicate filtering/sorting logic (use `sortFilterUtils`)
-- ❌ Use `any` type
-- ❌ Fetch data directly in components (use `useFetchData`)
+- ❌ Use `any` type (except when interfacing with Convex IDs)
+- ❌ Fetch data directly in components (use `useFetchDataConvex`)
 - ❌ Hardcode table names (use constants from `utils/constants.ts`)
 - ❌ Use `console.log` in production code (use `logger.info/error/debug`)
 - ❌ Throw errors from helper functions (return `Result` instead)
@@ -430,28 +436,36 @@ Uses MUI's theming system (`ThemeRegistry.tsx`). Components should use:
 
 ## 🔄 Real-Time System
 
-The app uses Supabase Realtime (WebSockets) for live updates:
+The app uses Convex's reactive queries for live updates:
 
 **How it works:**
 
-1. `useFetchData` creates one channel: `"db-changes"`
-2. Five listeners on that channel (one per table)
-3. On any database change, the relevant table is re-fetched
+1. `useFetchDataConvex` creates 5 Convex queries (one per table)
+2. Each query automatically subscribes to database changes
+3. On any database change, Convex pushes updates to the client
 4. React automatically re-renders components with new data
 
 **Connection lifecycle:**
 
-- Established when `useFetchData` mounts
+- Established when `useFetchDataConvex` mounts
 - Properly cleaned up on unmount
 - Handles reconnection automatically
-- Logs status changes to console
+- No manual subscription management needed
+
+**Benefits over traditional WebSockets:**
+
+- ✅ Automatic subscription management
+- ✅ Optimistic updates support
+- ✅ Built-in caching and deduplication
+- ✅ Type-safe queries
+- ✅ No connection pool limits
 
 ## 🐛 Common Issues
 
 ### Real-time not updating
 
-- Check Supabase Realtime is enabled for tables
-- Verify RLS policies allow SELECT
+- Check Convex dashboard for deployment status
+- Verify queries are properly subscribed (check Network tab for WebSocket)
 - Check browser console for connection errors
 
 ### Hydration errors
@@ -462,6 +476,7 @@ The app uses Supabase Realtime (WebSockets) for live updates:
 ### Type errors
 
 - Ensure types in `types/index.ts` match database schema
+- Run `bunx convex dev` to regenerate Convex types
 - Use type assertions only when necessary
 
 ## 🔧 Configuration
@@ -476,7 +491,10 @@ The `--prod` flag allows separate production credentials stored with `_PROD` suf
 
 ## 📚 Key Files Reference
 
-- **useFetchData.ts** - Main data hook with WebSocket setup
+- **useFetchDataConvex.ts** - Main data hook with Convex subscriptions
+- **convex/queries.ts** - All database query functions
+- **convex/mutations.ts** - All database mutation functions
+- **convex/schema.ts** - Database schema definition
 - **observability/logger.ts** - Centralized logging with error chains
 - **observability/result.ts** - Result type for error propagation
 - **getUtils.ts** - Functions to get related records

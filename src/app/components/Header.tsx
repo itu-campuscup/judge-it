@@ -6,91 +6,107 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Box,
 } from "@mui/material";
 import Link from "next/link";
+import {
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  SignedIn,
+  SignedOut,
+} from "@clerk/nextjs";
 
-interface User {
-  id: string;
-  email?: string;
-  [key: string]: unknown;
-}
-
-interface HeaderProps {
-  user: User | null;
-}
-
-const Header: React.FC<HeaderProps> = ({ user }) => {
+const Header: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleMenuToggle = (event?: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event ? event.currentTarget : null);
   };
 
-  const handleLogout = async (): Promise<void> => {
-    // Clear demo user from localStorage
-    localStorage.removeItem("judge-it-user");
-    window.location.reload();
-  };
-
   return (
     <>
       <AppBar position="static">
         <Toolbar sx={{ minHeight: "36px !important", py: 0.5 }}>
-          {user && (
-            <>
-              <Button
-                color="inherit"
-                onClick={handleMenuToggle}
-                size="small"
-                sx={{
-                  fontSize: "0.75rem",
-                  px: 1,
-                  py: 0.25,
-                  minHeight: "28px",
-                }}
+          <SignedIn>
+            <Button
+              color="inherit"
+              onClick={handleMenuToggle}
+              size="small"
+              sx={{
+                fontSize: "0.75rem",
+                px: 1,
+                py: 0.25,
+                minHeight: "28px",
+              }}
+            >
+              Menu
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={() => handleMenuToggle()}
+            >
+              <MenuItem
+                onClick={() => handleMenuToggle()}
+                sx={{ fontSize: "0.875rem", py: 0.5 }}
               >
-                Menu
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => handleMenuToggle()}
+                <Link
+                  href="/stats"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  Stats Page
+                </Link>
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleMenuToggle()}
+                sx={{ fontSize: "0.875rem", py: 0.5 }}
               >
-                <MenuItem
-                  onClick={() => handleMenuToggle()}
-                  sx={{ fontSize: "0.875rem", py: 0.5 }}
+                <Link
+                  href="/judge-it"
+                  style={{ textDecoration: "none", color: "inherit" }}
                 >
-                  <Link
-                    href="/stats"
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    Stats Page
-                  </Link>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => handleMenuToggle()}
-                  sx={{ fontSize: "0.875rem", py: 0.5 }}
-                >
-                  <Link
-                    href="/judge-it"
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    Judge Page
-                  </Link>
-                </MenuItem>
-                <Divider />
-                <MenuItem
-                  onClick={() => {
-                    handleMenuToggle();
-                    handleLogout();
+                  Judge Page
+                </Link>
+              </MenuItem>
+              <Divider sx={{ my: 0.5 }} />
+            </Menu>
+            <Box sx={{ marginLeft: "auto" }}>
+              <UserButton afterSignOutUrl="/" />
+            </Box>
+          </SignedIn>
+          <SignedOut>
+            <Box sx={{ display: "flex", gap: 1, marginLeft: "auto" }}>
+              <SignInButton mode="modal">
+                <Button
+                  color="inherit"
+                  size="small"
+                  sx={{
+                    fontSize: "0.75rem",
+                    px: 1,
+                    py: 0.25,
+                    minHeight: "28px",
                   }}
-                  sx={{ fontSize: "0.875rem", py: 0.5 }}
                 >
-                  Logout
-                </MenuItem>
-              </Menu>
-            </>
-          )}
+                  Sign In
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button
+                  color="inherit"
+                  size="small"
+                  sx={{
+                    fontSize: "0.75rem",
+                    px: 1,
+                    py: 0.25,
+                    minHeight: "28px",
+                  }}
+                >
+                  Sign Up
+                </Button>
+              </SignUpButton>
+            </Box>
+          </SignedOut>
         </Toolbar>
       </AppBar>
     </>

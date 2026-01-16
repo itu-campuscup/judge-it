@@ -160,31 +160,38 @@ If you are part of the CampusCup team please follow the steps below to get start
    bun install
    ```
 
-#### Connecting to Supabase
+#### Connecting to Convex
 
-First you have to get access to the CampusCup Supabase organization.
-You can check this by going to [this link](https://supabase.com/dashboard/org/ldsfnijfktroqlndyxwm/).
-If you don't have access, please reach out the CampusCup team via [Email](mailto:contact@campuscup.dk) or to the CampusCup board directly.
+1. **Initialize Convex** in your local project:
+   ```bash
+   bunx convex dev
+   ```
+   This will:
+   - Create a new Convex project (or connect to existing)
+   - Generate the schema and API
+   - Provide you with a deployment URL
 
-Once you have access do the following in the Supabase dashboard:
+2. **Set up Clerk authentication**:
+   - Go to [Clerk Dashboard](https://dashboard.clerk.com)
+   - Create a new application or use existing
+   - Copy your Publishable Key and Secret Key from the API Keys page
 
-1. Go to the `judge-it` project
-2. Click on `Project Settings` in the sidebar
-3. Click on `Data API`
-4. Copy the `URL`
-5. Click on `API Key` in the sidebar
-6. Copy the `anon public` key
+3. **Start the development server:**
+   ```bash
+   bun dev
+   ```
 
-**Start the development server:**
-```bash
-bun dev
-```
+   On first run, you'll be prompted to enter:
+   - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL from step 1
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Your Clerk publishable key
+   - `CLERK_SECRET_KEY` - Your Clerk secret key
 
-On first run, you'll be prompted to enter:
-- `NEXT_PUBLIC_SUPABASE_URL` - paste the URL from step 4
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - paste the anon public key from step 6
+   Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
 
-Your credentials are now stored securely in your system keychain and will be automatically loaded on future runs.
+4. **Import data** (if you have existing data to migrate):
+   ```bash
+   bun run scripts/importData.ts
+   ```
 
 **Managing credentials:**
 ```bash
@@ -192,25 +199,13 @@ bun run secrets:view   # View stored credentials (masked)
 bun run secrets:clear  # Clear credentials to reconfigure
 ```
 
-You now have access to the Supabase database.
+You now have access to the Convex database with real-time updates!
 
-#### Creating a user for the Web App
 
-When you have access to the Supabase project you need to create a user you can use to log into the webapp.
-You can do this by following these steps:
-
-1. Go to the `judge-it` project
-2. Click on `Authentication` in the sidebar
-3. Click on `Users`
-4. Click `Add user` then `Create new user`
-5. Click `Create user` after fulfilling all fields
-
-You should now have an account you can use for when starting up the web app.
 
 #### Making Changes
 
-> Note: When starting the web app first you will have to log into the web app.
-> This is the user you should have created during the [Creating a user for the Web App](#creating-a-user-for-the-web-app) step.
+> Note: The application uses Clerk for authentication. Sign in with Clerk when you start the app.
 
 1. Create a new branch for your feature or bug fix
 2. Start the development server using `bun dev`

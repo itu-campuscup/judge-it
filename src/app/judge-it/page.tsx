@@ -41,7 +41,7 @@ function Judge(): React.ReactElement {
 
   return (
     <Container maxWidth="md">
-      <Header user={user} />
+      <Header />
       <Stack
         spacing={2}
         sx={{

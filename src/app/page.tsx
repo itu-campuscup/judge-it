@@ -1,38 +1,12 @@
 "use client";
 
-import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/AuthContext";
-import {
-  Button,
-  TextField,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Container,
-} from "@mui/material";
+import { Button, Box, Typography, Card, Container } from "@mui/material";
 import Header from "./components/Header";
-import AlertComponent from "./components/AlertComponent";
-
-type AlertSeverity = "success" | "error" | "warning" | "info";
 
 function Home() {
   const { user, loading } = useAuth();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [alertOpen, setAlertOpen] = useState<boolean>(false);
-  const [alertSeverity, setAlertSeverity] = useState<AlertSeverity>("error");
-  const [alertText, setAlertText] = useState<string>("");
-
-  const handleLogin = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    // Demo auth - auto-login is handled by AuthContext
-    // In production, replace with proper authentication (Clerk, Auth0, or Convex Auth)
-    setAlertOpen(true);
-    setAlertSeverity("info");
-    setAlertText("Using demo authentication - you are automatically logged in");
-  };
 
   if (loading) {
     return (
@@ -52,7 +26,7 @@ function Home() {
           flexDirection: "column",
         }}
       >
-        <Header user={user} />
+        <Header />
         <Container
           maxWidth="md"
           sx={{
@@ -176,181 +150,66 @@ function Home() {
         minHeight: "100vh",
         background: "linear-gradient(135deg, #224186 0%, #1a3670 100%)",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        p: 2,
+        flexDirection: "column",
       }}
     >
-      <AlertComponent
-        open={alertOpen}
-        severity={alertSeverity}
-        text={alertText}
-        setOpen={setAlertOpen}
-      />
-      <Container maxWidth="sm">
+      <Header />
+      <Container
+        maxWidth="md"
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 4,
+        }}
+      >
         <Card
-          elevation={12}
+          elevation={8}
           sx={{
-            borderRadius: 4,
-            overflow: "hidden",
+            p: { xs: 3, sm: 4, md: 5 },
+            borderRadius: 3,
+            textAlign: "center",
             background: "rgba(255, 255, 255, 0.95)",
-            backdropFilter: "blur(15px)",
+            backdropFilter: "blur(10px)",
+            width: "100%",
           }}
         >
-          <Box
-            sx={{
-              background: "#224186",
-              p: 4,
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: "bold",
-                mb: 1,
-                fontSize: { xs: "2rem", sm: "2.5rem" },
-              }}
-            >
-              Judge-IT
-            </Typography>
-          </Box>
-
-          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-            <Box sx={{ textAlign: "center", mb: 3 }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: "text.secondary",
-                  fontSize: { xs: "0.9rem", sm: "1rem" },
-                }}
-              >
-                Sign in to start judging competitions
-              </Typography>
-            </Box>
-
-            <form onSubmit={handleLogin}>
-              <TextField
-                type="email"
-                label="Email Address"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-                sx={{
-                  mb: 2,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    fontSize: { xs: "1rem", sm: "1.1rem" },
-                    "& fieldset": {
-                      borderColor: "rgba(0,0,0,0.1)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#224186",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#224186",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    fontSize: { xs: "1rem", sm: "1.1rem" },
-                    "&.Mui-focused": {
-                      color: "#224186",
-                    },
-                  },
-                }}
-              />
-              <TextField
-                type="password"
-                label="Password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    fontSize: { xs: "1rem", sm: "1.1rem" },
-                    "& fieldset": {
-                      borderColor: "rgba(0,0,0,0.1)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#224186",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#224186",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    fontSize: { xs: "1rem", sm: "1.1rem" },
-                    "&.Mui-focused": {
-                      color: "#224186",
-                    },
-                  },
-                }}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                size="large"
-                sx={{
-                  py: 1.5,
-                  fontSize: { xs: "1.1rem", sm: "1.2rem" },
-                  fontWeight: "bold",
-                  background: "#224186",
-                  borderRadius: 2,
-                  textTransform: "none",
-                  "&:hover": {
-                    background: "#1a3670",
-                    transform: "translateY(-1px)",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-                  },
-                  transition: "all 0.3s ease",
-                }}
-              >
-                Login
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Box sx={{ textAlign: "center", mt: 3 }}>
           <Typography
-            variant="body2"
+            variant="h2"
             sx={{
-              color: "rgba(255,255,255,0.8)",
-              fontSize: { xs: "0.8rem", sm: "0.9rem" },
+              mb: 2,
+              fontWeight: "bold",
+              fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+              background: "#224186",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
           >
-            Judge-IT{" "}
-            <Link
-              href="https://github.com/itu-campuscup/judge-it"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: "none" }}
-            >
-              <Typography
-                component="span"
-                sx={{
-                  color: "white",
-                  textDecoration: "underline",
-                  ml: 0.5,
-                }}
-              >
-                GitHub Repository
-              </Typography>
-            </Link>
+            🏆 Judge-IT
           </Typography>
-        </Box>
+          <Typography
+            variant="h5"
+            sx={{
+              mb: 4,
+              color: "text.secondary",
+              fontSize: { xs: "1.1rem", sm: "1.3rem" },
+            }}
+          >
+            Real-time competition judging and statistics
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              mb: 3,
+              color: "text.secondary",
+            }}
+          >
+            Sign in with Clerk to access the judging interface and view
+            competition stats.
+          </Typography>
+        </Card>
       </Container>
     </Box>
   );
