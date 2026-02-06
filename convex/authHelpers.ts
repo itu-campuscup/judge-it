@@ -1,79 +1,75 @@
 /**
- * Convex Authentication Helpers for Clerk Integration
- * 
+ * Convex Authentication Helpers
+ *
  * This file provides authentication and authorization utilities for Convex functions.
- * It integrates with Clerk to verify user identity and organization membership.
+ * Uses Convex Auth for user authentication and custom metadata for authorization.
  */
 
-import { Auth } from "convex/server";
+import { QueryCtx, MutationCtx } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
- * Get the current user's ID from Clerk authentication
+ * Get the current authenticated user's ID
  * Throws an error if the user is not authenticated
  */
-export async function getCurrentUserId(auth: Auth): Promise<string> {
-  const identity = await auth.getUserIdentity();
-  
-  if (!identity) {
+export async function getCurrentUserId(
+  ctx: QueryCtx | MutationCtx,
+): Promise<string> {
+  const userId = await getAuthUserId(ctx);
+
+  if (!userId) {
     throw new Error("Not authenticated");
   }
-  
-  return identity.subject;
+
+  return userId;
 }
 
 /**
  * Get the current user's ID, or null if not authenticated
  */
-export async function getCurrentUserIdOrNull(auth: Auth): Promise<string | null> {
-  const identity = await auth.getUserIdentity();
-  return identity?.subject ?? null;
+export async function getCurrentUserIdOrNull(
+  ctx: QueryCtx | MutationCtx,
+): Promise<string | null> {
+  return await getAuthUserId(ctx);
 }
 
 /**
- * Check if the current user is a member of the "members" organization
- * Throws an error if the user is not authenticated or not a member
+ * Check if the current user is approved to use the application
+ * Throws an error if the user is not authenticated or not approved
+ *
+ * IMPORTANT: You must manually approve users by setting approved=true in the users table
  */
-export async function requireMembershipInOrg(auth: Auth): Promise<void> {
-  const identity = await auth.getUserIdentity();
-  
-  if (!identity) {
-    throw new Error("Not authenticated");
+export async function requireApprovedUser(
+  ctx: QueryCtx | MutationCtx,
+): Promise<void> {
+  const userId = await getCurrentUserId(ctx);
+
+  const user = await ctx.db.get(userId as any);
+
+  if (!user) {
+    throw new Error("User not found");
   }
 
-  // Check organization membership from Clerk's identity token
-  // Clerk includes org_id, org_slug, and org_role in the JWT token
-  const orgSlug = (identity as any).org_slug;
-  
-  if (orgSlug !== "members") {
-    throw new Error("User must be a member of the 'members' organization to access this resource");
+  const isApproved = (user as any).approved === true;
+
+  if (!isApproved) {
+    throw new Error(
+      "Your account is pending admin approval. Please wait for an administrator to approve your access.",
+    );
   }
 }
 
 /**
- * Check if the current user is a member of the "members" organization
- * Returns true if member, false otherwise
+ * Check if the current user is approved
+ * Returns true if approved, false if not authenticated or not approved
  */
-export async function isMemberOfOrg(auth: Auth): Promise<boolean> {
-  const identity = await auth.getUserIdentity();
-  
-  if (!identity) {
+export async function isApprovedUser(
+  ctx: QueryCtx | MutationCtx,
+): Promise<boolean> {
+  try {
+    await requireApprovedUser(ctx);
+    return true;
+  } catch {
     return false;
   }
-
-  const orgSlug = (identity as any).org_slug;
-  return orgSlug === "members";
-}
-
-/**
- * Get the current user's organization role (if any)
- * Returns "admin" or "basic_member" if in an organization, null otherwise
- */
-export async function getUserOrgRole(auth: Auth): Promise<string | null> {
-  const identity = await auth.getUserIdentity();
-  
-  if (!identity) {
-    return null;
-  }
-
-  return (identity as any).org_role ?? null;
 }

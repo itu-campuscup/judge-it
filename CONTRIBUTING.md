@@ -129,33 +129,24 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/itu-ca
 
 ### Your First Code Contribution
 
-This code uses a Supabase database, so you need to have access to the CampusCup Supabase organization.
-You can try to replicate the Supabase database locally, but it is not recommended - as no documentation is provided for this except the schema.
-
-<details>
-  <summary>
-    If you want to replicate the database locally, you can try and follow the visualization of the database schema, by toggling this <code>details</code>.
-  </summary>
-
-  <img src="./github-assets/supabase_schema.png"/>
-
-  This was last updated on 2025-05-19.
-</details>
-
-If you are part of the CampusCup team please follow the steps below to get started with the project.
+This code uses a Convex database, and thus defines the schema and API in the `convex/` directory.
+You should thus be able to make contributions without access to the Convex CampusCup organization, as long as you have a Convex project set up locally.
+Continue with [Getting Started](#getting-started) to set up your own Convex project and connect it to the application.
 
 #### Getting Started
 
 **Requirements:**
 
-- [Bun](https://bun.sh/) 1.3 or higher (required)
+- [Bun](https://bun.sh/) 1.3 or higher (required due to secret management)
   Installation instructions can be found on [bun.com](https://bun.com/).
 - Access to CampusCup Supabase organization
 
 **Installation:**
+
 1. Clone the repository
 2. `cd` into the project directory
 3. Install dependencies:
+
    ```bash
    bun install
    ```
@@ -163,45 +154,41 @@ If you are part of the CampusCup team please follow the steps below to get start
 #### Connecting to Convex
 
 1. **Initialize Convex** in your local project:
+
    ```bash
    bunx convex dev
    ```
+
    This will:
    - Create a new Convex project (or connect to existing)
    - Generate the schema and API
    - Provide you with a deployment URL
 
-2. **Set up Clerk authentication**:
-   - Go to [Clerk Dashboard](https://dashboard.clerk.com)
-   - Create a new application or use existing
-   - Copy your Publishable Key and Secret Key from the API Keys page
+2. **Start the development server:**
 
-3. **Start the development server:**
    ```bash
    bun dev
    ```
 
    On first run, you'll be prompted to enter:
    - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL from step 1
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Your Clerk publishable key
-   - `CLERK_SECRET_KEY` - Your Clerk secret key
 
    Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
 
-4. **Import data** (if you have existing data to migrate):
+3. **Import data** (if you have existing data to migrate):
+
    ```bash
    bun run scripts/importData.ts
    ```
 
 **Managing credentials:**
+
 ```bash
 bun run secrets:view   # View stored credentials (masked)
 bun run secrets:clear  # Clear credentials to reconfigure
 ```
 
-You now have access to the Convex database with real-time updates!
-
-
+You now have access to the Convex database with real-time updates.
 
 #### Making Changes
 
@@ -211,13 +198,21 @@ You now have access to the Convex database with real-time updates!
 2. Start the development server using `bun dev`
     - This will start the server on [http://localhost:3000](http://localhost:3000)
 3. Make your changes and test them in the development server
-4. Commit your changes with a clear and descriptive commit message
+4. Ensure that all lint and tests pass before committing your changes
+
+    ```bash
+    bunx eslint . --fix
+    bun run test
+    ```
+
+5. Commit your changes with a clear and descriptive commit message
     - Use the [commit message styleguide](#commit-messages) to write your commit message
-5. Push your changes
-6. Create a pull request to the develop branch of the repository
-    - Request a review from the CampusCup team
+6. Push your changes
+7. Create a pull request to the develop branch of the repository
     - Add a description of your changes and why they are needed
-7. Wait for the CampusCup team to review your changes and merge them into the develop branch
+    - Get a review from GitHub Copilot if you have access first
+    - Request a review from the CampusCup team
+8. Wait for the CampusCup team to review your changes and merge them into the develop branch
 
 > **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
 > Please add youself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.

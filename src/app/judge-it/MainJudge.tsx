@@ -34,7 +34,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
   const createHeat = useMutation(api.mutations.createHeat);
   const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
 
-  const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
   const [selectPlayerString, setSelectPlayerString] =
@@ -272,8 +271,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         selectedPlayer={selectedPlayer}
         setSelectedPlayer={setSelectedPlayer}
         players={players}
-        teamPlayers={teamPlayers}
-        setTeamPlayers={setTeamPlayers}
         selectPlayerString={selectPlayerString}
         setSelectPlayerString={setSelectPlayerString}
       />

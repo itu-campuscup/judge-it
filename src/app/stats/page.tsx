@@ -13,6 +13,9 @@ import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import CurrentHeat from "./CurrentHeat";
+import { RequireApproval } from "../components/RequireApproval";
+
+export const dynamic = "force-dynamic";
 
 type SelectedStat =
   | "BeerChugger"
@@ -46,14 +49,14 @@ function Stats() {
       teams,
       heats,
     }),
-    [timeLogs, players, timeTypes, teams, heats]
+    [timeLogs, players, timeTypes, teams, heats],
   );
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       const key = e.key;
       const statConfig = STATS_CONFIG.find(
-        (stat) => stat.number.toString() === key
+        (stat) => stat.number.toString() === key,
       );
 
       if (statConfig) {
@@ -176,4 +179,12 @@ function Stats() {
   );
 }
 
-export default Stats;
+function StatsWithApproval() {
+  return (
+    <RequireApproval>
+      <Stats />
+    </RequireApproval>
+  );
+}
+
+export default StatsWithApproval;

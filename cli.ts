@@ -9,11 +9,7 @@ import { spawn } from "child_process";
 import { secrets } from "bun";
 
 const SECRET_SERVICE = "judge-it";
-const KEYS = [
-  "NEXT_PUBLIC_CONVEX_URL",
-  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-  "CLERK_SECRET_KEY",
-];
+const KEYS = ["NEXT_PUBLIC_CONVEX_URL"];
 
 // Parse flags
 const args = process.argv.slice(2);
@@ -26,8 +22,6 @@ async function dev() {
     console.log(`[INFO]\t Loading credentials${envLabel}...\n`);
     const config = await readAppConfig(env);
     process.env.NEXT_PUBLIC_CONVEX_URL = config.convex.url;
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = config.clerk.publishableKey;
-    process.env.CLERK_SECRET_KEY = config.clerk.secretKey;
     console.log("[INFO]\t Starting Next.js development server...\n");
     const nextDev = spawn("bun", ["next", "dev"], {
       stdio: "inherit",
@@ -38,7 +32,7 @@ async function dev() {
   } catch (error) {
     console.error("[ERROR]\t Failed to start:", error);
     console.error(
-      "[INFO]\t Credentials will be prompted on next run if needed."
+      "[INFO]\t Credentials will be prompted on next run if needed.",
     );
     process.exit(1);
   }
@@ -50,8 +44,6 @@ async function build() {
     console.log(`[INFO]\t Loading credentials${envLabel}...\n`);
     const config = await readAppConfig(env);
     process.env.NEXT_PUBLIC_CONVEX_URL = config.convex.url;
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = config.clerk.publishableKey;
-    process.env.CLERK_SECRET_KEY = config.clerk.secretKey;
     console.log("[INFO]\t Building Next.js application...\n");
     const nextBuild = spawn("bun", ["next", "build"], {
       stdio: "inherit",
@@ -116,16 +108,16 @@ switch (command) {
     console.log("Judge-It Development CLI\n");
     console.log("Usage:");
     console.log(
-      "  bun cli.ts dev [--prod]           - Start dev server (prompts for credentials if needed)"
+      "  bun cli.ts dev [--prod]           - Start dev server (prompts for credentials if needed)",
     );
     console.log("  bun cli.ts build [--prod]         - Build for production");
     console.log(
-      "  bun cli.ts secrets:view [--prod]  - View stored credentials"
+      "  bun cli.ts secrets:view [--prod]  - View stored credentials",
     );
     console.log("  bun cli.ts secrets:clear [--prod] - Clear credentials");
     console.log("\nFlags:");
     console.log(
-      "  --prod  Use production credentials (stored separately from dev)"
+      "  --prod  Use production credentials (stored separately from dev)",
     );
     break;
 }

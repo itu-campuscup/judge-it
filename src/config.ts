@@ -11,11 +11,6 @@ interface ConvexConfig {
   url: string;
 }
 
-interface ClerkConfig {
-  publishableKey: string;
-  secretKey: string;
-}
-
 /**
  * Check if we're running in a CI/CD environment
  */
@@ -80,16 +75,16 @@ const getOrPrompt = async (
           });
           console.log(`[INFO]\t Saved ${storageKey} to keychain`);
           return entered;
-        } catch (err) {
-          console.warn(
+        } catch (saveErr) {
+          console.error(
             `[WARN]\t Could not save ${storageKey} to keychain:`,
-            err
+            saveErr,
           );
           return entered;
         }
       }
-    } catch (err) {
-      console.error(`[ERROR]\t Error prompting for ${storageKey}:`, err);
+    } catch (promptErr) {
+      console.error(`[ERROR]\t Prompt failed for ${storageKey}:`, promptErr);
     }
   }
 
@@ -107,7 +102,7 @@ export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
 
   if (!url) {
     throw new Error(
-      "Missing required Convex configuration. Please set NEXT_PUBLIC_CONVEX_URL"
+      "Missing required Convex configuration. Please set NEXT_PUBLIC_CONVEX_URL",
     );
   }
 
@@ -117,37 +112,11 @@ export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
 };
 
 /**
- * Read Clerk configuration
- * Returns the configuration or throws if required values are missing
- * @param env - Optional environment suffix (e.g., 'PROD' for production credentials)
- */
-export const readClerkConfig = async (env?: string): Promise<ClerkConfig> => {
-  const envSuffix = env ? `_${env.toUpperCase()}` : "";
-  const publishableKey = await getOrPrompt(
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    envSuffix
-  );
-  const secretKey = await getOrPrompt("CLERK_SECRET_KEY", envSuffix);
-
-  if (!publishableKey || !secretKey) {
-    throw new Error(
-      "Missing required Clerk configuration. Please set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY"
-    );
-  }
-
-  return {
-    publishableKey,
-    secretKey,
-  };
-};
-
-/**
- * Read all application configuration (Convex + Clerk)
+ * Read all application configuration (only Convex now)
  */
 export const readAppConfig = async (env?: string) => {
   const convex = await readConvexConfig(env);
-  const clerk = await readClerkConfig(env);
-  return { convex, clerk };
+  return { convex };
 };
 
 /**
@@ -162,17 +131,10 @@ export const clearStoredSecrets = async (env?: string): Promise<void> => {
       service: SECRET_SERVICE,
       name: `NEXT_PUBLIC_CONVEX_URL${envSuffix}`,
     });
-    await secrets.delete({
-      service: SECRET_SERVICE,
-      name: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY${envSuffix}`,
-    });
-    await secrets.delete({
-      service: SECRET_SERVICE,
-      name: `CLERK_SECRET_KEY${envSuffix}`,
-    });
-    const envLabel = env ? ` (${env.toUpperCase()})` : "";
-    console.log(`✓ Cleared stored secrets${envLabel}`);
+    console.log(
+      `[INFO]\t Cleared stored secrets${envSuffix ? ` for ${env}` : ""}`,
+    );
   } catch (err) {
-    console.error("Error clearing secrets:", err);
+    console.error("[ERROR]\t Could not clear secrets:", err);
   }
 };

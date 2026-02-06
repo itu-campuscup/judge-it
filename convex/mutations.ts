@@ -1,13 +1,13 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireMembershipInOrg } from "./authHelpers";
+import { requireApprovedUser } from "./authHelpers";
 
 /**
  * Convex Mutations for Judge-It Application
  *
  * These mutations replace Supabase INSERT/UPDATE/DELETE operations.
  * All mutations maintain data integrity and return appropriate responses.
- * All mutations require the user to be a member of the "members" organization.
+ * All mutations require the user to be authenticated and approved by an admin.
  */
 
 // ============ PLAYER MUTATIONS ============
@@ -19,7 +19,7 @@ export const createPlayer = mutation({
     fun_fact: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const playerId = await ctx.db.insert("players", args);
     return playerId;
   },
@@ -33,7 +33,7 @@ export const updatePlayer = mutation({
     fun_fact: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
@@ -43,7 +43,7 @@ export const updatePlayer = mutation({
 export const deletePlayer = mutation({
   args: { id: v.id("players") },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     await ctx.db.delete(args.id);
     return args.id;
   },
@@ -62,7 +62,7 @@ export const createTeam = mutation({
     is_out: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const teamId = await ctx.db.insert("teams", args);
     return teamId;
   },
@@ -80,7 +80,7 @@ export const updateTeam = mutation({
     is_out: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
@@ -90,7 +90,7 @@ export const updateTeam = mutation({
 export const deleteTeam = mutation({
   args: { id: v.id("teams") },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     await ctx.db.delete(args.id);
     return args.id;
   },
@@ -106,7 +106,7 @@ export const createHeat = mutation({
     is_current: v.boolean(),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     // If setting this heat as current, unset all others
     if (args.is_current) {
       const currentHeats = await ctx.db
@@ -133,7 +133,7 @@ export const updateHeat = mutation({
     is_current: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const { id, ...updates } = args;
 
     // If setting this heat as current, unset all others
@@ -158,7 +158,7 @@ export const updateHeat = mutation({
 export const deleteHeat = mutation({
   args: { id: v.id("heats") },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     await ctx.db.delete(args.id);
     return args.id;
   },
@@ -168,7 +168,7 @@ export const deleteHeat = mutation({
 export const setCurrentHeat = mutation({
   args: { id: v.id("heats") },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     // Unset all current heats
     const currentHeats = await ctx.db
       .query("heats")
@@ -194,7 +194,7 @@ export const createTimeType = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const typeId = await ctx.db.insert("time_types", args);
     return typeId;
   },
@@ -208,7 +208,7 @@ export const updateTimeType = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
@@ -218,7 +218,7 @@ export const updateTimeType = mutation({
 export const deleteTimeType = mutation({
   args: { id: v.id("time_types") },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     await ctx.db.delete(args.id);
     return args.id;
   },
@@ -236,7 +236,7 @@ export const createTimeLog = mutation({
     time: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const logId = await ctx.db.insert("time_logs", args);
     return logId;
   },
@@ -253,7 +253,7 @@ export const updateTimeLog = mutation({
     time: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
     return id;
@@ -263,7 +263,7 @@ export const updateTimeLog = mutation({
 export const deleteTimeLog = mutation({
   args: { id: v.id("time_logs") },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     await ctx.db.delete(args.id);
     return args.id;
   },
@@ -284,7 +284,7 @@ export const createTimeLogsBatch = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    await requireMembershipInOrg(ctx.auth);
+    await requireApprovedUser(ctx);
     const ids = [];
     for (const log of args.logs) {
       const id = await ctx.db.insert("time_logs", log);

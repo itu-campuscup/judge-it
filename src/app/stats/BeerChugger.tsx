@@ -76,7 +76,7 @@ const BeerChugger: React.FC<BeerChuggerProps> = ({
     ) {
       downloadCSV(chugTimes, players, teams, heats, "beer_chugger_times.csv");
     }
-  }, [topChugTimes]);
+  }, [topChugTimes, chugTimes, players, teams, heats]);
 
   const initialBarData = useMemo(
     () => generateRankableData(topChugTimes, players, teams, heats),

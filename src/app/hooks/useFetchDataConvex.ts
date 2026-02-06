@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type {
@@ -34,6 +34,8 @@ interface UseFetchDataReturn {
   };
   loading: boolean;
   error: string | null;
+  reload: () => void;
+  lastReloaded: number;
 }
 
 /**
@@ -50,6 +52,8 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
   >("error");
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
+  const [reloadTrigger, setReloadTrigger] = useState<number>(0);
+  const [lastReloaded, setLastReloaded] = useState<number>(Date.now());
 
   // Create logger for this endpoint
   const logger = useMemo(() => createLogger("useFetchDataConvex"), []);
@@ -59,12 +63,40 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
     logger.setUser(user);
   }, [user, logger]);
 
+  // Reload function to force refetch
+  const reload = useCallback(() => {
+    setReloadTrigger((prev) => prev + 1);
+    setLastReloaded(Date.now());
+    logger.info("Manual data reload triggered");
+  }, [logger]);
+
+  // Memoize alert object to prevent recreation on every render
+  const alert = useMemo(
+    () => ({
+      open: alertOpen,
+      severity: alertSeverity,
+      text: alertText,
+      context: alertContext,
+      setOpen: setAlertOpen,
+      setSeverity: setAlertSeverity,
+      setText: setAlertText,
+      setContext: setAlertContext,
+    }),
+    [alertOpen, alertSeverity, alertText, alertContext],
+  );
+
   // Fetch all data using Convex queries - these automatically subscribe to changes
-  const convexPlayers = useQuery(api.queries.getPlayers) ?? [];
-  const convexHeats = useQuery(api.queries.getHeats) ?? [];
-  const convexTeams = useQuery(api.queries.getTeams) ?? [];
-  const convexTimeTypes = useQuery(api.queries.getTimeTypes) ?? [];
-  const convexTimeLogs = useQuery(api.queries.getTimeLogs) ?? [];
+  // The reloadTrigger dependency forces a re-subscription when reload is called
+  const convexPlayers =
+    useQuery(api.queries.getPlayers, reloadTrigger >= 0 ? {} : "skip") ?? [];
+  const convexHeats =
+    useQuery(api.queries.getHeats, reloadTrigger >= 0 ? {} : "skip") ?? [];
+  const convexTeams =
+    useQuery(api.queries.getTeams, reloadTrigger >= 0 ? {} : "skip") ?? [];
+  const convexTimeTypes =
+    useQuery(api.queries.getTimeTypes, reloadTrigger >= 0 ? {} : "skip") ?? [];
+  const convexTimeLogs =
+    useQuery(api.queries.getTimeLogs, reloadTrigger >= 0 ? {} : "skip") ?? [];
 
   // Convert Convex data to match existing interfaces
   const players: Player[] = convexPlayers.map((p) => ({
@@ -157,18 +189,11 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
     teams,
     timeTypes,
     timeLogs,
-    alert: {
-      open: alertOpen,
-      severity: alertSeverity,
-      text: alertText,
-      context: alertContext,
-      setOpen: setAlertOpen,
-      setSeverity: setAlertSeverity,
-      setText: setAlertText,
-      setContext: setAlertContext,
-    },
+    alert,
     loading,
-    error: null, // Convex handles errors differently - queries will throw or return undefined
+    error: null,
+    reload,
+    lastReloaded,
   };
 };
 

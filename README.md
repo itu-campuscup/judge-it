@@ -55,6 +55,7 @@ The board is open to suggestions for other statistics that could be included in 
 - [🪪 License](#-license)
 - [➕ Contributing](#-contributing)
 - [🏃‍➡️ Getting Started](#%EF%B8%8F-getting-started)
+- [🧪 Testing](#-testing)
 - [⚡ Database](#-database)
 - [🔺 Deploy on Vercel](#-deploy-on-vercel)
 - [⭐ Contributors](#-contributors)
@@ -75,37 +76,79 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 # 1. Install dependencies
 bun install
 
-# 2. Start development server
+# 2. Start development (includes Convex + Next.js)
 bun dev
 ```
 
 For detailed setup and contribution guidelines, see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
 
-## ⚡ Database
+## 🧪 Testing
 
-This project uses [Convex](https://convex.dev/) as a real-time database with automatic subscriptions.
-No local database setup is needed.
+This project uses [Playwright](https://playwright.dev/) for comprehensive end-to-end testing.
+
+```bash
+# Install Playwright browsers (first time only)
+bunx playwright install --with-deps
+
+# Run all tests
+bun run test
+
+# Run tests in UI mode
+bun run test:ui
+
+# View test report
+bun run test:report
+
+# Update visual snapshots
+bun run test:update-snapshots
+```
+
+**Test Coverage:**
+
+- Authentication flows (sign up, sign in, approval)
+- Form validation and UI interactions
+- Performance benchmarks (load times, metrics)
+- Visual regression testing (screenshots)
+- Accessibility checks
+- Responsive design (mobile, tablet)
+
+**Tests run automatically on every PR** via GitHub Actions. See [tests/README.md](./tests/README.md) for detailed testing documentation.
+
+## ⚡ Database & Authentication
+
+This project uses [Convex](https://convex.dev/) for:
+
+- **Real-time database** with automatic subscriptions
+- **Authentication** via Convex Auth (email/password)
+- **Admin approval workflow** for user access control
 
 ### Setting up Convex
 
-To set up Convex for the project:
+1. **Initialize Convex** (first time):
 
-1. **Initialize Convex** (if not already done):
    ```bash
    bunx convex dev
    ```
-   This will create a Convex project and the deployment URL will be stored securely in your system keychain via the CLI.
 
-2. **Start development** - The CLI will prompt for credentials on first run:
+   This creates a Convex deployment and stores the URL in your system keychain.
+
+2. **Start development** - The CLI manages credentials automatically:
+
    ```bash
    bun dev
    ```
-   You'll be prompted to enter `NEXT_PUBLIC_CONVEX_URL` if not already stored.
 
-3. **Import existing data** (if migrating from Supabase):
+3. **Import data** (if needed):
+
    ```bash
    bun run scripts/importData.ts
    ```
+
+4. **Approve users** - New users need admin approval:
+   - Go to [Convex Dashboard](https://dashboard.convex.dev)
+   - Navigate to Data → users table
+   - Set `approved: true` for users
+   - See [ADMIN_APPROVAL_GUIDE.md](./ADMIN_APPROVAL_GUIDE.md) for details
 
 ## 🔺 Deploy on Vercel
 

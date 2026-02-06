@@ -1,12 +1,16 @@
 "use client";
 
 import { createContext, useContext, ReactNode } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useConvexAuth } from "convex/react";
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
 import type { User } from "@/types";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAuthenticated: boolean;
+  isApproved: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,20 +20,23 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { user: clerkUser, isLoaded } = useUser();
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const userStatus = useQuery(api.admin.getCurrentUserStatus);
 
-  // Convert Clerk user to our User type
-  const user: User | null = clerkUser
-    ? {
-        id: clerkUser.id,
-        email: clerkUser.primaryEmailAddress?.emailAddress,
-      }
-    : null;
+  const user: User | null =
+    isAuthenticated && userStatus?.authenticated
+      ? {
+          id: userStatus.userId || "unknown",
+          email: userStatus.email || "unknown@example.com",
+        }
+      : null;
 
-  const loading = !isLoaded;
+  const isApproved = userStatus?.approved === true;
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider
+      value={{ user, loading: isLoading, isAuthenticated, isApproved }}
+    >
       {children}
     </AuthContext.Provider>
   );
