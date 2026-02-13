@@ -28,10 +28,9 @@ jobs:
 
       - name: Generate ephemeral JWT signing key
         run: |
-          JWT_KEY=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform PEM 2>/dev/null)
-          echo "JWT_PRIVATE_KEY<<JWTEOF" >> $GITHUB_ENV
-          echo "$JWT_KEY" >> $GITHUB_ENV
-          echo "JWTEOF" >> $GITHUB_ENV
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform PEM 2>/dev/null > /tmp/jwt.pem
+          # Single-line PEM with literal \n — standard for env vars, avoids CLI arg parsing issues
+          echo "JWT_PRIVATE_KEY=$(awk '{printf "%s\\n", $0}' /tmp/jwt.pem)" >> $GITHUB_ENV
 
       - name: Deploy ephemeral Convex backend
         run: |
@@ -45,7 +44,7 @@ jobs:
       - name: Set JWT key on ephemeral deployment
         run: |
           DEPLOYMENT_NAME=$(echo "$NEXT_PUBLIC_CONVEX_URL" | sed 's|https://||; s|\.convex\.cloud||')
-          npx convex env set JWT_PRIVATE_KEY "$JWT_PRIVATE_KEY" --deployment-name "$DEPLOYMENT_NAME"
+          npx convex env set --deployment-name "$DEPLOYMENT_NAME" -- JWT_PRIVATE_KEY "$JWT_PRIVATE_KEY"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
