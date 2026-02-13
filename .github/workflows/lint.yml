@@ -69,7 +69,7 @@ jobs:
           echo "ESLINT_EXIT_CODE=$ESLINT_EXIT_CODE" >> $GITHUB_ENV
 
       - name: Commit and push fixes if any
-        if: github.event_name == 'push' && env.ESLINT_EXIT_CODE == '0'
+        if: env.ESLINT_EXIT_CODE == '0' && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -81,7 +81,13 @@ jobs:
             echo "Formatting changes detected, committing..."
             git add -A
             git commit -m "Format code with ESLint [skip ci]"
-            git push
+
+            # When running on a PR the runner may be on a detached HEAD; push to the PR head ref if available
+            if [ "${GITHUB_EVENT_NAME}" = "pull_request" ] && [ -n "${GITHUB_HEAD_REF}" ]; then
+              git push origin HEAD:${GITHUB_HEAD_REF}
+            else
+              git push
+            fi
           fi
 
       - name: Comment on PR with lint errors

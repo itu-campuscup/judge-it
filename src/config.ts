@@ -17,6 +17,7 @@ interface ConvexConfig {
 const isCI = (): boolean => {
   return !!(
     Bun.env.CI ||
+    
     Bun.env.GITHUB_ACTIONS ||
     Bun.env.GITLAB_CI ||
     Bun.env.CIRCLECI ||
