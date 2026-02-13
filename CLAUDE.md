@@ -35,12 +35,10 @@ Judge IT is a web application for judges at the CampusCup event, providing real-
 
 ```bash
 bun install                    # Install dependencies
-bun dev                        # Start dev (Next.js + Convex)
-bun run build                  # Build for production
-bun run lint                   # Run linter
-bunx eslint --fix .            # Lint with auto-fix
+bun dev [--prod|--stage]       # Start dev (Next.js + Convex)
+bun build                      # Build for production
+bun lint                       # Lint with auto-fix
 
-# Testing (⚠️ Use "bun run test", NOT "bun test")
 bun run test                   # Run E2E tests with Playwright
 bun run test:ui                # Interactive test UI
 bun run test:headed            # Run with visible browser
@@ -48,11 +46,11 @@ bun run test:report            # View test report
 bun run test:update-snapshots  # Update visual snapshots
 
 # Secrets
-bun cli.ts secrets:view        # View stored credentials
-bun cli.ts secrets:clear       # Clear credentials
+bun secrets:view [--prod|--stage]              # View stored credentials
+bun secrets:clear [--prod|--stage]             # Clear credentials
+bun auth:run [--prod|--stage]                  # Set up Convex Auth (JWT keys)
+bun env [--prod|--stage] list                  # List Convex deployment env vars
 ```
-
-**Important:** Always use `bun run test` for testing, NOT `bun test`. The latter uses Bun's native test runner which is incompatible with Playwright tests.
 
 ## Project Preferences
 

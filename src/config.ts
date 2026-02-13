@@ -29,7 +29,7 @@ const isCI = (): boolean => {
  * Get a configuration value from secrets, environment (CI only), or prompt
  * Priority: Bun.secrets (keychain) > Environment Variable (CI only) > Interactive Prompt
  * @param envKey - The environment variable key
- * @param envSuffix - Optional suffix for different environments (e.g., '_PROD')
+ * @param envSuffix - Optional suffix for different environments (e.g., '_PROD', '_STAGE')
  */
 const getOrPrompt = async (
   envKey: string,
@@ -94,7 +94,7 @@ const getOrPrompt = async (
 /**
  * Read Convex configuration
  * Returns the configuration or throws if required values are missing
- * @param env - Optional environment suffix (e.g., 'PROD' for production credentials)
+ * @param env - Optional environment suffix (e.g., 'PROD' for production, 'STAGE' for staging)
  */
 export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
@@ -112,7 +112,9 @@ export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
 };
 
 /**
- * Read all application configuration (only Convex now)
+ * Read all application configuration (Convex URL).
+ * JWT_PRIVATE_KEY is managed on the Convex deployment (via `bun auth:run`), not locally.
+ * @param env - Optional environment suffix (e.g., 'PROD' for production, 'STAGE' for staging)
  */
 export const readAppConfig = async (env?: string) => {
   const convex = await readConvexConfig(env);
@@ -122,15 +124,18 @@ export const readAppConfig = async (env?: string) => {
 /**
  * Clear all stored secrets for this service
  * Useful for testing or resetting configuration
- * @param env - Optional environment suffix (e.g., 'PROD' to clear production credentials)
+ * @param env - Optional environment suffix (e.g., 'PROD' to clear production, 'STAGE' for staging)
  */
 export const clearStoredSecrets = async (env?: string): Promise<void> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
+  const keysToDelete = ["NEXT_PUBLIC_CONVEX_URL"];
   try {
-    await secrets.delete({
-      service: SECRET_SERVICE,
-      name: `NEXT_PUBLIC_CONVEX_URL${envSuffix}`,
-    });
+    for (const key of keysToDelete) {
+      await secrets.delete({
+        service: SECRET_SERVICE,
+        name: `${key}${envSuffix}`,
+      });
+    }
     console.log(
       `[INFO]\t Cleared stored secrets${envSuffix ? ` for ${env}` : ""}`,
     );

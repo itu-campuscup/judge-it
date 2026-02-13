@@ -71,6 +71,7 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 ## 🏃‍➡️ Getting Started
 
 > **⚠️ Important:** This project requires [Bun](https://bun.sh/) as the package manager and runtime.
+> It will need modifications to run with npm or yarn, due to Bun-specific features like.
 
 ```bash
 # 1. Install dependencies
@@ -78,41 +79,21 @@ bun install
 
 # 2. Start development (includes Convex + Next.js)
 bun dev
+
+# 2a. Start with production credentials
+bun dev --prod
+
+# 2b. Start with staging credentials
+bun dev --stage
 ```
 
 For detailed setup and contribution guidelines, see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
 
 ## 🧪 Testing
 
-This project uses [Playwright](https://playwright.dev/) for comprehensive end-to-end testing.
+This project uses [Playwright](https://playwright.dev/) for end-to-end testing.
 
-```bash
-# Install Playwright browsers (first time only)
-bunx playwright install --with-deps
-
-# Run all tests
-bun run test
-
-# Run tests in UI mode
-bun run test:ui
-
-# View test report
-bun run test:report
-
-# Update visual snapshots
-bun run test:update-snapshots
-```
-
-**Test Coverage:**
-
-- Authentication flows (sign up, sign in, approval)
-- Form validation and UI interactions
-- Performance benchmarks (load times, metrics)
-- Visual regression testing (screenshots)
-- Accessibility checks
-- Responsive design (mobile, tablet)
-
-**Tests run automatically on every PR** via GitHub Actions. See [tests/README.md](./tests/README.md) for detailed testing documentation.
+**Tests run automatically on every PR** via GitHub Actions. See [tests/README.md](./tests/README.md) for detailed testing documentation and commands.
 
 ## ⚡ Database & Authentication
 
@@ -124,31 +105,7 @@ This project uses [Convex](https://convex.dev/) for:
 
 ### Setting up Convex
 
-1. **Initialize Convex** (first time):
-
-   ```bash
-   bunx convex dev
-   ```
-
-   This creates a Convex deployment and stores the URL in your system keychain.
-
-2. **Start development** - The CLI manages credentials automatically:
-
-   ```bash
-   bun dev
-   ```
-
-3. **Import data** (if needed):
-
-   ```bash
-   bun run scripts/importData.ts
-   ```
-
-4. **Approve users** - New users need admin approval:
-   - Go to [Convex Dashboard](https://dashboard.convex.dev)
-   - Navigate to Data → users table
-   - Set `approved: true` for users
-   - See [ADMIN_APPROVAL_GUIDE.md](./ADMIN_APPROVAL_GUIDE.md) for details
+To set up Convex see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started) and [Admin Approval Guide](./ADMIN_APPROVAL_GUIDE.md) for detailed instructions on the authentication flow and admin approval process.
 
 ## 🔺 Deploy on Vercel
 

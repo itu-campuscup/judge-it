@@ -44,21 +44,6 @@ If you then still feel the need to ask a question and need clarification, we rec
 
 We will then take care of the issue as soon as possible.
 
-<!--
-You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
-
-Depending on how large the project is, you may want to outsource the questioning, e.g. to Stack Overflow or Gitter. You may add additional contact and information possibilities:
-- IRC
-- Slack
-- Gitter
-- Stack Overflow tag
-- Blog
-- FAQ
-- Roadmap
-- E-Mail List
-- Forum
--->
-
 ## I Want To Contribute
 
 > ### Legal Notice <!-- omit from toc -->
@@ -175,6 +160,9 @@ Continue with [Getting Started](#getting-started) to set up your own Convex proj
 
    Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
 
+   Important production note: the Convex deployment requires a server-side signing key named `JWT_PRIVATE_KEY` for Convex Auth to work.
+   This is set automatically by running `bun auth:run --prod` (or `--stage`) — it is **not** stored locally. See the "JWT keys" section below for details.
+
 3. **Import data** (if you have existing data to migrate):
 
    ```bash
@@ -184,15 +172,57 @@ Continue with [Getting Started](#getting-started) to set up your own Convex proj
 **Managing credentials:**
 
 ```bash
-bun run secrets:view   # View stored credentials (masked)
-bun run secrets:clear  # Clear credentials to reconfigure
+bun secrets:view               # View dev credentials (masked)
+bun secrets:view --prod         # View production credentials
+bun secrets:view --stage        # View staging credentials
+bun secrets:clear               # Clear dev credentials to reconfigure
+bun secrets:clear --prod        # Clear production credentials
+bun secrets:clear --stage       # Clear staging credentials
 ```
 
 You now have access to the Convex database with real-time updates.
 
+### Running the Convex Auth CLI (dev vs prod vs stage)
+
+The project exposes a helper command `bun auth:run` which forwards to `bunx @convex-dev/auth`.
+By default it targets the development deployment.
+
+| Flag | Target | @convex-dev/auth mapping |
+| ------ | -------- | ------------------------- |
+| *(none)* | Local dev deployment | *(default)* |
+| `--prod` | Production deployment | `--prod` |
+| `--stage` | Staging deployment | `--deployment-name <id>` |
+
+```bash
+# Set up auth for dev (default)
+bun auth:run
+
+# Set up auth for production
+bun auth:run --prod
+
+# Set up auth for staging
+bun auth:run --stage
+```
+
+You can also manage Convex environment variables directly:
+
+```bash
+# List env vars on production
+bun env --prod list
+
+# Set an env var on staging
+bun env --stage set MY_VAR my_value
+```
+
+Notes & gotchas:
+
+- Credentials for each environment are stored separately in the system keychain with suffixed keys (e.g. `NEXT_PUBLIC_CONVEX_URL_PROD`).
+- The CLI auto-extracts `CONVEX_DEPLOYMENT` from your stored Convex URL — you usually don't need to set it manually.
+- The Convex CLI warns when your git working directory is dirty. Commit or stash local changes before running admin commands.
+
 #### Making Changes
 
-> Note: The application uses Clerk for authentication. Sign in with Clerk when you start the app.
+> ℹ️ **Note:** The application uses Clerk for authentication. Sign in with Clerk when you start the app.
 
 1. Create a new branch for your feature or bug fix
 2. Start the development server using `bun dev`
@@ -201,7 +231,7 @@ You now have access to the Convex database with real-time updates.
 4. Ensure that all lint and tests pass before committing your changes
 
     ```bash
-    bunx eslint . --fix
+    bun run lint
     bun run test
     ```
 
@@ -210,12 +240,14 @@ You now have access to the Convex database with real-time updates.
 6. Push your changes
 7. Create a pull request to the develop branch of the repository
     - Add a description of your changes and why they are needed
+    - Ensure checks are passing (lint, tests, etc)
+    - Check if test deployment looks correct
     - Get a review from GitHub Copilot if you have access first
     - Request a review from the CampusCup team
 8. Wait for the CampusCup team to review your changes and merge them into the develop branch
 
-> **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
-> Please add youself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.
+> ℹ️ **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
+> Please add yourself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.
 > This will add you to the list of contributors in the README file.
 
 ### Improving The Documentation
@@ -255,7 +287,7 @@ When creating a commit, please use imperative to describe what the commit does.
 Example:
 
 ```txt
-Fix bug in the login page
+Fix bug on the login page
 ```
 
 Keep the commit message short and descriptive.
@@ -264,10 +296,10 @@ If the commit is large use new lines to separate the different parts of the comm
 Example:
 
 ```txt
-Fix bug in the login page
+Fix bug on the login page
 
-- Fix redirect after login
-- Add a test for the bug
+Fix redirect after login
+Add a test for the bug
 ```
 
 ## Join The Project Team

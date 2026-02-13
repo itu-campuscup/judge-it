@@ -5,6 +5,7 @@ import { Typography, Box, Avatar } from "@mui/material";
 import { Heat, Player, Team, TimeLog, TimeType, AlertObject } from "@/types";
 import {
   getCurrentHeat,
+  getCurrentPlayer,
   getTeamPlayer,
   getTimeTypeSail,
 } from "@/utils/getUtils";
@@ -177,24 +178,11 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
           );
           const sailCount = teamSailLogs.length;
 
-          // Find current player based on most recent sail log
-          let currentPlayer: Player | null = null;
-          if (teamSailLogs.length > 0) {
-            const sortedSailLogs = sortTimeLogsByTime(teamSailLogs);
-            const mostRecentSailLog = sortedSailLogs[sortedSailLogs.length - 1];
-            currentPlayer =
-              teamPlayers.find((p) => p.id === mostRecentSailLog.player_id) ||
-              teamPlayers[0] ||
-              null;
-          } else {
-            currentPlayer = teamPlayers[0] || null;
-          }
-
           return {
             teamId,
             teamName: team?.name || `Team ${teamId}`,
             teamImage: team?.image_url,
-            currentPlayer,
+            currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
             sailCount,
             isFinished: raceComplete,
           };

@@ -40,9 +40,9 @@ export const getCurrentUserStatus = query({
 
       return {
         authenticated: true,
-        approved: (user as any)?.approved === true,
+        approved: user?.approved === true,
         userId: userId,
-        email: (user as any)?.email || null,
+        email: user?.email || null,
       };
     } catch (error) {
       console.error("Error getting user status:", error);
@@ -67,9 +67,9 @@ export const listUsers = query({
 
     return users.map((user) => ({
       _id: user._id,
-      email: (user as any).email,
-      name: (user as any).name,
-      approved: (user as any).approved || false,
+      email: user.email || null,
+      name: user.name || null,
+      approved: user.approved || false,
       _creationTime: user._creationTime,
     }));
   },
@@ -89,7 +89,7 @@ export const approveUser = mutation({
     // In production, verify the current user is an admin
     // For now, any authenticated user can approve
 
-    await ctx.db.patch(args.userId, { approved: true } as any);
+    await ctx.db.patch(args.userId, { approved: true });
 
     return { success: true };
   },
@@ -108,7 +108,7 @@ export const disapproveUser = mutation({
 
     // In production, verify the current user is an admin
 
-    await ctx.db.patch(args.userId, { approved: false } as any);
+    await ctx.db.patch(args.userId, { approved: false });
 
     return { success: true };
   },

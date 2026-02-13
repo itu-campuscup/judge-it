@@ -22,6 +22,7 @@ tests/
 ### Prerequisites
 
 Install Playwright browsers (only needed once):
+
 ```bash
 bunx playwright install --with-deps
 ```
@@ -244,9 +245,9 @@ Failures indicate performance regressions that need investigation.
 
 ## Future Improvements
 
-- [x] Add authenticated user flow tests ✅
-- [x] Add performance benchmarks ✅
-- [x] Add visual regression testing ✅
+- [x] Add authenticated user flow tests
+- [x] Add performance benchmarks
+- [x] Add visual regression testing
 - [ ] Add database fixture setup/teardown
 - [ ] Add API testing alongside E2E tests
 - [ ] Add load testing for concurrent users

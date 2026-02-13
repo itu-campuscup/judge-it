@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { Alert, Snackbar } from "@mui/material";
 import { createLogger, AppError } from "@/observability";
 import { useAuth } from "@/AuthContext";
@@ -69,7 +69,9 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
         document.removeEventListener("touchstart", enableAudio);
       };
     } catch (error) {
-      console.debug("Audio initialization failed - audio will be disabled");
+      console.debug(
+        `Audio initialization failed - audio will be disabled. Error: ${error}`,
+      );
     }
   }, []);
 
@@ -145,12 +147,14 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
               await audio.play();
             } catch (playError) {
               // Silently ignore audio play errors (user hasn't interacted, autoplay blocked, etc.)
-              console.debug("Audio play blocked - this is expected behavior");
+              console.debug(
+                `Audio play blocked - this is expected behavior. Error: ${playError}`,
+              );
             }
           }
         } catch (error) {
           // Silently ignore any other audio-related errors
-          console.debug("Audio error handled gracefully:", error);
+          console.debug(`Audio error handled gracefully. Error: ${error}`);
         }
       };
 
@@ -172,7 +176,7 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
             }
           }
         } catch (vibrationError) {
-          console.error("Vibration error", vibrationError);
+          console.error(`Vibration error. Error: ${vibrationError}`);
         }
       };
 

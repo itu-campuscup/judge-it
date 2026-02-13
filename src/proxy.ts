@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Middleware for Judge-It Application
+ * Proxy for the Judge-It application runtime.
  *
- * Currently allows all routes. Authentication is handled by Convex Auth
- * at the component/query/mutation level.
+ * It currently lets every request pass through. Convex Auth enforces
+ * authorization inside the UI/data layer instead of the runtime proxy.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function middleware(_request: NextRequest) {
+export function proxy(_request: NextRequest) {
   return NextResponse.next();
 }
 

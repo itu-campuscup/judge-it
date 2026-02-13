@@ -25,7 +25,6 @@ import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
-import type { Player } from "@/types";
 import { RequireApproval } from "../components/RequireApproval";
 
 export const dynamic = "force-dynamic";

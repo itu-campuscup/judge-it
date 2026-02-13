@@ -132,6 +132,31 @@ export const getPlayer = (
 };
 
 /**
+ * Get current player based on the most recent sail log.
+ * @param {Array} teamSailLogs - The list of sail logs for the team.
+ * @param {Array} teamPlayers - The list of players in the team.
+ * @returns {Object|null} The current player or null if not found.
+ */
+export const getCurrentPlayer = (
+  teamSailLogs: TimeLog[],
+  teamPlayers: Player[],
+): Player | null => {
+  if (teamSailLogs.length > 0) {
+    const sortedSailLogs = sortTimeLogsByTime(teamSailLogs);
+    const mostRecentSailLog = sortedSailLogs[sortedSailLogs.length - 1];
+    const curPlayer =
+      // Handles case when heat has started
+      getPlayer(mostRecentSailLog.player_id, teamPlayers) ||
+      // Handles case when heat has just started
+      teamPlayers[0] ||
+      // Fallback
+      null;
+    return curPlayer;
+  }
+  return teamPlayers[0] || null;
+};
+
+/**
  * Gets the players given the team ID.
  * @param {number} teamId - The team ID.
  * @param {Array} teams - The list of teams.
@@ -405,7 +430,7 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   const first = recentLogs[recentLogs.length - 1];
   const second = recentLogs[recentLogs.length - 2];
   const third = recentLogs[recentLogs.length - 3];
-  let latestLog: TimeLog | null = null;
+  let latestLog: TimeLog | null;
   if (
     first?.player_id !== second?.player_id &&
     first?.player_id !== third?.player_id

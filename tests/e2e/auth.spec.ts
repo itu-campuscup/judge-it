@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 import {
   signUp,
   signIn,
-  signOut,
   clearStorage,
   waitForConvexSync,
   isPendingApproval,
@@ -208,8 +207,6 @@ test.describe("Authentication Security", () => {
 
     const passwordInput = page.locator('input[type="password"]');
     await passwordInput.fill("");
-
-    const submitButton = page.getByRole("button", { name: /sign in/i });
 
     // Form should not submit with empty password
     const isRequired = await passwordInput.evaluate(

@@ -1,8 +1,0 @@
-.eslintrc.js
-node_modules/
-.next/
-out/
-build/
-dist/
-*.config.js
-*.config.mjs

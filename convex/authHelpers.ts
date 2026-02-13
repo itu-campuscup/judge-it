@@ -6,6 +6,7 @@
  */
 
 import { QueryCtx, MutationCtx } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
@@ -44,13 +45,13 @@ export async function requireApprovedUser(
 ): Promise<void> {
   const userId = await getCurrentUserId(ctx);
 
-  const user = await ctx.db.get(userId as any);
+  const user = await ctx.db.get(userId as Id<"users">);
 
   if (!user) {
     throw new Error("User not found");
   }
 
-  const isApproved = (user as any).approved === true;
+  const isApproved = (user as { approved?: boolean }).approved === true;
 
   if (!isApproved) {
     throw new Error(
