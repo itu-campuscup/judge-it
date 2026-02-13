@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+// Skip visual regression tests on CI — snapshots are platform-specific
+// (currently only chromium-win32 baselines exist).
+test.skip(!!process.env.CI, "Visual snapshots are platform-specific, skipped on CI");
+
 /**
  * Visual Regression Tests
  *
