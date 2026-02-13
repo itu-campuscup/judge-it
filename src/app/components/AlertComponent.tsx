@@ -22,7 +22,12 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
 }) => {
   const { user } = useAuth();
   const audioRef = useRef<{ [key: string]: HTMLAudioElement | null }>({});
-  const logger = createLogger("AlertComponent", user);
+  const loggerRef = useRef(createLogger("AlertComponent", user));
+
+  // Update logger when user changes
+  useEffect(() => {
+    loggerRef.current.setUser(user);
+  }, [user]);
 
   // Load audio files once
   useEffect(() => {
@@ -64,46 +69,57 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
         document.removeEventListener("touchstart", enableAudio);
       };
     } catch (error) {
-      console.debug("Audio initialization failed - audio will be disabled");
+      console.debug(
+        `Audio initialization failed - audio will be disabled. Error: ${error}`,
+      );
     }
   }, []);
 
+  // Store context in ref to avoid re-running effect when context object reference changes
+  const contextRef = useRef(context);
+  useEffect(() => {
+    contextRef.current = context;
+  }, [context]);
+
   useEffect(() => {
     if (open) {
+      // Use contextRef.current to get latest context without it being a dependency
+      const ctx = contextRef.current;
+
       // Log errors and warnings automatically
       if (severity === "error" || severity === "warning") {
-        const operation = context?.operation || "user_alert";
-        const location = context?.location || "AlertComponent";
+        const operation = ctx?.operation || "user_alert";
+        const location = ctx?.location || "AlertComponent";
 
-        const error = context?.error
-          ? context.error
+        const error = ctx?.error
+          ? ctx.error
           : new AppError(
               text,
               severity === "error" ? "USER_ERROR" : "USER_WARNING",
-              context?.metadata || {},
+              ctx?.metadata || {},
               undefined,
               location,
             );
 
         if (severity === "error") {
-          logger.error(operation, error, {
+          loggerRef.current.error(operation, error, {
             alertText: text,
             userVisible: true,
-            ...context?.metadata,
+            ...ctx?.metadata,
           });
         } else {
-          logger.warn(operation, {
+          loggerRef.current.warn(operation, {
             message: text,
             userVisible: true,
-            ...context?.metadata,
+            ...ctx?.metadata,
           });
         }
-      } else if (severity === "success" && context?.operation) {
+      } else if (severity === "success" && ctx?.operation) {
         // Optionally log successful operations if context provided
-        logger.info(context.operation, {
+        loggerRef.current.info(ctx.operation, {
           message: text,
           userVisible: true,
-          ...context?.metadata,
+          ...ctx?.metadata,
         });
       }
 
@@ -131,12 +147,14 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
               await audio.play();
             } catch (playError) {
               // Silently ignore audio play errors (user hasn't interacted, autoplay blocked, etc.)
-              console.debug("Audio play blocked - this is expected behavior");
+              console.debug(
+                `Audio play blocked - this is expected behavior. Error: ${playError}`,
+              );
             }
           }
         } catch (error) {
           // Silently ignore any other audio-related errors
-          console.debug("Audio error handled gracefully:", error);
+          console.debug(`Audio error handled gracefully. Error: ${error}`);
         }
       };
 
@@ -158,7 +176,7 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
             }
           }
         } catch (vibrationError) {
-          console.error("Vibration error", vibrationError);
+          console.error(`Vibration error. Error: ${vibrationError}`);
         }
       };
 
@@ -170,7 +188,7 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [open, severity, setOpen]);
+  }, [open, severity, text, setOpen]);
 
   return (
     <Snackbar

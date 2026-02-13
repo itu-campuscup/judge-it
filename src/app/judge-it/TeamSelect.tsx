@@ -37,7 +37,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
         },
       });
     }
-  }, [teams, activeTeams, alert]);
+  }, [teams, activeTeams]);
 
   return (
     <FormControl fullWidth margin="normal" variant="filled">

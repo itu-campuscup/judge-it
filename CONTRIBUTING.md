@@ -44,21 +44,6 @@ If you then still feel the need to ask a question and need clarification, we rec
 
 We will then take care of the issue as soon as possible.
 
-<!--
-You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
-
-Depending on how large the project is, you may want to outsource the questioning, e.g. to Stack Overflow or Gitter. You may add additional contact and information possibilities:
-- IRC
-- Slack
-- Gitter
-- Stack Overflow tag
-- Blog
-- FAQ
-- Roadmap
-- E-Mail List
-- Forum
--->
-
 ## I Want To Contribute
 
 > ### Legal Notice <!-- omit from toc -->
@@ -129,103 +114,140 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/itu-ca
 
 ### Your First Code Contribution
 
-This code uses a Supabase database, so you need to have access to the CampusCup Supabase organization.
-You can try to replicate the Supabase database locally, but it is not recommended - as no documentation is provided for this except the schema.
-
-<details>
-  <summary>
-    If you want to replicate the database locally, you can try and follow the visualization of the database schema, by toggling this <code>details</code>.
-  </summary>
-
-  <img src="./github-assets/supabase_schema.png"/>
-
-  This was last updated on 2025-05-19.
-</details>
-
-If you are part of the CampusCup team please follow the steps below to get started with the project.
+This code uses a Convex database, and thus defines the schema and API in the `convex/` directory.
+You should thus be able to make contributions without access to the Convex CampusCup organization, as long as you have a Convex project set up locally.
+Continue with [Getting Started](#getting-started) to set up your own Convex project and connect it to the application.
 
 #### Getting Started
 
 **Requirements:**
 
-- [Bun](https://bun.sh/) 1.3 or higher (required)
+- [Bun](https://bun.sh/) 1.3 or higher (required due to secret management)
   Installation instructions can be found on [bun.com](https://bun.com/).
 - Access to CampusCup Supabase organization
 
 **Installation:**
+
 1. Clone the repository
 2. `cd` into the project directory
 3. Install dependencies:
+
    ```bash
    bun install
    ```
 
-#### Connecting to Supabase
+#### Connecting to Convex
 
-First you have to get access to the CampusCup Supabase organization.
-You can check this by going to [this link](https://supabase.com/dashboard/org/ldsfnijfktroqlndyxwm/).
-If you don't have access, please reach out the CampusCup team via [Email](mailto:contact@campuscup.dk) or to the CampusCup board directly.
+1. **Initialize Convex** in your local project:
 
-Once you have access do the following in the Supabase dashboard:
+   ```bash
+   bunx convex dev
+   ```
 
-1. Go to the `judge-it` project
-2. Click on `Project Settings` in the sidebar
-3. Click on `Data API`
-4. Copy the `URL`
-5. Click on `API Key` in the sidebar
-6. Copy the `anon public` key
+   This will:
+   - Create a new Convex project (or connect to existing)
+   - Generate the schema and API
+   - Provide you with a deployment URL
 
-**Start the development server:**
-```bash
-bun dev
-```
+2. **Start the development server:**
 
-On first run, you'll be prompted to enter:
-- `NEXT_PUBLIC_SUPABASE_URL` - paste the URL from step 4
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - paste the anon public key from step 6
+   ```bash
+   bun dev
+   ```
 
-Your credentials are now stored securely in your system keychain and will be automatically loaded on future runs.
+   On first run, you'll be prompted to enter:
+   - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL from step 1
+
+   Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
+
+   Important production note: the Convex deployment requires a server-side signing key named `JWT_PRIVATE_KEY` for Convex Auth to work.
+   This is set automatically by running `bun auth:run --prod` (or `--stage`) — it is **not** stored locally. See the "JWT keys" section below for details.
+
+3. **Import data** (if you have existing data to migrate):
+
+   ```bash
+   bun run scripts/importData.ts
+   ```
 
 **Managing credentials:**
+
 ```bash
-bun run secrets:view   # View stored credentials (masked)
-bun run secrets:clear  # Clear credentials to reconfigure
+bun secrets:view               # View dev credentials (masked)
+bun secrets:view --prod         # View production credentials
+bun secrets:view --stage        # View staging credentials
+bun secrets:clear               # Clear dev credentials to reconfigure
+bun secrets:clear --prod        # Clear production credentials
+bun secrets:clear --stage       # Clear staging credentials
 ```
 
-You now have access to the Supabase database.
+You now have access to the Convex database with real-time updates.
 
-#### Creating a user for the Web App
+### Running the Convex Auth CLI (dev vs prod vs stage)
 
-When you have access to the Supabase project you need to create a user you can use to log into the webapp.
-You can do this by following these steps:
+The project exposes a helper command `bun auth:run` which forwards to `bunx @convex-dev/auth`.
+By default it targets the development deployment.
 
-1. Go to the `judge-it` project
-2. Click on `Authentication` in the sidebar
-3. Click on `Users`
-4. Click `Add user` then `Create new user`
-5. Click `Create user` after fulfilling all fields
+| Flag | Target | @convex-dev/auth mapping |
+| ------ | -------- | ------------------------- |
+| *(none)* | Local dev deployment | *(default)* |
+| `--prod` | Production deployment | `--prod` |
+| `--stage` | Staging deployment | `--deployment-name <id>` |
 
-You should now have an account you can use for when starting up the web app.
+```bash
+# Set up auth for dev (default)
+bun auth:run
+
+# Set up auth for production
+bun auth:run --prod
+
+# Set up auth for staging
+bun auth:run --stage
+```
+
+You can also manage Convex environment variables directly:
+
+```bash
+# List env vars on production
+bun env --prod list
+
+# Set an env var on staging
+bun env --stage set MY_VAR my_value
+```
+
+Notes & gotchas:
+
+- Credentials for each environment are stored separately in the system keychain with suffixed keys (e.g. `NEXT_PUBLIC_CONVEX_URL_PROD`).
+- The CLI auto-extracts `CONVEX_DEPLOYMENT` from your stored Convex URL — you usually don't need to set it manually.
+- The Convex CLI warns when your git working directory is dirty. Commit or stash local changes before running admin commands.
 
 #### Making Changes
 
-> Note: When starting the web app first you will have to log into the web app.
-> This is the user you should have created during the [Creating a user for the Web App](#creating-a-user-for-the-web-app) step.
+> ℹ️ **Note:** The application uses Clerk for authentication. Sign in with Clerk when you start the app.
 
 1. Create a new branch for your feature or bug fix
 2. Start the development server using `bun dev`
     - This will start the server on [http://localhost:3000](http://localhost:3000)
 3. Make your changes and test them in the development server
-4. Commit your changes with a clear and descriptive commit message
-    - Use the [commit message styleguide](#commit-messages) to write your commit message
-5. Push your changes
-6. Create a pull request to the develop branch of the repository
-    - Request a review from the CampusCup team
-    - Add a description of your changes and why they are needed
-7. Wait for the CampusCup team to review your changes and merge them into the develop branch
+4. Ensure that all lint and tests pass before committing your changes
 
-> **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
-> Please add youself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.
+    ```bash
+    bun run lint
+    bun run test
+    ```
+
+5. Commit your changes with a clear and descriptive commit message
+    - Use the [commit message styleguide](#commit-messages) to write your commit message
+6. Push your changes
+7. Create a pull request to the develop branch of the repository
+    - Add a description of your changes and why they are needed
+    - Ensure checks are passing (lint, tests, etc)
+    - Check if test deployment looks correct
+    - Get a review from GitHub Copilot if you have access first
+    - Request a review from the CampusCup team
+8. Wait for the CampusCup team to review your changes and merge them into the develop branch
+
+> ℹ️ **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
+> Please add yourself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.
 > This will add you to the list of contributors in the README file.
 
 ### Improving The Documentation
@@ -265,7 +287,7 @@ When creating a commit, please use imperative to describe what the commit does.
 Example:
 
 ```txt
-Fix bug in the login page
+Fix bug on the login page
 ```
 
 Keep the commit message short and descriptive.
@@ -274,10 +296,10 @@ If the commit is large use new lines to separate the different parts of the comm
 Example:
 
 ```txt
-Fix bug in the login page
+Fix bug on the login page
 
-- Fix redirect after login
-- Add a test for the bug
+Fix redirect after login
+Add a test for the bug
 ```
 
 ## Join The Project Team

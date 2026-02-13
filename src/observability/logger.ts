@@ -9,7 +9,7 @@
  * - Structured data
  */
 
-import { User } from "@supabase/supabase-js";
+import type { User } from "@/types";
 import { Result, isErr, AppError } from "./result";
 
 export interface LogContext {

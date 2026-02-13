@@ -1,9 +1,4 @@
-import {
-  HEATS_TABLE,
-  TIME_TYPE_BEER,
-  TIME_TYPE_SAIL,
-  TIME_TYPE_SPIN,
-} from "./constants";
+import { TIME_TYPE_BEER, TIME_TYPE_SAIL, TIME_TYPE_SPIN } from "./constants";
 import {
   calculateTimes,
   removeDuplicateTimeEntries,
@@ -13,7 +8,6 @@ import {
   sortTimeLogsByTime,
   splitTimeLogsPerHeat,
 } from "./sortFilterUtils";
-import { supabase } from "@/SupabaseClient";
 import type {
   Player,
   Heat,
@@ -138,6 +132,31 @@ export const getPlayer = (
 };
 
 /**
+ * Get current player based on the most recent sail log.
+ * @param {Array} teamSailLogs - The list of sail logs for the team.
+ * @param {Array} teamPlayers - The list of players in the team.
+ * @returns {Object|null} The current player or null if not found.
+ */
+export const getCurrentPlayer = (
+  teamSailLogs: TimeLog[],
+  teamPlayers: Player[],
+): Player | null => {
+  if (teamSailLogs.length > 0) {
+    const sortedSailLogs = sortTimeLogsByTime(teamSailLogs);
+    const mostRecentSailLog = sortedSailLogs[sortedSailLogs.length - 1];
+    const curPlayer =
+      // Handles case when heat has started
+      getPlayer(mostRecentSailLog.player_id, teamPlayers) ||
+      // Handles case when heat has just started
+      teamPlayers[0] ||
+      // Fallback
+      null;
+    return curPlayer;
+  }
+  return teamPlayers[0] || null;
+};
+
+/**
  * Gets the players given the team ID.
  * @param {number} teamId - The team ID.
  * @param {Array} teams - The list of teams.
@@ -178,36 +197,37 @@ export const getTeamPlayer = (
 
 /**
  * Get current heat
+ * Note: With Convex, you should use the getCurrentHeat query directly.
+ * This is a helper function for backwards compatibility.
+ * @param {Heat[]} heats - The list of heats.
  * @param {Object} alert - The alert object to set error messages (optional).
- * @returns {Promise<Heat|null>} The current heat or null if not found.
+ * @returns {Heat|null} The current heat or null if not found.
  */
-export const getCurrentHeat = async (
+export const getCurrentHeat = (
+  heats: Heat[],
   alert?: AlertObject,
-): Promise<Heat | null> => {
-  const { data, error } = await supabase
-    .from(HEATS_TABLE)
-    .select("*")
-    .eq("is_current", true);
+): Heat | null => {
+  const currentHeat = heats.find((h: Heat) => h.is_current);
 
-  if (error) {
-    const err = "Error fetching current heat: " + error.message;
-    console.error(err);
-    if (!alert) {
-      return data?.[0] || null;
+  if (!currentHeat) {
+    const err = "No current heat found";
+    console.warn(err);
+    if (alert) {
+      alert.setOpen(true);
+      alert.setSeverity("warning");
+      alert.setText(err);
+      alert.setContext({
+        operation: "find_current_heat",
+        location: "getUtils.getCurrentHeat",
+        metadata: {
+          step: "find_current_heat",
+          heatsCount: heats.length,
+        },
+      });
     }
-    alert.setOpen(true);
-    alert.setSeverity("error");
-    alert.setText(err);
-    alert.setContext({
-      operation: "fetch_current_heat",
-      location: "getUtils.getCurrentHeat",
-      metadata: {
-        errorCode: error.code,
-        step: "fetch_current_heat",
-      },
-    });
   }
-  return data?.[0] || null;
+
+  return currentHeat || null;
 };
 
 /**
@@ -410,7 +430,7 @@ export const getPlayerIdGivenTeamAndTimeLogs = (
   const first = recentLogs[recentLogs.length - 1];
   const second = recentLogs[recentLogs.length - 2];
   const third = recentLogs[recentLogs.length - 3];
-  let latestLog: TimeLog | null = null;
+  let latestLog: TimeLog | null;
   if (
     first?.player_id !== second?.player_id &&
     first?.player_id !== third?.player_id
