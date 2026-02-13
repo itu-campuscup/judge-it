@@ -8,6 +8,8 @@ on:
 
 jobs:
   test:
+    permissions:
+      contents: read
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
@@ -36,7 +38,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package.json') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
           restore-keys: |
             playwright-${{ runner.os }}-
 
