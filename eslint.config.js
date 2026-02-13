@@ -4,7 +4,7 @@ import prettierPlugin from "eslint-plugin-prettier";
 import tseslint from "typescript-eslint";
 
 export default [
-  // Global ignore patterns
+  // Global ignore patterns (migrated from .eslintignore)
   {
     ignores: [
       ".next/**",
@@ -13,6 +13,10 @@ export default [
       "dist/**",
       "build/**",
       "coverage/**",
+      "out/**",
+      ".eslintrc.js",
+      "*.config.js",
+      "*.config.mjs",
     ],
   },
 

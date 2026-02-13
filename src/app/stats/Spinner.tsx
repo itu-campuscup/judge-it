@@ -77,7 +77,7 @@ const Spinner: React.FC<SpinnerProps> = ({
     ) {
       downloadCSV(spinTimes, players, teams, heats, "spinner_times.csv");
     }
-  }, [topSpinTimes]);
+  }, [topSpinTimes, spinTimes, players, teams, heats]);
 
   const rpmData = useMemo(
     () => generateRPMData(topSpinTimes, players, teams, heats),

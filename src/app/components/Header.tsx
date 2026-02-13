@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   AppBar,
@@ -6,31 +8,30 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Box,
 } from "@mui/material";
-import { supabase } from "@/SupabaseClient";
-import { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import { useAuth } from "@/AuthContext";
+import { useAuthActions } from "@convex-dev/auth/react";
 
-interface HeaderProps {
-  user: User | null;
-}
-
-const Header: React.FC<HeaderProps> = ({ user }) => {
+const Header: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { isAuthenticated } = useAuth();
+  const { signOut } = useAuthActions();
 
   const handleMenuToggle = (event?: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event ? event.currentTarget : null);
   };
 
-  const handleLogout = async (): Promise<void> => {
-    await supabase.auth.signOut();
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
     <>
       <AppBar position="static">
         <Toolbar sx={{ minHeight: "36px !important", py: 0.5 }}>
-          {user && (
+          {isAuthenticated ? (
             <>
               <Button
                 color="inherit"
@@ -72,18 +73,41 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                     Judge Page
                   </Link>
                 </MenuItem>
-                <Divider />
-                <MenuItem
-                  onClick={() => {
-                    handleMenuToggle();
-                    handleLogout();
-                  }}
-                  sx={{ fontSize: "0.875rem", py: 0.5 }}
-                >
-                  Logout
-                </MenuItem>
+                <Divider sx={{ my: 0.5 }} />
               </Menu>
+              <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
+                <Button
+                  color="inherit"
+                  onClick={handleSignOut}
+                  size="small"
+                  sx={{
+                    fontSize: "0.75rem",
+                    px: 1,
+                    py: 0.25,
+                    minHeight: "28px",
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </Box>
             </>
+          ) : (
+            <Box sx={{ display: "flex", gap: 1, marginLeft: "auto" }}>
+              <Link href="/" style={{ textDecoration: "none" }}>
+                <Button
+                  color="inherit"
+                  size="small"
+                  sx={{
+                    fontSize: "0.75rem",
+                    px: 1,
+                    py: 0.25,
+                    minHeight: "28px",
+                  }}
+                >
+                  Sign In
+                </Button>
+              </Link>
+            </Box>
           )}
         </Toolbar>
       </AppBar>

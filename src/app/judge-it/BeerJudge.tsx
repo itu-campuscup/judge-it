@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { supabase } from "@/SupabaseClient";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
 import { Button, Stack } from "@mui/material";
 import {
@@ -8,15 +9,16 @@ import {
   getPlayerIdGivenTeamAndTimeLogs,
 } from "@/utils/getUtils";
 import {
-  TIME_LOGS_TABLE,
   TIME_TYPE_SAIL,
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type { Player, TimeLog, TimeType, AlertObject } from "@/types";
+import type { Player, TimeLog, TimeType, Heat, AlertObject } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface BeerJudgeProps {
   players: Player[];
+  heats: Heat[];
   selectedTeam: number | null;
   timeTypes: TimeType[];
   timeLogs: TimeLog[];
@@ -25,11 +27,14 @@ interface BeerJudgeProps {
 
 const BeerJudge: React.FC<BeerJudgeProps> = ({
   players,
+  heats,
   selectedTeam,
   timeTypes = [],
   timeLogs = [],
   alert,
 }) => {
+  const createTimeLog = useMutation(api.mutations.createTimeLog);
+
   const latestPlayer =
     selectedTeam !== null
       ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam, timeLogs)
@@ -102,7 +107,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
    * Handle button click to start/stop the timers to send a row to the db
    */
   const handleTimeTypeClick = async (timeTypeId: number): Promise<void> => {
-    const currentHeat = await getCurrentHeat(alert);
+    const currentHeat = getCurrentHeat(heats, alert);
     if (!currentHeat) {
       alert.setOpen(true);
       alert.setSeverity("error");
@@ -122,16 +127,23 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
     const isValid = validateInputs();
     if (!isValid) return;
 
-    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
-      {
-        team_id: selectedTeam,
-        player_id: latestPlayer,
-        time_type_id: timeTypeId,
-        heat_id: currentHeat.id,
-      },
-    ]);
-    if (error) {
-      const err = "Error inserting time log: " + error.message;
+    try {
+      // Get current time in seconds since midnight
+      const now = new Date();
+      const timeSeconds =
+        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
+
+      await createTimeLog({
+        team_id: selectedTeam as unknown as Id<"teams"> | undefined,
+        player_id: latestPlayer as unknown as Id<"players">,
+        time_type_id: timeTypeId as unknown as Id<"time_types">,
+        heat_id: currentHeat.id as unknown as Id<"heats">,
+        time_seconds: timeSeconds,
+        time: timeString,
+      });
+    } catch (error) {
+      const err = "Error inserting time log: " + (error as Error).message;
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText(err);
@@ -144,7 +156,6 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
           playerId: latestPlayer,
           timeTypeId,
           heatId: currentHeat.id,
-          errorCode: error.code,
         },
       });
       return;

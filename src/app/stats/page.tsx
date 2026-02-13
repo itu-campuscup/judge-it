@@ -11,8 +11,11 @@ import Teams from "./Teams";
 import { useAuth } from "@/AuthContext";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
-import useFetchData from "../hooks/useFetchData";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import CurrentHeat from "./CurrentHeat";
+import { RequireApproval } from "../components/RequireApproval";
+
+export const dynamic = "force-dynamic";
 
 type SelectedStat =
   | "BeerChugger"
@@ -34,7 +37,8 @@ const STATS_CONFIG = [
 function Stats() {
   const { user } = useAuth();
   const [selectedStat, setSelectedStat] = useState<SelectedStat>("BeerChugger");
-  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
+  const { players, heats, teams, timeTypes, timeLogs, alert } =
+    useFetchDataConvex();
 
   // Memoize props object to prevent unnecessary re-renders of stat components
   const commonProps = useMemo(
@@ -96,7 +100,7 @@ function Stats() {
         overflow: "hidden",
       }}
     >
-      <Header user={user} />
+      <Header />
       <AppBar
         position="static"
         sx={{ backgroundColor: "primary.main", flexShrink: 0 }}
@@ -175,4 +179,12 @@ function Stats() {
   );
 }
 
-export default Stats;
+function StatsWithApproval() {
+  return (
+    <RequireApproval>
+      <Stats />
+    </RequireApproval>
+  );
+}
+
+export default StatsWithApproval;

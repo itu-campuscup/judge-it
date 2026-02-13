@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Container,
   Box,
@@ -10,7 +10,10 @@ import {
   RadioGroup,
   FormControlLabel,
   Stack,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { useAuth } from "@/AuthContext";
 import TeamSelect from "./TeamSelect";
 import PlayerSelect from "./PlayerSelect";
@@ -20,9 +23,11 @@ import ParticipantsJudge from "./ParticipantsJudge";
 import BeerJudge from "./BeerJudge";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
-import useFetchData from "../hooks/useFetchData";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
-import type { Player } from "@/types";
+import { RequireApproval } from "../components/RequireApproval";
+
+export const dynamic = "force-dynamic";
 
 function Judge(): React.ReactElement {
   const { user } = useAuth();
@@ -31,8 +36,21 @@ function Judge(): React.ReactElement {
   const [selectPlayerString, setSelectPlayerString] =
     useState<string>("Select player");
   const [judgeType, setJudgeType] = useState<string>("");
-  const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
-  const { players, heats, teams, timeTypes, timeLogs, alert } = useFetchData();
+  const {
+    players,
+    heats,
+    teams,
+    timeTypes,
+    timeLogs,
+    alert,
+    reload,
+    lastReloaded,
+  } = useFetchDataConvex();
+
+  const reloadTooltip = useMemo(
+    () => `Reload data (Last: ${new Date(lastReloaded).toLocaleTimeString()})`,
+    [lastReloaded],
+  );
 
   if (!user) {
     return <NotLoggedIn />;
@@ -40,7 +58,7 @@ function Judge(): React.ReactElement {
 
   return (
     <Container maxWidth="md">
-      <Header user={user} />
+      <Header />
       <Stack
         spacing={2}
         sx={{
@@ -56,9 +74,31 @@ function Judge(): React.ReactElement {
           py: 2,
         }}
       >
-        <Typography variant="h3" align="center">
-          Judge Page
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+          }}
+        >
+          <Typography variant="h3" align="center">
+            Judge Page
+          </Typography>
+          <Tooltip title={reloadTooltip}>
+            <IconButton
+              onClick={reload}
+              color="primary"
+              size="large"
+              sx={{
+                bgcolor: "action.hover",
+                "&:hover": { bgcolor: "action.selected" },
+              }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <FormControl fullWidth variant="filled">
           <Typography variant="h6" gutterBottom>
             Judge type
@@ -107,8 +147,6 @@ function Judge(): React.ReactElement {
               selectedPlayer={selectedPlayer}
               setSelectedPlayer={setSelectedPlayer}
               players={players}
-              teamPlayers={teamPlayers}
-              setTeamPlayers={setTeamPlayers}
               selectPlayerString={selectPlayerString}
               setSelectPlayerString={setSelectPlayerString}
             />
@@ -140,6 +178,7 @@ function Judge(): React.ReactElement {
             selectedPlayer={
               players.find((p) => p.id === Number(selectedPlayer)) || null
             }
+            heats={heats}
             timeTypes={timeTypes}
             players={players}
             timeLogs={timeLogs}
@@ -149,6 +188,7 @@ function Judge(): React.ReactElement {
         {judgeType === BEER_JUDGE && (
           <BeerJudge
             players={players}
+            heats={heats}
             timeLogs={timeLogs}
             selectedTeam={selectedTeamId ? Number(selectedTeamId) : null}
             timeTypes={timeTypes}
@@ -167,4 +207,12 @@ function Judge(): React.ReactElement {
   );
 }
 
-export default Judge;
+function JudgeWithApproval() {
+  return (
+    <RequireApproval>
+      <Judge />
+    </RequireApproval>
+  );
+}
+
+export default JudgeWithApproval;

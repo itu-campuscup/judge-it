@@ -9,7 +9,7 @@
   <img alt="License" src="https://img.shields.io/github/license/itu-campuscup/judge-it" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white" />
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white" />
-  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white" />
+  <img alt="Convex" src="https://img.shields.io/badge/Convex-FF5733?logo=convex&logoColor=white" />
   <img alt="Material-UI" src="https://img.shields.io/badge/Material--UI-0081CB?logo=material-ui&logoColor=white" />
   <img alt="Bun" src="https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white" />
 </p>
@@ -55,6 +55,7 @@ The board is open to suggestions for other statistics that could be included in 
 - [🪪 License](#-license)
 - [➕ Contributing](#-contributing)
 - [🏃‍➡️ Getting Started](#%EF%B8%8F-getting-started)
+- [🧪 Testing](#-testing)
 - [⚡ Database](#-database)
 - [🔺 Deploy on Vercel](#-deploy-on-vercel)
 - [⭐ Contributors](#-contributors)
@@ -70,25 +71,41 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 ## 🏃‍➡️ Getting Started
 
 > **⚠️ Important:** This project requires [Bun](https://bun.sh/) as the package manager and runtime.
+> It will need modifications to run with npm or yarn, due to Bun-specific features like.
 
 ```bash
 # 1. Install dependencies
 bun install
 
-# 2. Start development server
+# 2. Start development (includes Convex + Next.js)
 bun dev
+
+# 2a. Start with production credentials
+bun dev --prod
+
+# 2b. Start with staging credentials
+bun dev --stage
 ```
 
 For detailed setup and contribution guidelines, see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
 
-## ⚡ Database
+## 🧪 Testing
 
-This project uses [Supabase](https://supabase.com/) as a database.
-Thus no local database is needed.
+This project uses [Playwright](https://playwright.dev/) for end-to-end testing.
 
-### ⚡ Connecting to Supabase
+**Tests run automatically on every PR** via GitHub Actions. See [tests/README.md](./tests/README.md) for detailed testing documentation and commands.
 
-To set up Supabase for the project, please read the [Connecting to Supabase](./CONTRIBUTING.md#connecting-to-supabase) section in the [CONTRIBUTING](./CONTRIBUTING.md) file.
+## ⚡ Database & Authentication
+
+This project uses [Convex](https://convex.dev/) for:
+
+- **Real-time database** with automatic subscriptions
+- **Authentication** via Convex Auth (email/password)
+- **Admin approval workflow** for user access control
+
+### Setting up Convex
+
+To set up Convex see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started) and [Admin Approval Guide](./ADMIN_APPROVAL_GUIDE.md) for detailed instructions on the authentication flow and admin approval process.
 
 ## 🔺 Deploy on Vercel
 

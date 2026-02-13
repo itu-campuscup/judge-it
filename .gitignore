@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/tests/**/*-snapshots/
 
 # next.js
 /.next/
@@ -30,7 +34,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (though these should not be in the local project - as bun uses machine env variables)
+# env files (credentials managed via CLI using Bun.secrets keychain storage)
 .env*
 
 # vercel
@@ -39,3 +43,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ignore summary .md documents prefixed with "SUMMARY_" or suffixed with "_SUMMARY" (gitignored)
+SUMMARY_*.md
+*_SUMMARY.md
+
+# ESLint config (CommonJS format causes linting issues)
+.eslintrc.js

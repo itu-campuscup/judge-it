@@ -14,13 +14,23 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: oven-sh/setup-bun@v1
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
 
       - name: Install dependencies
         run: bun install
@@ -59,7 +69,7 @@ jobs:
           echo "ESLINT_EXIT_CODE=$ESLINT_EXIT_CODE" >> $GITHUB_ENV
 
       - name: Commit and push fixes if any
-        if: github.event_name == 'push' && env.ESLINT_EXIT_CODE == '0'
+        if: env.ESLINT_EXIT_CODE == '0' && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -71,7 +81,14 @@ jobs:
             echo "Formatting changes detected, committing..."
             git add -A
             git commit -m "Format code with ESLint [skip ci]"
-            git push
+            echo "ESLINT_FIX_COMMITTED=true" >> $GITHUB_ENV
+
+            # When running on a PR the runner may be on a detached HEAD; push to the PR head ref if available
+            if [ "${GITHUB_EVENT_NAME}" = "pull_request" ] && [ -n "${GITHUB_HEAD_REF}" ]; then
+              git push origin HEAD:${GITHUB_HEAD_REF}
+            else
+              git push
+            fi
           fi
 
       - name: Comment on PR with lint errors
@@ -99,12 +116,18 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
             const { execSync } = require('child_process');
+
+            const fixCommitted = process.env.ESLINT_FIX_COMMITTED === 'true';
+            let hasChanges = false;
 
             try {
               execSync('git diff --quiet');
             } catch (error) {
+              hasChanges = true;
+            }
+
+            if (fixCommitted || hasChanges) {
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
