@@ -26,12 +26,26 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps
 
+      - name: Generate ephemeral JWT signing key
+        run: |
+          JWT_KEY=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform PEM 2>/dev/null)
+          echo "JWT_PRIVATE_KEY<<JWTEOF" >> $GITHUB_ENV
+          echo "$JWT_KEY" >> $GITHUB_ENV
+          echo "JWTEOF" >> $GITHUB_ENV
+
       - name: Deploy ephemeral Convex backend
         run: |
           npx convex deploy \
             --preview-create "ci-e2e-${{ github.run_id }}" \
             --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL \
             --cmd 'echo "NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL" >> $GITHUB_ENV && echo "NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL" > .env.local'
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Set JWT key on ephemeral deployment
+        run: |
+          DEPLOYMENT_NAME=$(echo "$NEXT_PUBLIC_CONVEX_URL" | sed 's|https://||; s|\.convex\.cloud||')
+          npx convex env set JWT_PRIVATE_KEY "$JWT_PRIVATE_KEY" --deployment-name "$DEPLOYMENT_NAME"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
