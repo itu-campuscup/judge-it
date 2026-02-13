@@ -37,7 +37,17 @@ const getOrPrompt = async (
 ): Promise<string | null> => {
   const storageKey = envKey + envSuffix;
 
-  // Try Bun.secrets for local keychain storage first
+  // In CI we must not access the OS keychain — read only from environment
+  if (isCI()) {
+    const fromEnv = Bun.env[envKey];
+    if (fromEnv) {
+      console.log(`[INFO]\t Loaded ${envKey} from environment (CI)`);
+      return fromEnv;
+    }
+    return null;
+  }
+
+  // Local/dev flow: try Bun.secrets for keychain storage first
   try {
     const stored = await secrets.get({
       service: SECRET_SERVICE,
@@ -49,15 +59,6 @@ const getOrPrompt = async (
     }
   } catch (err) {
     console.error(`[ERROR]\t Error accessing secrets for ${storageKey}:`, err);
-  }
-
-  // Check environment variables only in CI/CD environments
-  if (isCI()) {
-    const fromEnv = Bun.env[envKey];
-    if (fromEnv) {
-      console.log(`[INFO]\t Loaded ${envKey} from environment (CI)`);
-      return fromEnv;
-    }
   }
 
   // Interactive prompt (only on TTY)
