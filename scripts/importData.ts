@@ -10,7 +10,6 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
-import { readAppConfig } from "../src/config";
 import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
