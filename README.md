@@ -77,13 +77,19 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 # 1. Install dependencies
 bun install
 
-# 2. Start development (includes Convex + Next.js)
+# 2. Initialize Convex (if not already set up)
+bun cli.ts init
+
+# 3. Connect to Convex project
+bun auth:run
+
+# 4. Start development
 bun dev
 
-# 2a. Start with production credentials
+# 4a. Start with production credentials
 bun dev --prod
 
-# 2b. Start with staging credentials
+# 4b. Start with staging credentials
 bun dev --stage
 ```
 

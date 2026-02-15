@@ -10,18 +10,11 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
+import { readAppConfig } from "../src/config";
 import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
 import { Id } from "node_modules/convex/dist/esm-types/values/value";
-
-// Initialize Convex client
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
-if (!CONVEX_URL) {
-  throw new Error("NEXT_PUBLIC_CONVEX_URL environment variable is not set");
-}
-
-const client = new ConvexHttpClient(CONVEX_URL);
 
 const CSV_DIR = path.join(process.cwd(), "exported-csv-data-from-supabase");
 
@@ -101,6 +94,25 @@ interface TimeLogRow {
 }
 
 async function importData() {
+  const fromEnv = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const convexUrl = fromEnv ?? (await readAppConfig()).convex.url;
+  const authTokenRaw = process.env.CONVEX_AUTH_TOKEN;
+
+  if (!authTokenRaw) {
+    throw new Error(
+      "CONVEX_AUTH_TOKEN environment variable is required for import. Use a valid auth token for an approved user and run: CONVEX_AUTH_TOKEN=... bun run scripts/importData.ts",
+    );
+  }
+
+  const authTokenCandidate = authTokenRaw.trim();
+  const jwtMatch = authTokenCandidate.match(
+    /[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/,
+  );
+  const authToken = jwtMatch?.[0] ?? authTokenCandidate;
+
+  const client = new ConvexHttpClient(convexUrl);
+  client.setAuth(authToken);
+
   console.log("Starting data import...\n");
 
   try {

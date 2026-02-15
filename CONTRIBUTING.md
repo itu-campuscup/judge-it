@@ -138,16 +138,22 @@ Continue with [Getting Started](#getting-started) to set up your own Convex proj
 
 #### Connecting to Convex
 
+This assumes you have created a Convex project.
+If not, you can create one for free at [convex.dev](https://convex.dev/).
+
 1. **Initialize Convex** in your local project:
 
    ```bash
-   bunx convex dev
+   bun cli.ts init
    ```
 
-   This will:
-   - Create a new Convex project (or connect to existing)
-   - Generate the schema and API
-   - Provide you with a deployment URL
+   Ensure you connect it to your Convex project when prompted.
+
+   ```bash
+   bun auth:run
+   ```
+
+   If this is the first run of `auth:run` ensure to say yes to all prompts.
 
 2. **Start the development server:**
 
@@ -156,18 +162,13 @@ Continue with [Getting Started](#getting-started) to set up your own Convex proj
    ```
 
    On first run, you'll be prompted to enter:
-   - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL from step 1
+   - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL (can be found in your Convex dashboard for the project you created, in the form of https://\<project-name\>.\<server-location\>.convex.cloud)
 
    Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
 
-   Important production note: the Convex deployment requires a server-side signing key named `JWT_PRIVATE_KEY` for Convex Auth to work.
-   This is set automatically by running `bun auth:run --prod` (or `--stage`) — it is **not** stored locally. See the "JWT keys" section below for details.
+3. **Import data**
 
-3. **Import data** (if you have existing data to migrate):
-
-   ```bash
-   bun run scripts/importData.ts
-   ```
+   If you want initial data then see [scripts/README.md](scripts/README.md) for instructions on importing data.
 
 **Managing credentials:**
 
@@ -222,7 +223,7 @@ Notes & gotchas:
 
 #### Making Changes
 
-> ℹ️ **Note:** The application uses Clerk for authentication. Sign in with Clerk when you start the app.
+> **ℹ️ Note:** The application uses Clerk for authentication. Sign in with Clerk when you start the app.
 
 1. Create a new branch for your feature or bug fix
 2. Start the development server using `bun dev`
@@ -246,7 +247,7 @@ Notes & gotchas:
     - Request a review from the CampusCup team
 8. Wait for the CampusCup team to review your changes and merge them into the develop branch
 
-> ℹ️ **Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
+> **ℹ️ Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
 > Please add yourself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.
 > This will add you to the list of contributors in the README file.
 
