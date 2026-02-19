@@ -1,5 +1,6 @@
 import { Heat, Player, Team } from "@/types";
 import { removeDuplicateTimeEntriesAll } from "./visualizationUtils";
+import { Id } from "convex/_generated/dataModel";
 import {
   getHeatNumber,
   getHeatYear,
@@ -23,9 +24,9 @@ const escapeCSVValue = (value: string | number): string => {
 
 interface TimeLogEntry {
   formattedTime?: string;
-  playerId: number;
-  teamId: number;
-  heatId: number;
+  playerId: Id<"players">;
+  teamId?: Id<"teams">;
+  heatId: Id<"heats">;
   time?: string;
 }
 
@@ -45,10 +46,10 @@ export const downloadCSV = (
   const deref = processedData.map((entry) => {
     return {
       formattedTime: entry.formattedTime,
-      player: getPlayerName(entry.playerId, players),
-      team: getTeamName(entry.teamId, teams),
-      heat: getHeatNumber(entry.heatId, heats),
-      heatYear: getHeatYear(entry.heatId, heats),
+      player: getPlayerName(entry.playerId as Id<"players">, players),
+      team: entry.teamId ? getTeamName(entry.teamId as Id<"teams">, teams) : "",
+      heat: getHeatNumber(entry.heatId as Id<"heats">, heats),
+      heatYear: getHeatYear(entry.heatId as Id<"heats">, heats),
     };
   });
 

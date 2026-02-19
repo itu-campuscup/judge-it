@@ -31,6 +31,7 @@ import {
 } from "@mui/material";
 import RadarChartComponent from "./components/RadarChartComponent";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
+import { Id } from "convex/_generated/dataModel";
 
 interface TeamsProps {
   timeLogs: TimeLog[];
@@ -64,26 +65,26 @@ const Teams: React.FC<TeamsProps> = ({
     [],
   );
 
-  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || 0;
-  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || 0;
-  const sailTypeId = getTimeTypeSail(timeTypes)?.id || 0;
+  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || "";
+  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || "";
+  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
 
   const team1Players = useMemo(
-    () => getTeamPlayerIds(selectedTeam1Id, teams),
+    () => getTeamPlayerIds(selectedTeam1Id as Id<"teams">, teams),
     [selectedTeam1Id, teams],
   );
 
   const team2Players = useMemo(
-    () => getTeamPlayerIds(selectedTeam2Id, teams),
+    () => getTeamPlayerIds(selectedTeam2Id as Id<"teams">, teams),
     [selectedTeam2Id, teams],
   );
 
   const team1LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
     () =>
-      team1Players.map((playerId: number) => {
+      team1Players.map((playerId: string) => {
         const logsFilteredByPlayer = filterTimeLogsByPlayerId(
           timeLogs,
-          playerId,
+          playerId as Id<"players">,
         );
         const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
         return sortTimeLogsByHeat(sortedByTime);
@@ -93,10 +94,10 @@ const Teams: React.FC<TeamsProps> = ({
 
   const team2LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
     () =>
-      team2Players.map((playerId: number) => {
+      team2Players.map((playerId: string) => {
         const logsFilteredByPlayer = filterTimeLogsByPlayerId(
           timeLogs,
-          playerId,
+          playerId as Id<"players">,
         );
         const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
         return sortTimeLogsByHeat(sortedByTime);
@@ -104,34 +105,37 @@ const Teams: React.FC<TeamsProps> = ({
     [team2Players, timeLogs],
   );
 
-  const filterPlayerLogsByType = (logs: TimeLog[][], typeId: number) =>
+  const filterPlayerLogsByType = (
+    logs: TimeLog[][],
+    typeId: Id<"time_types">,
+  ) =>
     logs.map((playerLogs: TimeLog[]) =>
       filterTimeLogsByTimeType(playerLogs, typeId),
     );
 
   const team1BeerLogs = filterPlayerLogsByType(
     team1LogsSortedByHeatAndTime,
-    beerTypeId,
+    beerTypeId as Id<"time_types">,
   );
   const team1SpinnerLogs = filterPlayerLogsByType(
     team1LogsSortedByHeatAndTime,
-    spinnerTypeId,
+    spinnerTypeId as Id<"time_types">,
   );
   const team1SailLogs = filterPlayerLogsByType(
     team1LogsSortedByHeatAndTime,
-    sailTypeId,
+    sailTypeId as Id<"time_types">,
   );
   const team2BeerLogs = filterPlayerLogsByType(
     team2LogsSortedByHeatAndTime,
-    beerTypeId,
+    beerTypeId as Id<"time_types">,
   );
   const team2SpinnerLogs = filterPlayerLogsByType(
     team2LogsSortedByHeatAndTime,
-    spinnerTypeId,
+    spinnerTypeId as Id<"time_types">,
   );
   const team2SailLogs = filterPlayerLogsByType(
     team2LogsSortedByHeatAndTime,
-    sailTypeId,
+    sailTypeId as Id<"time_types">,
   );
 
   const getBestIntraHeatTimeAverage = (logs: TimeLog[][]): number =>
@@ -161,7 +165,7 @@ const Teams: React.FC<TeamsProps> = ({
   };
 
   const team1ChartData = generateRadarChartData(
-    Number(selectedTeam1Id),
+    selectedTeam1Id,
     team1BestTimes,
     [],
     teams,
@@ -169,7 +173,7 @@ const Teams: React.FC<TeamsProps> = ({
     false,
   );
   const team2ChartData = generateRadarChartData(
-    Number(selectedTeam2Id),
+    selectedTeam2Id,
     team2BestTimes,
     [],
     teams,

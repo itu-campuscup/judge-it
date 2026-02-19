@@ -40,6 +40,7 @@
   "exclude": [
     "node_modules",
     "cli.ts",
-    "src/config.ts"
+    "src/config.ts",
+    "scripts/**/*"
   ]
 }

@@ -1,20 +1,16 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-  ReactNode,
-} from "react";
-import { supabase } from "./SupabaseClient";
-import { User } from "@supabase/supabase-js";
-import { createLogger, AppError } from "./observability";
+import { createContext, useContext, ReactNode } from "react";
+import { useConvexAuth } from "convex/react";
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
+import type { User } from "@/types";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAuthenticated: boolean;
+  isApproved: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,96 +20,26 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const userStatus = useQuery(api.admin.getCurrentUserStatus);
 
-  // Create logger once - will update user context as needed
-  const logger = useMemo(() => createLogger("AuthProvider"), []);
-
-  // Update logger's user context when user changes
-  useEffect(() => {
-    logger.setUser(user);
-  }, [user, logger]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const getSession = async () => {
-        try {
-          const {
-            data: { session },
-            error,
-          } = await supabase.auth.getSession();
-
-          if (error) {
-            logger.error(
-              "get_session",
-              new AppError(
-                "Failed to get session",
-                "AUTH_SESSION_ERROR",
-                { error: error.message },
-                error,
-                "AuthProvider.getSession",
-              ),
-            );
-          } else {
-            setUser(session?.user ?? null);
-            logger.info("get_session", {
-              authenticated: !!session?.user,
-              userId: session?.user?.id,
-            });
-          }
-          setLoading(false);
-        } catch (error) {
-          const appError =
-            error instanceof AppError
-              ? error
-              : error instanceof Error
-                ? new AppError(
-                    "Unknown session error",
-                    "AUTH_SESSION_ERROR",
-                    {},
-                    error,
-                    "AuthProvider.getSession",
-                  )
-                : new AppError(
-                    "Unknown session error",
-                    "AUTH_SESSION_ERROR",
-                    { error: String(error) },
-                    undefined,
-                    "AuthProvider.getSession",
-                  );
-          logger.error("get_session", appError);
-          setLoading(false);
+  const user: User | null =
+    isAuthenticated && userStatus?.authenticated
+      ? {
+          id: userStatus.userId || "unknown",
+          email: userStatus.email || "unknown@example.com",
         }
-      };
+      : null;
 
-      getSession();
+  const isApproved = userStatus?.approved === true;
 
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          const newUser = session?.user ?? null;
-          setUser(newUser);
-          setLoading(false);
-
-          logger.info("auth_state_change", {
-            event,
-            authenticated: !!newUser,
-            userId: newUser?.id,
-            userEmail: newUser?.email,
-          });
-        },
-      );
-
-      return () => {
-        authListener.subscription.unsubscribe();
-        logger.info("cleanup", { message: "Auth listener unsubscribed" });
-      };
-    }
-  }, [logger]); // Only depends on logger which is created once
-
-  const value = useMemo(() => ({ user, loading }), [user, loading]);
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ user, loading: isLoading, isAuthenticated, isApproved }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = (): AuthContextType => {

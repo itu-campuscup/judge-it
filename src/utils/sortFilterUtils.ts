@@ -1,15 +1,16 @@
+import { Id } from "convex/_generated/dataModel";
 import { timeToMilli } from "./timeUtils";
 import type { TimeLog } from "@/types";
 
 /**
  * Filters time logs by player ID
  * @param {Array} timeLogs - The list of time logs.
- * @param {number} playerId - The player ID to filter by.
+ * @param {Id<"players">} playerId - The player ID to filter by.
  * @returns {Array} The filtered time logs.
  */
 export const filterTimeLogsByPlayerId = (
   timeLogs: TimeLog[],
-  playerId: number,
+  playerId: Id<"players">,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.player_id === playerId);
 };
@@ -17,12 +18,12 @@ export const filterTimeLogsByPlayerId = (
 /**
  * Filters time logs by team ID
  * @param {Array} timeLogs - The list of time logs.
- * @param {number} teamId - The team ID to filter by.
+ * @param {Id<"teams">} teamId - The team ID to filter by.
  * @returns {Array} The filtered time logs.
  */
 export const filterTimeLogsByTeamId = (
   timeLogs: TimeLog[],
-  teamId: number,
+  teamId: Id<"teams">,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.team_id === teamId);
 };
@@ -33,7 +34,11 @@ export const filterTimeLogsByTeamId = (
  * @returns {Array} The sorted time logs by heat ID.
  */
 export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
-  return timeLogs.sort((a: TimeLog, b: TimeLog) => a.heat_id - b.heat_id);
+  return timeLogs.sort((a: TimeLog, b: TimeLog) => {
+    const aHeat = String(a.heat_id ?? "");
+    const bHeat = String(b.heat_id ?? "");
+    return aHeat.localeCompare(bHeat);
+  });
 };
 
 /**
@@ -51,12 +56,12 @@ export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
 /**
  * Filters time logs by Time Type Id
  * @param {Array} timeLogs - The list of time logs.
- * @param {number} timeTypeId - The time type ID to filter by.
+ * @param {Id<"time_types">} timeTypeId - The Time Type ID to filter by.
  * @returns {Array} The filtered time logs.
  */
 export const filterTimeLogsByTimeType = (
   timeLogs: TimeLog[],
-  timeTypeId: number,
+  timeTypeId: Id<"time_types">,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.time_type_id === timeTypeId);
 };
@@ -88,13 +93,14 @@ export const splitTimeLogsPerHeat = (timeLogs: TimeLog[]): TimeLog[][] => {
 
 /**
  * Filters time logs by heat ID.
+ * Accepts Convex `Id<"heats">` or plain string for compatibility.
  * @param {Array} timeLogs - The list of time logs.
- * @param {number} heatId - The heat ID to filter by.
+ * @param {Id<"heats">} heatId - The heat ID to filter by.
  * @returns {Array} The filtered time logs for the specified heat ID.
  */
 export const filterTimeLogsByHeatId = (
   timeLogs: TimeLog[],
-  heatId: number,
+  heatId: Id<"heats">,
 ): TimeLog[] => {
   return timeLogs.filter((log: TimeLog) => log.heat_id === heatId);
 };

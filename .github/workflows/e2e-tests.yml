@@ -1,0 +1,94 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install --with-deps
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps
+
+      - name: Generate ephemeral JWT signing key
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -outform PEM 2>/dev/null > /tmp/jwt.pem
+          # Single-line PEM with literal \n — standard for env vars, avoids CLI arg parsing issues
+          echo "JWT_PRIVATE_KEY=$(awk '{printf "%s\\n", $0}' /tmp/jwt.pem)" >> $GITHUB_ENV
+
+      - name: Deploy ephemeral Convex backend
+        run: |
+          npx convex deploy \
+            --preview-create "ci-e2e-${{ github.run_id }}" \
+            --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL \
+            --cmd 'echo "NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL" >> $GITHUB_ENV && echo "NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL" > .env.local'
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Set JWT key on ephemeral deployment
+        run: |
+          DEPLOYMENT_NAME=$(echo "$NEXT_PUBLIC_CONVEX_URL" | sed 's|https://||; s|\.convex\.cloud||')
+          npx convex env set --deployment-name "$DEPLOYMENT_NAME" -- JWT_PRIVATE_KEY "$JWT_PRIVATE_KEY"
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Run Playwright tests
+        run: bun run test
+        env:
+          CI: true
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30

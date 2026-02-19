@@ -5,6 +5,7 @@ import { Typography, Box, Avatar } from "@mui/material";
 import { Heat, Player, Team, TimeLog, TimeType, AlertObject } from "@/types";
 import {
   getCurrentHeat,
+  getCurrentPlayer,
   getTeamPlayer,
   getTimeTypeSail,
 } from "@/utils/getUtils";
@@ -14,6 +15,7 @@ import {
   sortTimeLogsByTime,
 } from "@/utils/sortFilterUtils";
 import { timeToMilli, formatTime, calcTimeDifference } from "@/utils/timeUtils";
+import { Id } from "convex/_generated/dataModel";
 
 interface CurrentHeatProps {
   timeLogs: TimeLog[];
@@ -25,7 +27,7 @@ interface CurrentHeatProps {
 }
 
 interface TeamData {
-  teamId: number;
+  teamId: Id<"teams">;
   teamName: string;
   teamImage?: string;
   currentPlayer: Player | null;
@@ -47,16 +49,13 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
   const [raceStartTime, setRaceStartTime] = useState<string | null>(null);
   const [raceFinished, setRaceFinished] = useState<boolean>(false);
 
-  const sailTypeId = getTimeTypeSail(timeTypes)?.id || 0;
+  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
 
   useEffect(() => {
-    const loadCurrentHeat = async () => {
-      const heat = await getCurrentHeat(alert || undefined);
-      if (heat) {
-        setCurrentHeat(heat);
-      }
-    };
-    loadCurrentHeat();
+    const heat = getCurrentHeat(heats, alert || undefined);
+    if (heat) {
+      setCurrentHeat(heat);
+    }
   }, [heats, alert]);
 
   // Reset timer state when heat changes
@@ -103,7 +102,11 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
   );
 
   const allSailLogs = useMemo(
-    () => filterTimeLogsByTimeType(currentHeatTimeLogs, sailTypeId),
+    () =>
+      filterTimeLogsByTimeType(
+        currentHeatTimeLogs,
+        sailTypeId as Id<"time_types">,
+      ),
     [currentHeatTimeLogs, sailTypeId],
   );
 
@@ -114,10 +117,10 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
       // Check if any team has reached 16 sail logs
       const teamIds = [...new Set(allSailLogs.map((log) => log.team_id))];
       let raceComplete = false;
-      let winningTeamId: number | null = null;
+      let winningTeamId: string | null = null;
 
       for (const teamId of teamIds) {
-        if (typeof teamId === "number") {
+        if (teamId) {
           const teamSailLogs = allSailLogs.filter(
             (log) => log.team_id === teamId,
           );
@@ -169,7 +172,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
       }
 
       const processedTeams: TeamData[] = teamIds
-        .filter((teamId): teamId is number => typeof teamId === "number")
+        .filter((teamId): teamId is Id<"teams"> => Boolean(teamId))
         .map((teamId) => {
           const team = teams.find((t) => t.id === teamId);
           const teamPlayers = getTeamPlayer(teamId, teams, players);
@@ -180,24 +183,11 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
           );
           const sailCount = teamSailLogs.length;
 
-          // Find current player based on most recent sail log
-          let currentPlayer: Player | null = null;
-          if (teamSailLogs.length > 0) {
-            const sortedSailLogs = sortTimeLogsByTime(teamSailLogs);
-            const mostRecentSailLog = sortedSailLogs[sortedSailLogs.length - 1];
-            currentPlayer =
-              teamPlayers.find((p) => p.id === mostRecentSailLog.player_id) ||
-              teamPlayers[0] ||
-              null;
-          } else {
-            currentPlayer = teamPlayers[0] || null;
-          }
-
           return {
             teamId,
             teamName: team?.name || `Team ${teamId}`,
             teamImage: team?.image_url,
-            currentPlayer,
+            currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
             sailCount,
             isFinished: raceComplete,
           };
@@ -249,7 +239,7 @@ const CurrentHeat: React.FC<CurrentHeatProps> = ({
     );
     const allSailLogs = filterTimeLogsByTimeType(
       currentHeatTimeLogs,
-      sailTypeId,
+      sailTypeId as Id<"time_types">,
     );
 
     // Check if either team has 16+ sail logs

@@ -17,6 +17,7 @@ import {
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
 import type { TimeLog, Heat, Player, Team } from "../types";
+import { Id } from "convex/_generated/dataModel";
 
 /**
  * Filters and sorts time logs for a given year and time type.
@@ -25,12 +26,12 @@ export const filterAndSortTimeLogs = (
   timeLogs: TimeLog[],
   heats: Heat[],
   selectedYear: number,
-  timeTypeId: number,
+  timeTypeId: string,
 ): TimeLog[] => {
   const heatsInYear = heats.filter(
     (heat) => new Date(heat.date).getFullYear() === selectedYear,
   );
-  const logsForHeats = [];
+  const logsForHeats: TimeLog[] = [];
   for (const heat of heatsInYear) {
     const filteredTimeLogs = timeLogs.filter(
       (tl) => tl.heat_id === heat.id && tl.time_type_id === timeTypeId,
@@ -43,9 +44,9 @@ export const filterAndSortTimeLogs = (
 };
 
 interface TimeEntry {
-  playerId: number;
-  teamId: number;
-  heatId: number;
+  playerId: Id<"players">;
+  teamId?: Id<"teams">;
+  heatId: Id<"heats">;
   timeSeconds?: number;
   startTime?: string;
   endTime?: string;
@@ -69,7 +70,7 @@ export const calculateTimes = (
     const startTime = curLog.time || "";
     const playerId = curLog.player_id;
     const heatId = curLog.heat_id;
-    const teamId = curLog.team_id || 0;
+    const teamId = curLog.team_id;
     const endTime = getEndTime(
       playerId,
       heatId,
@@ -142,8 +143,8 @@ export const removeDuplicateTimeEntries = (
  * @returns {string|null} The end time id or null if not found.
  */
 export const getEndTime = (
-  playerId: number,
-  heatId: number,
+  playerId: string,
+  heatId: string,
   startIdx: number,
   logsForHeatsSortByTime: TimeLog[],
   endTimeIds: Set<number>,
@@ -186,7 +187,7 @@ export const generateRankableData = (
     time: time.duration ?? 0,
     imageUrl: getPlayerImageWithFallback(time.playerId, players, teams),
     playerName: getPlayerName(time.playerId, players),
-    teamName: getTeamName(time.teamId, teams),
+    teamName: time.teamId ? getTeamName(time.teamId, teams) : "",
     heatNumber: getHeatNumber(time.heatId, heats),
   }));
 };
@@ -233,7 +234,7 @@ export const generateRPMData = (
  * @returns {Object} The radar chart data including player/team name, fun fact, image URL, and radar data.
  */
 export const generateRadarChartData = (
-  playerOrTeamId: number,
+  playerOrTeamId: string,
   bestTimes: Record<string, number>,
   players: Player[],
   teams: Team[],
@@ -241,12 +242,18 @@ export const generateRadarChartData = (
   isPlayer: boolean = true,
 ) => {
   const name = isPlayer
-    ? getPlayerNameWithTeam(playerOrTeamId, players, teams)
-    : getTeamName(playerOrTeamId, teams);
-  const funFact = isPlayer ? getPlayerFunFact(playerOrTeamId, players) : "";
+    ? getPlayerNameWithTeam(playerOrTeamId as Id<"players">, players, teams)
+    : getTeamName(playerOrTeamId as Id<"teams">, teams);
+  const funFact = isPlayer
+    ? getPlayerFunFact(playerOrTeamId as Id<"players">, players)
+    : "";
   const imageUrl = isPlayer
-    ? getPlayerImageWithFallback(playerOrTeamId, players, teams)
-    : getTeamImageUrl(playerOrTeamId, teams);
+    ? getPlayerImageWithFallback(
+        playerOrTeamId as Id<"players">,
+        players,
+        teams,
+      )
+    : getTeamImageUrl(playerOrTeamId as Id<"teams">, teams);
 
   const timeToPercentage = (
     time: number,

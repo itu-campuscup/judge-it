@@ -7,9 +7,8 @@ import { secrets } from "bun";
 
 const SECRET_SERVICE = "judge-it";
 
-interface SupabaseConfig {
+interface ConvexConfig {
   url: string;
-  anonKey: string;
 }
 
 /**
@@ -30,7 +29,7 @@ const isCI = (): boolean => {
  * Get a configuration value from secrets, environment (CI only), or prompt
  * Priority: Bun.secrets (keychain) > Environment Variable (CI only) > Interactive Prompt
  * @param envKey - The environment variable key
- * @param envSuffix - Optional suffix for different environments (e.g., '_PROD')
+ * @param envSuffix - Optional suffix for different environments (e.g., '_PROD', '_STAGE')
  */
 const getOrPrompt = async (
   envKey: string,
@@ -38,7 +37,17 @@ const getOrPrompt = async (
 ): Promise<string | null> => {
   const storageKey = envKey + envSuffix;
 
-  // Try Bun.secrets for local keychain storage first
+  // In CI we must not access the OS keychain — read only from environment
+  if (isCI()) {
+    const fromEnv = Bun.env[envKey];
+    if (fromEnv) {
+      console.log(`[INFO]\t Loaded ${envKey} from environment (CI)`);
+      return fromEnv;
+    }
+    return null;
+  }
+
+  // Local/dev flow: try Bun.secrets for keychain storage first
   try {
     const stored = await secrets.get({
       service: SECRET_SERVICE,
@@ -50,15 +59,6 @@ const getOrPrompt = async (
     }
   } catch (err) {
     console.error(`[ERROR]\t Error accessing secrets for ${storageKey}:`, err);
-  }
-
-  // Check environment variables only in CI/CD environments
-  if (isCI()) {
-    const fromEnv = Bun.env[envKey];
-    if (fromEnv) {
-      console.log(`[INFO]\t Loaded ${envKey} from environment (CI)`);
-      return fromEnv;
-    }
   }
 
   // Interactive prompt (only on TTY)
@@ -76,16 +76,16 @@ const getOrPrompt = async (
           });
           console.log(`[INFO]\t Saved ${storageKey} to keychain`);
           return entered;
-        } catch (err) {
-          console.warn(
+        } catch (saveErr) {
+          console.error(
             `[WARN]\t Could not save ${storageKey} to keychain:`,
-            err,
+            saveErr,
           );
           return entered;
         }
       }
-    } catch (err) {
-      console.error(`[ERROR]\t Error prompting for ${storageKey}:`, err);
+    } catch (promptErr) {
+      console.error(`[ERROR]\t Prompt failed for ${storageKey}:`, promptErr);
     }
   }
 
@@ -93,48 +93,54 @@ const getOrPrompt = async (
 };
 
 /**
- * Read Supabase configuration
+ * Read Convex configuration
  * Returns the configuration or throws if required values are missing
- * @param env - Optional environment suffix (e.g., 'PROD' for production credentials)
+ * @param env - Optional environment suffix (e.g., 'PROD' for production, 'STAGE' for staging)
  */
-export const readSupabaseConfig = async (
-  env?: string,
-): Promise<SupabaseConfig> => {
+export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
-  const url = await getOrPrompt("NEXT_PUBLIC_SUPABASE_URL", envSuffix);
-  const anonKey = await getOrPrompt("NEXT_PUBLIC_SUPABASE_ANON_KEY", envSuffix);
+  const url = await getOrPrompt("NEXT_PUBLIC_CONVEX_URL", envSuffix);
 
-  if (!url || !anonKey) {
+  if (!url) {
     throw new Error(
-      "Missing required Supabase configuration. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "Missing required Convex configuration. Please set NEXT_PUBLIC_CONVEX_URL",
     );
   }
 
   return {
     url,
-    anonKey,
   };
+};
+
+/**
+ * Read all application configuration (Convex URL).
+ * JWT_PRIVATE_KEY is managed on the Convex deployment (via `bun auth:run`), not locally.
+ * @param env - Optional environment suffix (e.g., 'PROD' for production, 'STAGE' for staging)
+ */
+export const readAppConfig = async (env?: string) => {
+  const convex = await readConvexConfig(env);
+  return { convex };
 };
 
 /**
  * Clear all stored secrets for this service
  * Useful for testing or resetting configuration
- * @param env - Optional environment suffix (e.g., 'PROD' to clear production credentials)
+ * @param env - Optional environment suffix (e.g., 'PROD' to clear production, 'STAGE' for staging)
  */
 export const clearStoredSecrets = async (env?: string): Promise<void> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
+  const keysToDelete = ["NEXT_PUBLIC_CONVEX_URL"];
   try {
-    await secrets.delete({
-      service: SECRET_SERVICE,
-      name: `NEXT_PUBLIC_SUPABASE_URL${envSuffix}`,
-    });
-    await secrets.delete({
-      service: SECRET_SERVICE,
-      name: `NEXT_PUBLIC_SUPABASE_ANON_KEY${envSuffix}`,
-    });
-    const envLabel = env ? ` (${env.toUpperCase()})` : "";
-    console.log(`✓ Cleared stored secrets${envLabel}`);
+    for (const key of keysToDelete) {
+      await secrets.delete({
+        service: SECRET_SERVICE,
+        name: `${key}${envSuffix}`,
+      });
+    }
+    console.log(
+      `[INFO]\t Cleared stored secrets${envSuffix ? ` for ${env}` : ""}`,
+    );
   } catch (err) {
-    console.error("Error clearing secrets:", err);
+    console.error("[ERROR]\t Could not clear secrets:", err);
   }
 };
