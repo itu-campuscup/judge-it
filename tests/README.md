@@ -88,7 +88,7 @@ bunx playwright test -g "authentication"
 
 Tests run automatically on:
 
-- Pull requests to main/develop
+- PR to main/develop
 - Pushes to main/develop
 
 ### GitHub Actions Workflow

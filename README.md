@@ -28,7 +28,7 @@
 <br />
 
 Welcome to **Judge IT**!
-This project was created and initiated by [the treasurer](https://github.com/lucasfth) of the [CampusCup 2024-2025 board](a "Chair: Andreas Guldborg, Vice: Lisa Hauge, Treasurer: Lucas Hanson, Sponsor: Carmen Nielsen, PR: Natalie Petersen") for the 2025 CampusCup event at the IT University of Copenhagen.
+This project was created and initiated by [the treasurer](https://links.lucashanson.dk/gh) of the [CampusCup 2024-2025 board](a "Chair: Andreas Guldborg, Vice: Lisa Hauge, Treasurer: Lucas Hanson, Sponsor: Carmen Nielsen, PR: Natalie Petersen") for the **2025** CampusCup event at the IT University of Copenhagen.
 The board will be responsible for the project, while the volunteers are welcome to contribute.
 
 ## ⚓ Why create Judge IT?
@@ -39,16 +39,19 @@ Thus, the idea of creating a web application was discussed to help the judges fo
 But while creating a whole new web application, why not make the CampusCup event even more fun for the crowd?
 The idea was to create a web app that could be used by the judges but also display fun statistics for the crowd to follow along with.
 
-The idea is to include the following statistics:
+Following statistics are included:
 
 - The best beer chug times
 - The best spinning times
 - The best sailing times
-- The best overall times
 - A players general stats ([Radar chart](https://recharts.org/en-US/api/RadarChart))
+- A teams general stats ([Radar chart](https://recharts.org/en-US/api/RadarChart))
+- Current heat progression and who is currently competing
 
-This is not a static list of statistics, but rather a list of ideas that the board has discussed.
-The board is open to suggestions for other statistics that could be included in the web application.
+This is not a static list of statistics, but rather a list of ideas that was discussed.
+The project is open to suggestions for other statistics that could be included in the web application.
+
+Maybe best overall times could be shown.
 
 ## Table of Contents
 
@@ -56,7 +59,7 @@ The board is open to suggestions for other statistics that could be included in 
 - [➕ Contributing](#-contributing)
 - [🏃‍➡️ Getting Started](#%EF%B8%8F-getting-started)
 - [🧪 Testing](#-testing)
-- [⚡ Database](#-database)
+- [⚡ Database & Authentication](#-database--authentication)
 - [🔺 Deploy on Vercel](#-deploy-on-vercel)
 - [⭐ Contributors](#-contributors)
 
@@ -70,7 +73,7 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 
 ## 🏃‍➡️ Getting Started
 
-> **⚠️ Important:** This project requires [Bun](https://bun.sh/) as the package manager and runtime.
+> **⚠️ Important:** This project **requires [Bun](https://bun.com)** as the package manager and runtime.
 > It will need modifications to run with npm or yarn, due to Bun-specific features like.
 
 ```bash
@@ -99,7 +102,8 @@ For detailed setup and contribution guidelines, see [Getting Started in CONTRIBU
 
 This project uses [Playwright](https://playwright.dev/) for end-to-end testing.
 
-**Tests run automatically on every PR** via GitHub Actions. See [tests/README.md](./tests/README.md) for detailed testing documentation and commands.
+**Tests run automatically** on every PR via GitHub Actions.
+See [tests/README.md](./tests/README.md) for detailed testing documentation and commands.
 
 ## ⚡ Database & Authentication
 

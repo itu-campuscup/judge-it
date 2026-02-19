@@ -82,25 +82,12 @@ const formatted = formatTime(duration);
 
 ### Authentication
 
-Authentication is handled via Clerk:
+Authentication is handled via Convex Auth with the Password provider. Key points:
 
-```tsx
-import { useAuth } from "@/AuthContext";
-
-function MyComponent() {
-  const { user, loading } = useAuth();
-
-  if (loading) return <div>Loading...</div>;\n  if (!user) return <div>Not authenticated</div>;
-  
-  // ... authenticated content
-}
-```
-
-Clerk components available:
-- `<SignedIn>` - Renders children only when user is signed in
-- `<SignedOut>` - Renders children only when user is signed out
-- `<UserButton />` - Pre-built user menu with sign out
-- `<SignInButton />` and `<SignUpButton />` - Authentication triggers
+- Users sign up with email/password
+- New users have `approved: false` by default
+- Admins must approve users in Convex Dashboard (`users` table, set `approved: true`) - see [Admin Approval Guide](./ADMIN_APPROVAL_GUIDE.md) for details
+- Unapproved users see "Pending Approval" message and cannot access protected pages or execute mutations
 
 ### Logging & Observability
 

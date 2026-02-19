@@ -2,7 +2,9 @@
 
 First off, thanks for taking the time to contribute! 💙
 
-All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions ⚓💙
+All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents-) for different ways to help and details about how this project handles them.
+Please make sure to read the relevant section before making your contribution.
+It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions ⚓💙
 
 > And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
 >
@@ -223,7 +225,8 @@ Notes & gotchas:
 
 #### Making Changes
 
-> **ℹ️ Note:** The application uses Clerk for authentication. Sign in with Clerk when you start the app.
+> **ℹ️ Note:** The application uses Convex Auth for authentication and has an admin approval workflow.
+> If your changes involve authentication or user management, please refer to the [Admin Approval Guide](./ADMIN_APPROVAL_GUIDE.md) for detailed instructions on how to implement and test these features.
 
 1. Create a new branch for your feature or bug fix
 2. Start the development server using `bun dev`
@@ -239,7 +242,7 @@ Notes & gotchas:
 5. Commit your changes with a clear and descriptive commit message
     - Use the [commit message styleguide](#commit-messages) to write your commit message
 6. Push your changes
-7. Create a pull request to the develop branch of the repository
+7. Create a PR to the develop branch of the repository
     - Add a description of your changes and why they are needed
     - Ensure checks are passing (lint, tests, etc)
     - Check if test deployment looks correct
@@ -248,7 +251,7 @@ Notes & gotchas:
 8. Wait for the CampusCup team to review your changes and merge them into the develop branch
 
 > **ℹ️ Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
-> Please add yourself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first pull request.
+> Please add yourself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first PR.
 > This will add you to the list of contributors in the README file.
 
 ### Improving The Documentation
@@ -303,9 +306,14 @@ Fix redirect after login
 Add a test for the bug
 ```
 
+### Coding Style
+
+Fortunately this project uses TypeScript, which enforces a lot of the coding style as well as linting with auto-fix.
+For more info on how the project `src` folder i structured see [`src/README.md`](./src/README.md).
+
 ## Join The Project Team
 
-If you want to join the CampusCup team, please contact us via [Email](mailto:contact@campuscup.dk).
+If you want to join the CampusCup team, please contact us via [Email](mailto:contact@campuscup.dk) or see if we have opened our applications on [CampusCup.dk/volunteer](https://campuscup.dk/volunteer).
 
 ## Attribution <!-- omit from toc -->
 
