@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import { Button, Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import {
@@ -42,15 +42,15 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   timeLogs = [],
   alert,
 }) => {
-  const createTimeLog = useMutation(api.mutations.createTimeLog);
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
     "error",
   );
+  const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
-  const playerName = getPlayerName(selectedPlayer?.id || 0, players);
+  const playerName = getPlayerName(selectedPlayer?.id || null, players);
 
   useEffect(() => {
     const loadCurrentHeat = async () => {
@@ -60,13 +60,13 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     loadCurrentHeat();
   }, [timeLogs]);
   const prevPlayerId = currentHeat
-    ? getPrevPlayerId(selectedTeam?.id || 0, currentHeat, timeLogs)
-    : "No previous player";
+    ? getPrevPlayerId(selectedTeam?.id || null, currentHeat, timeLogs)
+    : '"No previous player"';
   const prevPlayerName =
-    typeof prevPlayerId === "number"
+    prevPlayerId && prevPlayerId !== '"No previous player"'
       ? getPlayerName(prevPlayerId, players)
-      : prevPlayerId;
-  const handleStartStop = async (playerId: number | string | null) => {
+      : (prevPlayerId as string);
+  const handleStartStop = async (playerId: string | null) => {
     if (!playerId || !currentHeat) {
       setAlertOpen(true);
       setAlertSeverity("error");
@@ -100,31 +100,21 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
     }
 
     try {
-      // Get current time
-      const now = new Date();
-      const timeSeconds =
-        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
-
-      // Insert both time logs (stop previous player, start new player)
-      await createTimeLog({
-        team_id: selectedTeam?.id as Id<"teams"> | undefined,
-        player_id: prevPlayerId as Id<"players">,
-        time_type_id: timeTypeId as unknown as Id<"time_types">,
-        heat_id: currentHeat.id.toString() as Id<"heats">,
-        time_seconds: timeSeconds,
-        time: timeString,
-      });
-
-      await createTimeLog({
-        team_id: selectedTeam?.id as Id<"teams"> | undefined,
-        player_id: (typeof playerId === "string"
-          ? parseInt(playerId)
-          : playerId) as unknown as Id<"players">,
-        time_type_id: timeTypeId as unknown as Id<"time_types">,
-        heat_id: currentHeat.id as unknown as Id<"heats">,
-        time_seconds: timeSeconds,
-        time: timeString,
+      await createTimeLogsBatch({
+        logs: [
+          {
+            team_id: selectedTeam?.id,
+            player_id: prevPlayerId as Id<"players">,
+            time_type_id: timeTypeId,
+            heat_id: currentHeat.id,
+          },
+          {
+            team_id: selectedTeam?.id,
+            player_id: playerId as Id<"players">,
+            time_type_id: timeTypeId,
+            heat_id: currentHeat.id,
+          },
+        ],
       });
     } catch (error) {
       const err = "Error inserting time log: " + (error as Error).message;

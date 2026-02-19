@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
 import { Button, Stack } from "@mui/material";
 import {
@@ -13,13 +13,20 @@ import {
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type { Player, TimeLog, TimeType, Heat, AlertObject } from "@/types";
+import type {
+  Player,
+  TimeLog,
+  TimeType,
+  Heat,
+  AlertObject,
+  Team,
+} from "@/types";
 import { Id } from "convex/_generated/dataModel";
 
 interface BeerJudgeProps {
   players: Player[];
   heats: Heat[];
-  selectedTeam: number | null;
+  selectedTeam: Team | null;
   timeTypes: TimeType[];
   timeLogs: TimeLog[];
   alert: AlertObject;
@@ -37,12 +44,11 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
 
   const latestPlayer =
     selectedTeam !== null
-      ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam, timeLogs)
+      ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam.id, timeLogs)
       : null;
-  const playerName =
-    latestPlayer !== null
-      ? getPlayerName(latestPlayer, players)
-      : "player null";
+  const playerName = latestPlayer
+    ? getPlayerName(latestPlayer, players)
+    : "player null";
   /**
    * Create buttons for each time type
    *
@@ -106,7 +112,9 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
   /**
    * Handle button click to start/stop the timers to send a row to the db
    */
-  const handleTimeTypeClick = async (timeTypeId: number): Promise<void> => {
+  const handleTimeTypeClick = async (
+    timeTypeId: Id<"time_types">,
+  ): Promise<void> => {
     const currentHeat = getCurrentHeat(heats, alert);
     if (!currentHeat) {
       alert.setOpen(true);
@@ -128,19 +136,11 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
     if (!isValid) return;
 
     try {
-      // Get current time in seconds since midnight
-      const now = new Date();
-      const timeSeconds =
-        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
-
       await createTimeLog({
-        team_id: selectedTeam as unknown as Id<"teams"> | undefined,
-        player_id: latestPlayer as unknown as Id<"players">,
-        time_type_id: timeTypeId as unknown as Id<"time_types">,
-        heat_id: currentHeat.id as unknown as Id<"heats">,
-        time_seconds: timeSeconds,
-        time: timeString,
+        team_id: (selectedTeam ?? undefined) as Id<"teams"> | undefined,
+        player_id: latestPlayer as Id<"players">,
+        time_type_id: timeTypeId,
+        heat_id: currentHeat.id,
       });
     } catch (error) {
       const err = "Error inserting time log: " + (error as Error).message;

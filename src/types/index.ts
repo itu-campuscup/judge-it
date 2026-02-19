@@ -1,4 +1,5 @@
 // Global type definitions for Judge-It application
+import { Id } from "convex/_generated/dataModel";
 
 // Auth types
 export interface User {
@@ -8,19 +9,19 @@ export interface User {
 
 // Database schema types
 export interface Team {
-  id: number;
+  id: Id<"teams">;
   name: string;
-  player_1_id?: number;
-  player_2_id?: number;
-  player_3_id?: number;
-  player_4_id?: number;
+  player_1_id?: Id<"players">;
+  player_2_id?: Id<"players">;
+  player_3_id?: Id<"players">;
+  player_4_id?: Id<"players">;
   image_url?: string;
   created_at?: string;
   is_out?: boolean;
 }
 
 export interface Player {
-  id: number;
+  id: Id<"players">;
   name: string;
   image_url?: string;
   fun_fact?: string;
@@ -28,7 +29,7 @@ export interface Player {
 }
 
 export interface Heat {
-  id: number;
+  id: Id<"heats">;
   name?: string;
   heat: number;
   date: string;
@@ -37,19 +38,19 @@ export interface Heat {
 }
 
 export interface TimeType {
-  id: number;
+  id: Id<"time_types">;
   name: string;
   time_eng: string;
   description?: string;
 }
 
 export interface TimeLog {
-  id: number;
-  player_id: number;
-  time_type_id: number;
+  id: Id<"time_logs">;
+  player_id: Id<"players">;
+  time_type_id: Id<"time_types">;
   time_seconds: number;
-  heat_id: number;
-  team_id?: number;
+  heat_id: Id<"heats">;
+  team_id?: Id<"teams">;
   time?: string; // Time string format like "HH:MM:SS"
   created_at?: string;
   // Joined data from related tables
@@ -83,17 +84,6 @@ export interface YearSelectorProps {
 export interface ThemeContextType {
   darkMode: boolean;
   toggleDarkMode: () => void;
-}
-
-export interface AuthContextType {
-  user: {
-    id: string;
-    email?: string;
-    [key: string]: unknown;
-  } | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  loading: boolean;
 }
 
 // Judge types
@@ -150,10 +140,10 @@ export interface FetchDataResult<T> {
 }
 
 export interface TimeLogDetail {
-  playerId: number;
-  teamId: number;
-  heatId: number;
-  timeTypeId?: number;
+  playerId: Id<"players">;
+  teamId?: Id<"teams">;
+  heatId: Id<"heats">;
+  timeTypeId?: Id<"time_types">;
   formattedTime?: string;
   time?: string;
   duration?: number;

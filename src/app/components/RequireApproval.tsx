@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
@@ -31,7 +31,7 @@ export function RequireApproval({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, router]);
 
   // Loading state
-  if (isAuthenticated === null || !userStatus) {
+  if (userStatus === undefined) {
     return (
       <Container>
         <Box

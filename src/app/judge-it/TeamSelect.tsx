@@ -2,10 +2,11 @@ import React, { useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { getActiveTeams } from "@/utils/getUtils";
 import type { Team, AlertObject } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface TeamSelectProps {
-  selectedTeamId: string;
-  setSelectedTeam: (value: string) => void;
+  selectedTeamId: Id<"teams"> | null;
+  setSelectedTeam: (value: Id<"teams"> | null) => void;
   teams: Team[];
   alert?: AlertObject;
 }
@@ -45,7 +46,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
       <Select
         labelId="team-select-label"
         value={selectedTeamId}
-        onChange={(e) => setSelectedTeam(e.target.value)}
+        onChange={(e) => setSelectedTeam(e.target.value as Id<"teams">)}
       >
         {activeTeams.map((team: Team) => (
           <MenuItem key={team.id} value={team.id}>

@@ -1,4 +1,4 @@
-import { Id, TableNames } from "../../convex/_generated/dataModel";
+import { Id, TableNames } from "convex/_generated/dataModel";
 
 /**
  * Convex Helper Utilities
@@ -14,6 +14,8 @@ const reverseIdMap = new Map<number, string>();
 /**
  * Convert Convex ID to a stable number ID
  * This maintains a consistent mapping for each Convex ID
+ * @param convexId - The Convex ID to convert
+ * @returns A stable number ID corresponding to the Convex ID
  */
 export function convexIdToNumber(convexId: Id<TableNames>): number {
   const existing = idMap.get(convexId);
@@ -40,6 +42,8 @@ export function convexIdToNumber(convexId: Id<TableNames>): number {
 /**
  * Convert number ID back to Convex ID
  * Only works for IDs that have been previously converted
+ * @param numberId - The numeric ID to convert
+ * @returns The corresponding Convex ID, or undefined if not found
  */
 export function numberToConvexId<T extends TableNames>(
   numberId: number,
@@ -51,6 +55,8 @@ export function numberToConvexId<T extends TableNames>(
 /**
  * Get or create a Convex ID for a given number
  * This is useful when you have a number ID but need a Convex ID
+ * @param numberId - The numeric ID to convert
+ * @returns The corresponding Convex ID, or undefined if invalid
  */
 export function getConvexId<T extends TableNames>(
   numberId: number,
@@ -60,6 +66,8 @@ export function getConvexId<T extends TableNames>(
 
 /**
  * Convert Convex document with _id to legacy format with numeric id
+ * @param doc - The Convex document to convert
+ * @returns The converted document with numeric id and created_at timestamp
  */
 export function convertDocument<
   T extends { _id: Id<TableNames>; _creationTime: number },
@@ -76,6 +84,8 @@ export function convertDocument<
 
 /**
  * Helper to get Convex ID from various input types
+ * @param id - Can be a Convex ID string, a number ID, or an Id<T>
+ * @returns The corresponding Convex ID or undefined if invalid
  */
 export function ensureConvexId<T extends TableNames>(
   id: number | string | Id<T>,
@@ -92,6 +102,8 @@ export function ensureConvexId<T extends TableNames>(
 
 /**
  * Clear the ID mapping cache (useful for testing)
+ * @param void
+ * @returns void
  */
 export function clearIdMappings(): void {
   idMap.clear();

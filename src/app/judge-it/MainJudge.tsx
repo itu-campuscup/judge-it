@@ -3,17 +3,16 @@ import TeamSelect from "./TeamSelect";
 import PlayerSelect from "./PlayerSelect";
 import { Button, Stack } from "@mui/material";
 import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
 import { getCurrentHeat } from "@/utils/getUtils";
-import { convexIdToNumber } from "@/utils/convexHelpers";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type { Team, Player, TimeType, Heat, AlertObject } from "@/types";
 import { Id } from "convex/_generated/dataModel";
 
 interface MainJudgeProps {
-  parentTeam: number | null;
-  parentPlayer: number | null;
+  parentTeam: string | null;
+  parentPlayer: string | null;
   teams: Team[];
   players: Player[];
   time_types: TimeType[];
@@ -30,11 +29,13 @@ const MainJudge: React.FC<MainJudgeProps> = ({
   heats,
   alert,
 }) => {
-  const createTimeLog = useMutation(api.mutations.createTimeLog);
   const createHeat = useMutation(api.mutations.createHeat);
   const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
+  const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
 
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(
+    null,
+  );
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
   const [selectPlayerString, setSelectPlayerString] =
     useState<string>("Select Player");
@@ -73,9 +74,9 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       // Set as current (this automatically unsets other heats)
       await setCurrentHeat({ id: newHeatId as Id<"heats"> });
 
-      // Return the new heat object
+      // Return the new heat object (use Convex _id)
       return {
-        id: convexIdToNumber(newHeatId as Id<"heats">),
+        id: newHeatId as Id<"heats">,
         heat: nextHeatNumber,
         date: new Date().toISOString().split("T")[0],
         is_current: true,
@@ -127,29 +128,21 @@ const MainJudge: React.FC<MainJudgeProps> = ({
     }
 
     try {
-      // Get current time
-      const now = new Date();
-      const timeSeconds =
-        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
-
-      // Insert both time logs
-      await createTimeLog({
-        team_id: parentTeam as unknown as Id<"teams"> | undefined,
-        player_id: parentPlayer as unknown as Id<"players">,
-        time_type_id: sailTimeType.id as unknown as Id<"time_types">,
-        heat_id: newHeat.id as unknown as Id<"heats">,
-        time_seconds: timeSeconds,
-        time: timeString,
-      });
-
-      await createTimeLog({
-        team_id: selectedTeamId as unknown as Id<"teams"> | undefined,
-        player_id: selectedPlayer as unknown as Id<"players">,
-        time_type_id: sailTimeType.id as unknown as Id<"time_types">,
-        heat_id: newHeat.id as unknown as Id<"heats">,
-        time_seconds: timeSeconds,
-        time: timeString,
+      await createTimeLogsBatch({
+        logs: [
+          {
+            team_id: (parentTeam ?? undefined) as Id<"teams"> | undefined,
+            player_id: parentPlayer as Id<"players">,
+            time_type_id: sailTimeType.id,
+            heat_id: newHeat.id,
+          },
+          {
+            team_id: (selectedTeamId || undefined) as Id<"teams"> | undefined,
+            player_id: selectedPlayer as Id<"players">,
+            time_type_id: sailTimeType.id,
+            heat_id: newHeat.id,
+          },
+        ],
       });
 
       // Success - show confirmation

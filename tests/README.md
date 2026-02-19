@@ -1,6 +1,10 @@
 # End-to-End Testing Guide
 
-This directory contains end-to-end tests using [Playwright](https://playwright.dev/).
+> **⚠️ Important:** This E2E testing suite is not complete.
+> It currently covers unauthenticated user flows and basic navigation.
+> Thus if the tests pass it does **not guarantee** that all protected features are working correctly.
+
+This directory contains E2E tests using [Playwright](https://playwright.dev/).
 
 ## Test Structure
 
@@ -10,10 +14,10 @@ tests/
 │   ├── homepage.spec.ts       # Homepage and authentication UI tests
 │   ├── navigation.spec.ts     # Page navigation and routing tests
 │   ├── forms.spec.ts          # Form validation and interaction tests
-│   ├── auth.spec.ts           # ✨ Authenticated user flow tests
-│   ├── performance.spec.ts    # ✨ Performance benchmarks
-│   ├── visual.spec.ts         # ✨ Visual regression tests
-│   └── helpers.ts             # ✨ Test utilities and fixtures
+│   ├── auth.spec.ts           # Authenticated user flow tests
+│   ├── performance.spec.ts    # Performance benchmarks
+│   ├── visual.spec.ts         # Visual regression tests
+│   └── helpers.ts             # Test utilities and fixtures
 └── README.md
 ```
 

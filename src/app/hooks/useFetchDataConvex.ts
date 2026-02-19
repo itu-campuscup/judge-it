@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import type {
   Player,
   Heat,
@@ -13,8 +13,6 @@ import type {
 } from "@/types";
 import { createLogger } from "@/observability";
 import { useAuth } from "@/AuthContext";
-import { Id, TableNames } from "../../../convex/_generated/dataModel";
-import { SystemTableNames } from "convex/server";
 
 interface UseFetchDataReturn {
   players: Player[];
@@ -100,7 +98,7 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
 
   // Convert Convex data to match existing interfaces
   const players: Player[] = convexPlayers.map((p) => ({
-    id: convertIdToNumber(p._id),
+    id: p._id,
     name: p.name,
     image_url: p.image_url,
     fun_fact: p.fun_fact,
@@ -110,7 +108,7 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
   }));
 
   const heats: Heat[] = convexHeats.map((h) => ({
-    id: convertIdToNumber(h._id),
+    id: h._id,
     name: h.name,
     heat: h.heat,
     date: h.date,
@@ -121,12 +119,12 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
   }));
 
   const teams: Team[] = convexTeams.map((t) => ({
-    id: convertIdToNumber(t._id),
+    id: t._id,
     name: t.name,
-    player_1_id: t.player_1_id ? convertIdToNumber(t.player_1_id) : undefined,
-    player_2_id: t.player_2_id ? convertIdToNumber(t.player_2_id) : undefined,
-    player_3_id: t.player_3_id ? convertIdToNumber(t.player_3_id) : undefined,
-    player_4_id: t.player_4_id ? convertIdToNumber(t.player_4_id) : undefined,
+    player_1_id: t.player_1_id ?? undefined,
+    player_2_id: t.player_2_id ?? undefined,
+    player_3_id: t.player_3_id ?? undefined,
+    player_4_id: t.player_4_id ?? undefined,
     image_url: t.image_url,
     is_out: t.is_out,
     created_at: t._creationTime
@@ -135,18 +133,18 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
   }));
 
   const timeTypes: TimeType[] = convexTimeTypes.map((tt) => ({
-    id: convertIdToNumber(tt._id),
+    id: tt._id,
     name: tt.name,
     time_eng: tt.time_eng,
     description: tt.description,
   }));
 
   const timeLogs: TimeLog[] = convexTimeLogs.map((tl) => ({
-    id: convertIdToNumber(tl._id),
-    player_id: convertIdToNumber(tl.player_id),
-    team_id: tl.team_id ? convertIdToNumber(tl.team_id) : undefined,
-    heat_id: convertIdToNumber(tl.heat_id),
-    time_type_id: convertIdToNumber(tl.time_type_id),
+    id: tl._id,
+    player_id: tl.player_id,
+    team_id: tl.team_id ?? undefined,
+    heat_id: tl.heat_id,
+    time_type_id: tl.time_type_id,
     time_seconds: tl.time_seconds,
     time: tl.time,
     created_at: tl._creationTime
@@ -196,24 +194,6 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
     lastReloaded,
   };
 };
-
-/**
- * Helper to convert Convex ID to number for backwards compatibility
- * This is a temporary solution until we fully migrate to Convex IDs
- */
-function convertIdToNumber<T extends TableNames | SystemTableNames>(
-  id: Id<T>,
-): number {
-  // Extract a consistent number from the Convex ID string
-  // This is a hash function that generates a stable number from the ID
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    const char = id.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
-}
 
 // Default export for backwards compatibility
 export default useFetchDataConvex;

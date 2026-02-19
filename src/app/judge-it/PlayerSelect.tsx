@@ -8,10 +8,11 @@ import {
 } from "@mui/material";
 import { getTeamPlayerIds, getPlayer } from "@/utils/getUtils";
 import type { Team, Player } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface PlayerSelectProps {
   teams: Team[];
-  selectedTeamId: string;
+  selectedTeamId: Id<"teams"> | null;
   selectedPlayer: string;
   setSelectedPlayer: (value: string) => void;
   players: Player[];

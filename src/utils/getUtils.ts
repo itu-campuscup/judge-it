@@ -17,81 +17,80 @@ import type {
   AlertObject,
   TimeEntry,
 } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 /**
  * Gets the player name given the player ID.
- * @param {number} playerId - The player ID.
+ * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @returns {string} The player name.
  */
 export const getPlayerName = (
-  playerId: number | string,
+  playerId: Id<"players"> | null,
   players: Player[],
 ): string => {
-  if (typeof playerId !== "number") playerId = parseInt(playerId);
   const player = players.find((p) => p.id === playerId);
   return player ? player.name : "";
 };
 
 /**
  * Gets the player name with team name given the player ID.
- * @param {number} playerId - The player ID.
+ * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
  * @returns {string} The player name - team name.
  */
 export const getPlayerNameWithTeam = (
-  playerId: number | string,
+  playerId: Id<"players"> | null,
   players: Player[],
   teams: Team[],
 ): string => {
-  if (typeof playerId !== "number") playerId = parseInt(playerId);
   const player = players.find((p) => p.id === playerId);
-  const team = getPlayerTeam(playerId, teams);
+  const team = getPlayerTeam(playerId as Player["id"], teams);
   return player && team ? `${player.name} - ${team.name}` : "";
 };
 
 /**
  * Gets the heat number given the heat ID.
- * @param {number} heatId - The heat ID.
+ * @param {Id<"heats">} heatId - The heat ID.
  * @param {Array} heats - The list of heats.
  * @returns {string} The heat number.
  */
-export const getHeatNumber = (heatId: number, heats: Heat[]): string => {
+export const getHeatNumber = (heatId: Id<"heats">, heats: Heat[]): string => {
   const heat = heats.find((h: Heat) => h.id === heatId);
   return heat ? heat.heat.toString() : "";
 };
 
 /**
  * Get the heat year given the heat ID.
- * @param {number} heatId - The heat ID.
+ * @param {Id<"heats">} heatId - The heat ID.
  * @param {Array} heats - The list of heats.
  * @returns {string} The heat year.
  */
-export const getHeatYear = (heatId: number, heats: Heat[]): string => {
+export const getHeatYear = (heatId: Id<"heats">, heats: Heat[]): string => {
   const heat = heats.find((h: Heat) => h.id === heatId);
   return heat ? heat.date.split("-")[0] : "";
 };
 
 /**
  * Gets the team name given the team ID.
- * @param {number} teamId - The team ID.
+ * @param {Id<"teams">} teamId - The team ID.
  * @param {Array} teams - The list of teams.
  * @returns {string} The team name.
  */
-export const getTeamName = (teamId: number, teams: Team[]): string => {
+export const getTeamName = (teamId: Id<"teams">, teams: Team[]): string => {
   const team = teams.find((t: Team) => t.id === teamId);
   return team ? team.name : "";
 };
 
 /**
  * Gets the player image URL given the player ID.
- * @param {number} playerId - The player ID.
+ * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @returns {string} The player image URL.
  */
 export const getPlayerImageUrl = (
-  playerId: number,
+  playerId: Id<"players">,
   players: Player[],
 ): string => {
   const player = players.find((p: Player) => p.id === playerId);
@@ -100,11 +99,11 @@ export const getPlayerImageUrl = (
 
 /**
  * Gets the team image URL given the team ID.
- * @param {number} teamId - The team ID.
+ * @param {Id<"teams">} teamId - The team ID.
  * @param {Array} teams - The list of teams.
  * @returns {string} The team image URL.
  */
-export const getTeamImageUrl = (teamId: number, teams: Team[]): string => {
+export const getTeamImageUrl = (teamId: Id<"teams">, teams: Team[]): string => {
   const team = teams.find((t: Team) => t.id === teamId);
   return team?.image_url || "";
 };
@@ -120,12 +119,12 @@ export const getActiveTeams = (teams: Team[]): Team[] => {
 
 /**
  * Get player given the player ID.
- * @param {number} playerId - The player ID.
+ * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @returns {Object} The player.
  */
 export const getPlayer = (
-  playerId: number,
+  playerId: Id<"players">,
   players: Player[],
 ): Player | undefined => {
   return players.find((p: Player) => p.id === playerId);
@@ -158,33 +157,33 @@ export const getCurrentPlayer = (
 
 /**
  * Gets the players given the team ID.
- * @param {number} teamId - The team ID.
+ * @param {Id<"teams">} teamId - The team ID.
  * @param {Array} teams - The list of teams.
  * @returns {Array} The list of player IDs in the team.
  */
 export const getTeamPlayerIds = (
-  teamId: number | string,
+  teamId: Id<"teams">,
   teams: Team[],
-): number[] => {
-  const team = teams.filter((t) => t.id === Number(teamId))[0];
+): Player["id"][] => {
+  const team = teams.find((t) => t.id === teamId);
   if (!team) return [];
   return [
     team.player_1_id,
     team.player_2_id,
     team.player_3_id,
     team.player_4_id,
-  ].filter((id): id is number => id !== null && id !== undefined);
+  ].filter((id): id is Player["id"] => Boolean(id));
 };
 
 /**
  * Get players given the team ID.
- * @param teamId - The team ID.
- * @param teams - The list of teams.
- * @param players - The list of players.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @param {Array} players - The list of players.
  * @returns {Array} The list of players in the team.
  */
 export const getTeamPlayer = (
-  teamId: number | string,
+  teamId: Id<"teams">,
   teams: Team[],
   players: Player[],
 ): Player[] => {
@@ -232,21 +231,21 @@ export const getCurrentHeat = (
 
 /**
  * Get the previous player given the team ID and heat ID.
- * @param {number} teamId - The team ID.
+ * @param {Id<"teams">} teamId - The team ID.
  * @param {Object} heat - The heat object.
  * @param {Array} timeLogs - The list of time logs.
- * @returns {number|string} The previous player ID or a message if not found.
+ * @returns {Id<"players">| '"No previous player"'} The previous player ID or a message if not found.
  */
 export const getPrevPlayerId = (
-  teamId: number,
+  teamId: Id<"teams"> | null,
   heat: Heat,
   timeLogs: TimeLog[],
-): number | string => {
+): Player["id"] | '"No previous player"' => {
   const prevNotFound = '"No previous player"';
   if (!teamId || !heat || !timeLogs) return prevNotFound;
 
   const logs = timeLogs.filter(
-    (e: TimeLog) => e.team_id == teamId && e.heat_id == heat.id,
+    (e: TimeLog) => e.team_id === teamId && e.heat_id === heat.id,
   );
   const sortedByTimeDesc = logs.sort((a: TimeLog, b: TimeLog) => {
     const aTime = a.time || "";
@@ -313,12 +312,12 @@ export const getTimeTypeSail = (
  * Get the time type Id given the time type string.
  * @param {string} timeTypeString - The time type string.
  * @param {Array} timeTypes - The list of time types.
- * @return {number|null} The time type ID or null if not found.
+ * @return {Id<"time_types">|null} The time type ID or null if not found.
  */
 export const getTimeTypeId = (
   timeTypeString: string,
   timeTypes: TimeType[],
-): number | null => {
+): TimeType["id"] | null => {
   return getTimeType(timeTypeString, timeTypes)?.id || null;
 };
 
@@ -350,12 +349,12 @@ export const getBestIntraHeatTime = (timeLogs: TimeLog[]): TimeEntry | null => {
 
 /**
  * Get the fun fact of a player given their ID.
- * @param {number} playerId - The player ID.
+ * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @returns {string|null} - The fun fact of the player or null if not found.
  */
 export const getPlayerFunFact = (
-  playerId: number,
+  playerId: Id<"players">,
   players: Player[],
 ): string | null => {
   const player = players.find((p: Player) => p.id === playerId);
@@ -364,20 +363,21 @@ export const getPlayerFunFact = (
 
 /**
  * Gets the team for a player given their ID
- * @param playerId - The player ID
- * @param teams - The list of teams.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
  * @returns {Team|null} - The team for the player or null if not found.
  */
 export const getPlayerTeam = (
-  playerId: number | string,
+  playerId: Id<"players">,
   teams: Team[],
 ): Team | null => {
   const team = teams.find(
     (t: Team) =>
-      t.player_1_id === playerId ||
-      t.player_2_id === playerId ||
-      t.player_3_id === playerId ||
-      t.player_4_id === playerId,
+      t.player_1_id === (playerId as Player["id"]) ||
+      t.player_2_id === (playerId as Player["id"]) ||
+      t.player_3_id === (playerId as Player["id"]) ||
+      t.player_4_id === (playerId as Player["id"]),
   );
   return team ? team : null;
 };
@@ -385,13 +385,13 @@ export const getPlayerTeam = (
 /**
  * Gets the player image URL with team image as fallback.
  * If the player doesn't have an image, returns the team's image.
- * @param {number} playerId - The player ID.
+ * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
  * @returns {string} The player image URL or team image URL as fallback.
  */
 export const getPlayerImageWithFallback = (
-  playerId: number,
+  playerId: Id<"players">,
   players: Player[],
   teams: Team[],
 ): string => {
@@ -409,19 +409,19 @@ export const getPlayerImageWithFallback = (
 
 /**
  * Get the player ID given the team ID and time logs.
- * @param teamId - The team ID.
- * @param timeLogs - The list of time logs.
- * @returns The player ID or null if not found.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} timeLogs - The list of time logs.
+ * @returns {Id<"players">|null} The player ID or null if not found.
  */
 export const getPlayerIdGivenTeamAndTimeLogs = (
-  teamId: number,
+  teamId: Id<"teams">,
   timeLogs: TimeLog[],
-): number | null => {
+): Player["id"] | null => {
   const teamLogs = filterTimeLogsByTeamId(timeLogs, teamId);
   const recentLogs = sortTimeLogsByTime(teamLogs);
   if (recentLogs.length === 0) return null;
 
-  // Sorry for the following if statements
+  // Sorry for the following if statements (When I wrote this code, only God and I understood what I did. Now only God knows.)
   // Reasoning: As the teams change players, two time logs are inserted with the same start and stop times
   // Thus to figure out the new player, we need to check the last three logs and choose the one that is the new player
   // Last 3 logs: [PlayerA, PlayerA, PlayerB]

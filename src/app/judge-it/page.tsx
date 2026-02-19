@@ -26,12 +26,13 @@ import AlertComponent from "../components/AlertComponent";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 import { RequireApproval } from "../components/RequireApproval";
+import { Id } from "convex/_generated/dataModel";
 
 export const dynamic = "force-dynamic";
 
 function Judge(): React.ReactElement {
   const { user } = useAuth();
-  const [selectedTeamId, setSelectedTeam] = useState<string>("");
+  const [selectedTeamId, setSelectedTeam] = useState<Id<"teams"> | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
   const [selectPlayerString, setSelectPlayerString] =
     useState<string>("Select player");
@@ -161,8 +162,8 @@ function Judge(): React.ReactElement {
          */}
         {judgeType === MAIN_JUDGE && (
           <MainJudge
-            parentTeam={selectedTeamId ? Number(selectedTeamId) : null}
-            parentPlayer={selectedPlayer ? Number(selectedPlayer) : null}
+            parentTeam={selectedTeamId ? selectedTeamId : null}
+            parentPlayer={selectedPlayer ? selectedPlayer : null}
             teams={teams}
             players={players}
             heats={heats}
@@ -172,11 +173,9 @@ function Judge(): React.ReactElement {
         )}
         {judgeType === PARTICIPANTS_JUDGE && (
           <ParticipantsJudge
-            selectedTeam={
-              teams.find((t) => t.id === Number(selectedTeamId)) || null
-            }
+            selectedTeam={teams.find((t) => t.id === selectedTeamId) || null}
             selectedPlayer={
-              players.find((p) => p.id === Number(selectedPlayer)) || null
+              players.find((p) => p.id === selectedPlayer) || null
             }
             heats={heats}
             timeTypes={timeTypes}
@@ -190,7 +189,7 @@ function Judge(): React.ReactElement {
             players={players}
             heats={heats}
             timeLogs={timeLogs}
-            selectedTeam={selectedTeamId ? Number(selectedTeamId) : null}
+            selectedTeam={teams.find((t) => t.id === selectedTeamId) || null}
             timeTypes={timeTypes}
             alert={alert}
           />

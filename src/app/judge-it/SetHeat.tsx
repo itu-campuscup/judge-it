@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { FormControl, TextField, Button } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import type { Heat, AlertContext } from "@/types";
 import { Id } from "convex/_generated/dataModel";
 
@@ -115,7 +115,7 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
         throw new Error(`Heat ${heatNumber} not found`);
       }
       // Set it as current (automatically unsets others)
-      await setCurrentHeat({ id: heat.id as unknown as Id<"heats"> });
+      await setCurrentHeat({ id: heat.id });
       return undefined;
     } catch (error) {
       const err = "Error updating heat: " + (error as Error).message;

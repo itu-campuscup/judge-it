@@ -232,12 +232,23 @@ export const createTimeLog = mutation({
     team_id: v.optional(v.id("teams")),
     heat_id: v.id("heats"),
     time_type_id: v.id("time_types"),
-    time_seconds: v.number(),
-    time: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireApprovedUser(ctx);
-    const logId = await ctx.db.insert("time_logs", args);
+
+    // Use Convex/server time so timestamps are authoritative and consistent across clients
+    const maybeNow = (ctx as { now?: unknown }).now;
+    const now = maybeNow instanceof Date ? maybeNow : new Date();
+    const timeSeconds =
+      now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
+
+    const logId = await ctx.db.insert("time_logs", {
+      ...args,
+      time_seconds: timeSeconds,
+      time: timeString,
+    });
+
     return logId;
   },
 });
@@ -269,25 +280,38 @@ export const deleteTimeLog = mutation({
   },
 });
 
-// Batch insert time logs (useful for bulk operations)
 export const createTimeLogsBatch = mutation({
   args: {
     logs: v.array(
       v.object({
         player_id: v.id("players"),
         team_id: v.optional(v.id("teams")),
-        heat_id: v.id("heats"),
         time_type_id: v.id("time_types"),
-        time_seconds: v.float64(),
-        time: v.optional(v.string()),
+        heat_id: v.id("heats"),
       }),
     ),
   },
   handler: async (ctx, args) => {
     await requireApprovedUser(ctx);
+
+    // Compute a single server-side timestamp to use for any logs that don't supply one.
+    const maybeNow = (ctx as { now?: unknown }).now;
+    const now = maybeNow instanceof Date ? maybeNow : new Date();
+    const seconds =
+      now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
+
     const ids = [];
     for (const log of args.logs) {
-      const id = await ctx.db.insert("time_logs", log);
+      const insertPayload = {
+        player_id: log.player_id,
+        team_id: log.team_id,
+        heat_id: log.heat_id,
+        time_type_id: log.time_type_id,
+        time_seconds: seconds,
+        time: timeString,
+      };
+      const id = await ctx.db.insert("time_logs", insertPayload);
       ids.push(id);
     }
     return ids;

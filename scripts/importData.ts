@@ -14,7 +14,7 @@ import { readAppConfig } from "../src/config";
 import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
-import { Id } from "node_modules/convex/dist/esm-types/values/value";
+import { Id } from "../convex/_generated/dataModel";
 
 const CSV_DIR = path.join(process.cwd(), "exported-csv-data-from-supabase");
 
