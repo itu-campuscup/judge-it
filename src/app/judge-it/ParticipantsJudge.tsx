@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/SupabaseClient";
+import { useMutation } from "convex/react";
+import { api } from "convex/_generated/api";
 import { Button, Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import {
@@ -10,7 +11,7 @@ import {
   getPrevPlayerId,
   getTimeType,
 } from "@/utils/getUtils";
-import { TIME_LOGS_TABLE, TIME_TYPE_SAIL } from "@/utils/constants";
+import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type {
   Team,
   Player,
@@ -20,10 +21,12 @@ import type {
   AlertContext,
   AlertObject,
 } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
   selectedPlayer: Player | null;
+  heats: Heat[];
   timeTypes?: TimeType[];
   players?: Player[];
   timeLogs?: TimeLog[];
@@ -33,6 +36,7 @@ interface ParticipantsJudgeProps {
 const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   selectedTeam,
   selectedPlayer,
+  heats,
   timeTypes = [],
   players = [],
   timeLogs = [],
@@ -42,26 +46,27 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
     "error",
   );
+  const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
-  const playerName = getPlayerName(selectedPlayer?.id || 0, players);
+  const playerName = getPlayerName(selectedPlayer?.id || null, players);
 
   useEffect(() => {
     const loadCurrentHeat = async () => {
-      const some = await getCurrentHeat(alert);
+      const some = getCurrentHeat(heats, alert);
       setCurrentHeat(some);
     };
     loadCurrentHeat();
   }, [timeLogs]);
   const prevPlayerId = currentHeat
-    ? getPrevPlayerId(selectedTeam?.id || 0, currentHeat, timeLogs)
-    : "No previous player";
+    ? getPrevPlayerId(selectedTeam?.id || null, currentHeat, timeLogs)
+    : '"No previous player"';
   const prevPlayerName =
-    typeof prevPlayerId === "number"
+    prevPlayerId && prevPlayerId !== '"No previous player"'
       ? getPlayerName(prevPlayerId, players)
-      : prevPlayerId;
-  const handleStartStop = async (playerId: number | string | null) => {
+      : (prevPlayerId as string);
+  const handleStartStop = async (playerId: string | null) => {
     if (!playerId || !currentHeat) {
       setAlertOpen(true);
       setAlertSeverity("error");
@@ -94,22 +99,25 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       return;
     }
 
-    const { error } = await supabase.from(TIME_LOGS_TABLE).insert([
-      {
-        team_id: selectedTeam?.id,
-        player_id: prevPlayerId,
-        time_type_id: timeTypeId,
-        heat_id: currentHeat.id,
-      },
-      {
-        team_id: selectedTeam?.id,
-        player_id: typeof playerId === "string" ? parseInt(playerId) : playerId,
-        time_type_id: timeTypeId,
-        heat_id: currentHeat.id,
-      },
-    ]);
-    if (error) {
-      const err = "Error inserting time log: " + error.message;
+    try {
+      await createTimeLogsBatch({
+        logs: [
+          {
+            team_id: selectedTeam?.id,
+            player_id: prevPlayerId as Id<"players">,
+            time_type_id: timeTypeId,
+            heat_id: currentHeat.id,
+          },
+          {
+            team_id: selectedTeam?.id,
+            player_id: playerId as Id<"players">,
+            time_type_id: timeTypeId,
+            heat_id: currentHeat.id,
+          },
+        ],
+      });
+    } catch (error) {
+      const err = "Error inserting time log: " + (error as Error).message;
       setAlertOpen(true);
       setAlertSeverity("error");
       setAlertText(err);
@@ -122,7 +130,6 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
           prevPlayerId,
           currentPlayerId: playerId,
           heatId: currentHeat.id,
-          errorCode: error.code,
         },
       });
       return;

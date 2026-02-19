@@ -73,7 +73,7 @@ const Sailing: React.FC<SailingProps> = ({
     if (window.location.search.includes("export=true") && topTimes.length > 0) {
       downloadCSV(sailTimes, players, teams, heats, "sailing_times.csv");
     }
-  }, [topTimes]);
+  }, [topTimes, sailTimes, players, teams, heats]);
 
   const sailData = useMemo(
     () => generateRankableData(topTimes, players, teams, heats),

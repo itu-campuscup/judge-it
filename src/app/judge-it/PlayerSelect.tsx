@@ -8,15 +8,14 @@ import {
 } from "@mui/material";
 import { getTeamPlayerIds, getPlayer } from "@/utils/getUtils";
 import type { Team, Player } from "@/types";
+import { Id } from "convex/_generated/dataModel";
 
 interface PlayerSelectProps {
   teams: Team[];
-  selectedTeamId: string;
+  selectedTeamId: Id<"teams"> | null;
   selectedPlayer: string;
   setSelectedPlayer: (value: string) => void;
   players: Player[];
-  teamPlayers?: Player[];
-  setTeamPlayers: (players: Player[]) => void;
   selectPlayerString: string;
   setSelectPlayerString: (value: string) => void;
 }
@@ -27,8 +26,6 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   selectedPlayer,
   setSelectedPlayer,
   players,
-  teamPlayers = [],
-  setTeamPlayers,
   selectPlayerString,
   setSelectPlayerString,
 }) => {
@@ -41,23 +38,19 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
   }, [selectedTeamId, teams, players]);
 
   useEffect(() => {
-    setTeamPlayers(calculatedTeamPlayers);
-  }, [calculatedTeamPlayers, setTeamPlayers]);
-
-  useEffect(() => {
-    if (teamPlayers.length === 0) {
+    if (calculatedTeamPlayers.length === 0) {
       setSelectPlayerString("No players found");
     } else {
       setSelectPlayerString("Select Player");
     }
-  }, [teamPlayers, setSelectPlayerString]);
+  }, [calculatedTeamPlayers.length, setSelectPlayerString]);
 
   return (
     <FormControl
       fullWidth
       margin="normal"
       variant="filled"
-      disabled={teamPlayers.length === 0}
+      disabled={calculatedTeamPlayers.length === 0}
     >
       <Typography id="player-select-label">{selectPlayerString}</Typography>
       <RadioGroup
@@ -66,15 +59,14 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
         value={selectedPlayer}
         onChange={(e) => setSelectedPlayer(e.target.value)}
       >
-        {teamPlayers &&
-          teamPlayers.map((player) => (
-            <FormControlLabel
-              key={player.id}
-              value={player.id}
-              control={<Radio />}
-              label={player.name}
-            />
-          ))}
+        {calculatedTeamPlayers.map((player) => (
+          <FormControlLabel
+            key={player.id}
+            value={player.id}
+            control={<Radio />}
+            label={player.name}
+          />
+        ))}
       </RadioGroup>
     </FormControl>
   );
