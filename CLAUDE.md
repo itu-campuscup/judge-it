@@ -1,1 +1,1 @@
-C:/projects/lucasfth/judge-it/AGENTS.md
+AGENTS.md
