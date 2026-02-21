@@ -30,12 +30,16 @@ The application now uses **Convex Auth** (built into Convex, no external service
 4. Find the user you want to approve (check their email)
 5. Click on the user row to open the document editor
 6. Click **"Edit"** button
-7. Add a new field:
+7. Add a new field for approval:
    - Field name: `approved`
    - Type: `Boolean`
    - Value: `true` (check the box)
-8. Click **"Save"**
-9. The user will immediately gain access (their page will update automatically)
+8. Add a new field for admin access (if needed):
+   - Field name: `isAdmin`
+   - Type: `Boolean`
+   - Value: `true` (check the box)
+9. Click **"Save"**
+10. The user will immediately gain access (their page will update automatically)
 
 ## Technical Implementation
 
@@ -45,12 +49,14 @@ The application now uses **Convex Auth** (built into Convex, no external service
 2. **`convex/authHelpers.ts`** - Authorization helpers:
    - `requireApprovedUser(ctx)` - Throws error if user not approved
    - `isApprovedUser(ctx)` - Returns boolean for approval status
+   - `requireAdminUser(ctx)` - Throws error if user is not an admin
+   - `isAdminUser(ctx)` - Returns boolean for admin status
 
 3. **`convex/admin.ts`** - Admin queries and mutations:
-   - `getCurrentUserStatus` - Query current user's approval status
-   - `listUsers` - List all users with approval info
-   - `approveUser` - Approve a user
-   - `disapproveUser` - Revoke approval
+   - `getCurrentUserStatus` - Query current user's approval and admin status
+   - `listUsers` - List all users with approval info (admin only)
+   - `approveUser` - Approve a user (admin only)
+   - `disapproveUser` - Revoke approval (admin only)
 
 4. **`convex/mutations.ts`** - All 17 mutations check approval:
 
@@ -118,29 +124,13 @@ export default StatsWithApproval;
    - Even if someone bypasses UI checks, mutations will fail
 
 3. **Admin Identification**:
-   - Current implementation: Any authenticated user can call admin functions
-   - For production: Add admin role check in `convex/admin.ts`
-   - Recommended: Add `isAdmin: boolean` field to users table
-   - Check admin status in all admin mutations/queries
+   - Implementation: Users with `isAdmin: true` in the `users` table are considered administrators.
+   - Authorization: Admin-only functions in `convex/admin.ts` are protected by `requireAdminUser(ctx)`.
+   - Access Control: Only administrators can list all users, approve new users, or revoke access.
 
 ## Next Steps (Future Enhancements)
 
-### 1. Admin Role System
-
-Add `isAdmin` field to users table and protect admin functions:
-
-```typescript
-async function requireAdmin(ctx: QueryCtx | MutationCtx) {
-  const userId = await getCurrentUserId(ctx);
-  const user = await ctx.db.get(userId);
-  
-  if (!user || !(user as any).isAdmin) {
-    throw new Error("Admin access required");
-  }
-}
-```
-
-### 2. Admin UI Dashboard
+### 1. Admin UI Dashboard
 
 Create `/admin` page with:
 - List of pending users

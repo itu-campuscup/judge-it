@@ -23,8 +23,9 @@ export default defineSchema({
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
-    // Custom field for admin approval
+    // Custom fields for admin approval and roles
     approved: v.optional(v.boolean()),
+    isAdmin: v.optional(v.boolean()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
