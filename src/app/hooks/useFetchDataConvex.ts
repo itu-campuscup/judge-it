@@ -85,72 +85,103 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
 
   // Fetch all data using Convex queries - these automatically subscribe to changes
   // The reloadTrigger dependency forces a re-subscription when reload is called
-  const convexPlayers =
-    useQuery(api.queries.getPlayers, reloadTrigger >= 0 ? {} : "skip") ?? [];
-  const convexHeats =
-    useQuery(api.queries.getHeats, reloadTrigger >= 0 ? {} : "skip") ?? [];
-  const convexTeams =
-    useQuery(api.queries.getTeams, reloadTrigger >= 0 ? {} : "skip") ?? [];
-  const convexTimeTypes =
-    useQuery(api.queries.getTimeTypes, reloadTrigger >= 0 ? {} : "skip") ?? [];
-  const convexTimeLogs =
-    useQuery(api.queries.getTimeLogs, reloadTrigger >= 0 ? {} : "skip") ?? [];
+  const convexPlayers = useQuery(
+    api.queries.getPlayers,
+    reloadTrigger >= 0 ? {} : "skip",
+  );
+  const convexHeats = useQuery(
+    api.queries.getHeats,
+    reloadTrigger >= 0 ? {} : "skip",
+  );
+  const convexTeams = useQuery(
+    api.queries.getTeams,
+    reloadTrigger >= 0 ? {} : "skip",
+  );
+  const convexTimeTypes = useQuery(
+    api.queries.getTimeTypes,
+    reloadTrigger >= 0 ? {} : "skip",
+  );
+  const convexTimeLogs = useQuery(
+    api.queries.getTimeLogs,
+    reloadTrigger >= 0 ? {} : "skip",
+  );
 
   // Convert Convex data to match existing interfaces
-  const players: Player[] = convexPlayers.map((p) => ({
-    id: p._id,
-    name: p.name,
-    image_url: p.image_url,
-    fun_fact: p.fun_fact,
-    created_at: p._creationTime
-      ? new Date(p._creationTime).toISOString()
-      : undefined,
-  }));
+  // Memoize to prevent unnecessary re-mapping and re-renders when data hasn't changed
+  const players: Player[] = useMemo(
+    () =>
+      convexPlayers?.map((p) => ({
+        id: p._id,
+        name: p.name,
+        image_url: p.image_url,
+        fun_fact: p.fun_fact,
+        created_at: p._creationTime
+          ? new Date(p._creationTime).toISOString()
+          : undefined,
+      })) ?? [],
+    [convexPlayers],
+  );
 
-  const heats: Heat[] = convexHeats.map((h) => ({
-    id: h._id,
-    name: h.name,
-    heat: h.heat,
-    date: h.date,
-    is_current: h.is_current,
-    created_at: h._creationTime
-      ? new Date(h._creationTime).toISOString()
-      : undefined,
-  }));
+  const heats: Heat[] = useMemo(
+    () =>
+      convexHeats?.map((h) => ({
+        id: h._id,
+        name: h.name,
+        heat: h.heat,
+        date: h.date,
+        is_current: h.is_current,
+        created_at: h._creationTime
+          ? new Date(h._creationTime).toISOString()
+          : undefined,
+      })) ?? [],
+    [convexHeats],
+  );
 
-  const teams: Team[] = convexTeams.map((t) => ({
-    id: t._id,
-    name: t.name,
-    player_1_id: t.player_1_id ?? undefined,
-    player_2_id: t.player_2_id ?? undefined,
-    player_3_id: t.player_3_id ?? undefined,
-    player_4_id: t.player_4_id ?? undefined,
-    image_url: t.image_url,
-    is_out: t.is_out,
-    created_at: t._creationTime
-      ? new Date(t._creationTime).toISOString()
-      : undefined,
-  }));
+  const teams: Team[] = useMemo(
+    () =>
+      convexTeams?.map((t) => ({
+        id: t._id,
+        name: t.name,
+        player_1_id: t.player_1_id ?? undefined,
+        player_2_id: t.player_2_id ?? undefined,
+        player_3_id: t.player_3_id ?? undefined,
+        player_4_id: t.player_4_id ?? undefined,
+        image_url: t.image_url,
+        is_out: t.is_out,
+        created_at: t._creationTime
+          ? new Date(t._creationTime).toISOString()
+          : undefined,
+      })) ?? [],
+    [convexTeams],
+  );
 
-  const timeTypes: TimeType[] = convexTimeTypes.map((tt) => ({
-    id: tt._id,
-    name: tt.name,
-    time_eng: tt.time_eng,
-    description: tt.description,
-  }));
+  const timeTypes: TimeType[] = useMemo(
+    () =>
+      convexTimeTypes?.map((tt) => ({
+        id: tt._id,
+        name: tt.name,
+        time_eng: tt.time_eng,
+        description: tt.description,
+      })) ?? [],
+    [convexTimeTypes],
+  );
 
-  const timeLogs: TimeLog[] = convexTimeLogs.map((tl) => ({
-    id: tl._id,
-    player_id: tl.player_id,
-    team_id: tl.team_id ?? undefined,
-    heat_id: tl.heat_id,
-    time_type_id: tl.time_type_id,
-    time_seconds: tl.time_seconds,
-    time: tl.time,
-    created_at: tl._creationTime
-      ? new Date(tl._creationTime).toISOString()
-      : undefined,
-  }));
+  const timeLogs: TimeLog[] = useMemo(
+    () =>
+      convexTimeLogs?.map((tl) => ({
+        id: tl._id,
+        player_id: tl.player_id,
+        team_id: tl.team_id ?? undefined,
+        heat_id: tl.heat_id,
+        time_type_id: tl.time_type_id,
+        time_seconds: tl.time_seconds,
+        time: tl.time,
+        created_at: tl._creationTime
+          ? new Date(tl._creationTime).toISOString()
+          : undefined,
+      })) ?? [],
+    [convexTimeLogs],
+  );
 
   // Determine loading state - if any query is undefined, we're still loading
   const loading =
