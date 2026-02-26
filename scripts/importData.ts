@@ -223,7 +223,7 @@ async function importData() {
         time?: string;
       }[];
 
-      await client.mutation(api.mutations.createTimeLogsBatch, {
+      await client.mutation(api.mutations.importTimeLogsBatch, {
         logs: batchData,
       });
 
