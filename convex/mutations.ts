@@ -317,3 +317,36 @@ export const createTimeLogsBatch = mutation({
     return ids;
   },
 });
+
+// Import-only mutation for batch inserting time logs with specific times (from CSV data)
+export const importTimeLogsBatch = mutation({
+  args: {
+    logs: v.array(
+      v.object({
+        player_id: v.id("players"),
+        team_id: v.optional(v.id("teams")),
+        time_type_id: v.id("time_types"),
+        heat_id: v.id("heats"),
+        time_seconds: v.number(),
+        time: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await requireApprovedUser(ctx);
+
+    const ids = [];
+    for (const log of args.logs) {
+      const id = await ctx.db.insert("time_logs", {
+        player_id: log.player_id,
+        team_id: log.team_id,
+        heat_id: log.heat_id,
+        time_type_id: log.time_type_id,
+        time_seconds: log.time_seconds,
+        time: log.time,
+      });
+      ids.push(id);
+    }
+    return ids;
+  },
+});
