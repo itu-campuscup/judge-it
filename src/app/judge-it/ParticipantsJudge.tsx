@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import {
   getPlayerName,
@@ -15,6 +15,7 @@ import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type { Team, Player, Heat, AlertContext, AlertSeverity } from "@/types";
 import { Id } from "convex/_generated/dataModel";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
+import JudgeButton from "../components/JudgeButton";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
@@ -145,34 +146,17 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
         setOpen={setAlertOpen}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
-        <Button
-          variant="contained"
+        <JudgeButton
           color="error"
-          size="large"
-          fullWidth
-          sx={{
-            minHeight: 80,
-            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-            padding: 2,
-          }}
           onClick={() => handleStartStop(prevPlayerId)}
         >
           STOP {prevPlayerName} {TIME_TYPE_SAIL}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          fullWidth
-          sx={{
-            minHeight: 80,
-            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-            padding: 2,
-          }}
+        </JudgeButton>
+        <JudgeButton
           onClick={() => handleStartStop(selectedPlayer?.id || null)}
         >
           Stop prev and Start {playerName} {TIME_TYPE_SAIL}
-        </Button>
+        </JudgeButton>
       </Stack>
     </>
   );
