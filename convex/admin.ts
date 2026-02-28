@@ -7,7 +7,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { getCurrentUserId } from "./authHelpers";
+import { requireAdminUser } from "./authHelpers";
 
 /**
  * Get current user's approval status
@@ -21,6 +21,7 @@ export const getCurrentUserStatus = query({
         return {
           authenticated: false,
           approved: false,
+          isAdmin: false,
           userId: null,
           email: null,
         };
@@ -33,6 +34,7 @@ export const getCurrentUserStatus = query({
         return {
           authenticated: true,
           approved: false,
+          isAdmin: false,
           userId: userId,
           email: null,
         };
@@ -41,6 +43,7 @@ export const getCurrentUserStatus = query({
       return {
         authenticated: true,
         approved: user?.approved === true,
+        isAdmin: (user as { isAdmin?: boolean })?.isAdmin === true,
         userId: userId,
         email: user?.email || null,
       };
@@ -52,16 +55,12 @@ export const getCurrentUserStatus = query({
 });
 
 /**
- * List all users (admin only - manual check required)
- * In a production app, you'd check if the current user is an admin
+ * List all users (admin only)
  */
 export const listUsers = query({
   handler: async (ctx) => {
-    // Get current user to verify they're authenticated
-    await getCurrentUserId(ctx);
-
-    // In production, add admin check here
-    // For now, any authenticated user can see this
+    // Verify user is an administrator
+    await requireAdminUser(ctx);
 
     const users = await ctx.db.query("users").collect();
 
@@ -70,6 +69,7 @@ export const listUsers = query({
       email: user.email || null,
       name: user.name || null,
       approved: user.approved || false,
+      isAdmin: (user as { isAdmin?: boolean }).isAdmin || false,
       _creationTime: user._creationTime,
     }));
   },
@@ -83,11 +83,8 @@ export const approveUser = mutation({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    // Get current user to verify they're authenticated
-    await getCurrentUserId(ctx);
-
-    // In production, verify the current user is an admin
-    // For now, any authenticated user can approve
+    // Verify user is an administrator
+    await requireAdminUser(ctx);
 
     await ctx.db.patch(args.userId, { approved: true });
 
@@ -103,10 +100,8 @@ export const disapproveUser = mutation({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    // Get current user to verify they're authenticated
-    await getCurrentUserId(ctx);
-
-    // In production, verify the current user is an admin
+    // Verify user is an administrator
+    await requireAdminUser(ctx);
 
     await ctx.db.patch(args.userId, { approved: false });
 

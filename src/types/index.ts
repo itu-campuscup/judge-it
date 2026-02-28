@@ -5,6 +5,7 @@ import { Id } from "convex/_generated/dataModel";
 export interface User {
   id: string;
   email?: string;
+  isAdmin?: boolean;
 }
 
 // Database schema types

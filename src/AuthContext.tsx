@@ -11,6 +11,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isApproved: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,14 +29,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       ? {
           id: userStatus.userId || "unknown",
           email: userStatus.email || "unknown@example.com",
+          isAdmin: userStatus.isAdmin === true,
         }
       : null;
 
   const isApproved = userStatus?.approved === true;
+  const isAdmin = userStatus?.isAdmin === true;
 
   return (
     <AuthContext.Provider
-      value={{ user, loading: isLoading, isAuthenticated, isApproved }}
+      value={{ user, loading: isLoading, isAuthenticated, isApproved, isAdmin }}
     >
       {children}
     </AuthContext.Provider>
