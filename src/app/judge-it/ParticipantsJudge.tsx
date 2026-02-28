@@ -12,7 +12,7 @@ import {
   getTimeType,
 } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
-import type { Team, Player, Heat, AlertContext } from "@/types";
+import type { Team, Player, Heat, AlertContext, AlertSeverity } from "@/types";
 import { Id } from "convex/_generated/dataModel";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
@@ -27,9 +27,7 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
 }) => {
   const { alert, heats, players, timeTypes, timeLogs } = useFetchDataConvex();
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
-  const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
-    "error",
-  );
+  const [alertSeverity, setAlertSeverity] = useState<AlertSeverity>("error");
   const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
