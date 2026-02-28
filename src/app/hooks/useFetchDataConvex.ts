@@ -10,6 +10,7 @@ import type {
   TimeType,
   TimeLog,
   AlertContext,
+  AlertSeverity,
 } from "@/types";
 import { createLogger } from "@/observability";
 import { useAuth } from "@/AuthContext";
@@ -22,11 +23,11 @@ interface UseFetchDataReturn {
   timeLogs: TimeLog[];
   alert: {
     open: boolean;
-    severity: "error" | "success" | "info" | "warning";
+    severity: AlertSeverity;
     text: string;
     context?: AlertContext;
     setOpen: (open: boolean) => void;
-    setSeverity: (severity: "error" | "success" | "info" | "warning") => void;
+    setSeverity: (severity: AlertSeverity) => void;
     setText: (text: string) => void;
     setContext: (context: AlertContext | undefined) => void;
   };
@@ -45,9 +46,7 @@ interface UseFetchDataReturn {
 export const useFetchDataConvex = (): UseFetchDataReturn => {
   const { user } = useAuth();
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
-  const [alertSeverity, setAlertSeverity] = useState<
-    "error" | "success" | "info" | "warning"
-  >("error");
+  const [alertSeverity, setAlertSeverity] = useState<AlertSeverity>("error");
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
   const [reloadTrigger, setReloadTrigger] = useState<number>(0);
