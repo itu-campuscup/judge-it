@@ -37,16 +37,7 @@ function Judge(): React.ReactElement {
   const [selectPlayerString, setSelectPlayerString] =
     useState<string>("Select player");
   const [judgeType, setJudgeType] = useState<string>("");
-  const {
-    players,
-    heats,
-    teams,
-    timeTypes,
-    timeLogs,
-    alert,
-    reload,
-    lastReloaded,
-  } = useFetchDataConvex();
+  const { players, teams, alert, reload, lastReloaded } = useFetchDataConvex();
 
   const reloadTooltip = useMemo(
     () => `Reload data (Last: ${new Date(lastReloaded).toLocaleTimeString()})`,
@@ -131,8 +122,6 @@ function Judge(): React.ReactElement {
           <TeamSelect
             selectedTeamId={selectedTeamId}
             setSelectedTeam={setSelectedTeam}
-            teams={teams}
-            alert={alert}
           />
         </Box>
 
@@ -143,11 +132,9 @@ function Judge(): React.ReactElement {
              * Disable the radio group if there are no players
              */}
             <PlayerSelect
-              teams={teams}
               selectedTeamId={selectedTeamId}
               selectedPlayer={selectedPlayer}
               setSelectedPlayer={setSelectedPlayer}
-              players={players}
               selectPlayerString={selectPlayerString}
               setSelectPlayerString={setSelectPlayerString}
             />
@@ -164,11 +151,6 @@ function Judge(): React.ReactElement {
           <MainJudge
             parentTeam={selectedTeamId ? selectedTeamId : null}
             parentPlayer={selectedPlayer ? selectedPlayer : null}
-            teams={teams}
-            players={players}
-            heats={heats}
-            time_types={timeTypes}
-            alert={alert}
           />
         )}
         {judgeType === PARTICIPANTS_JUDGE && (
@@ -177,21 +159,11 @@ function Judge(): React.ReactElement {
             selectedPlayer={
               players.find((p) => p.id === selectedPlayer) || null
             }
-            heats={heats}
-            timeTypes={timeTypes}
-            players={players}
-            timeLogs={timeLogs}
-            alert={alert}
           />
         )}
         {judgeType === BEER_JUDGE && (
           <BeerJudge
-            players={players}
-            heats={heats}
-            timeLogs={timeLogs}
             selectedTeam={teams.find((t) => t.id === selectedTeamId) || null}
-            timeTypes={timeTypes}
-            alert={alert}
           />
         )}
       </Stack>

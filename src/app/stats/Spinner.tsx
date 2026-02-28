@@ -11,16 +11,8 @@ import { MEDAL_EMOJIS, TIME_TYPE_SPIN } from "@/utils/constants";
 import SpinnerAnimation from "./animations/SpinnerAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
-import { Player, Team, Heat, TimeType, TimeLog } from "@/types";
 import { downloadCSV } from "@/utils/exportData";
-
-interface SpinnerProps {
-  timeLogs: TimeLog[];
-  players: Player[];
-  timeTypes: TimeType[];
-  teams: Team[];
-  heats: Heat[];
-}
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface ProcessedRankingData {
   playerName: string;
@@ -32,15 +24,10 @@ interface ProcessedRankingData {
   displayRpmLabel: string;
 }
 
-const Spinner: React.FC<SpinnerProps> = ({
-  timeLogs = [],
-  players = [],
-  timeTypes = [],
-  teams = [],
-  heats = [],
-}) => {
+const Spinner: React.FC = () => {
   const [animationCycleKey, setAnimationCycleKey] = useState<number>(0);
 
+  const { heats, players, teams, timeLogs, timeTypes } = useFetchDataConvex();
   const { selectedYear, setSelectedYear, uniqueYears } = useYearSelector(heats);
 
   const handleYearChange = (e: SelectChangeEvent<number>): void => {

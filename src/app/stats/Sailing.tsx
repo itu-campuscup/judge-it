@@ -12,16 +12,8 @@ import { MEDAL_EMOJIS, TIME_TYPE_SAIL } from "@/utils/constants";
 import SailingAnimation from "./animations/SailingAnimation";
 import useYearSelector from "@/app/hooks/useYearSelector";
 import YearSelect from "../components/YearSelect";
-import { Player, Team, Heat, TimeType, TimeLog } from "@/types";
 import { downloadCSV } from "@/utils/exportData";
-
-interface SailingProps {
-  timeLogs: TimeLog[];
-  players: Player[];
-  timeTypes: TimeType[];
-  teams: Team[];
-  heats: Heat[];
-}
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface ProcessedRankingData {
   playerName: string;
@@ -33,15 +25,10 @@ interface ProcessedRankingData {
   time: number;
 }
 
-const Sailing: React.FC<SailingProps> = ({
-  timeLogs = [],
-  players = [],
-  timeTypes = [],
-  teams = [],
-  heats = [],
-}) => {
+const Sailing: React.FC = () => {
   const [animationCycleKey, setAnimationCycleKey] = useState<number>(0);
 
+  const { heats, players, teams, timeLogs, timeTypes } = useFetchDataConvex();
   const { selectedYear, setSelectedYear, uniqueYears } = useYearSelector(heats);
 
   const handleYearChange = (e: SelectChangeEvent<number>): void => {
