@@ -66,9 +66,18 @@ const Contestants: React.FC<ContestantsProps> = ({
     [],
   );
 
-  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || "";
-  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || "";
-  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
+  const beerTypeId = useMemo(
+    () => getTimeTypeBeer(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const spinnerTypeId = useMemo(
+    () => getTimeTypeSpinner(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const sailTypeId = useMemo(
+    () => getTimeTypeSail(timeTypes)?.id || "",
+    [timeTypes],
+  );
 
   const logsFilteredByPlayer1 = useMemo(
     () =>
@@ -92,56 +101,70 @@ const Contestants: React.FC<ContestantsProps> = ({
     [logsFilteredByPlayer2],
   );
 
-  const player1BeerLogs = filterTimeLogsByTimeType(
-    player1logsSortedByHeatAndTime,
-    beerTypeId as Id<"time_types">,
-  );
-  const player1SpinnerLogs = filterTimeLogsByTimeType(
-    player1logsSortedByHeatAndTime,
-    spinnerTypeId as Id<"time_types">,
-  );
-  const player1SailLogs = filterTimeLogsByTimeType(
-    player1logsSortedByHeatAndTime,
-    sailTypeId as Id<"time_types">,
-  );
-  const player2BeerLogs = filterTimeLogsByTimeType(
-    player2logsSortedByHeatAndTime,
-    beerTypeId as Id<"time_types">,
-  );
-  const player2SpinnerLogs = filterTimeLogsByTimeType(
-    player2logsSortedByHeatAndTime,
-    spinnerTypeId as Id<"time_types">,
-  );
-  const player2SailLogs = filterTimeLogsByTimeType(
-    player2logsSortedByHeatAndTime,
-    sailTypeId as Id<"time_types">,
+  const player1BestTimes = useMemo(() => {
+    const beerLogs = filterTimeLogsByTimeType(
+      player1logsSortedByHeatAndTime,
+      beerTypeId as Id<"time_types">,
+    );
+    const spinnerLogs = filterTimeLogsByTimeType(
+      player1logsSortedByHeatAndTime,
+      spinnerTypeId as Id<"time_types">,
+    );
+    const sailLogs = filterTimeLogsByTimeType(
+      player1logsSortedByHeatAndTime,
+      sailTypeId as Id<"time_types">,
+    );
+
+    return {
+      [TIME_TYPE_BEER]: getBestIntraHeatTime(beerLogs)?.duration || 0,
+      [TIME_TYPE_SPIN]: getBestIntraHeatTime(spinnerLogs)?.duration || 0,
+      [TIME_TYPE_SAIL]: getBestIntraHeatTime(sailLogs)?.duration || 0,
+    };
+  }, [player1logsSortedByHeatAndTime, beerTypeId, spinnerTypeId, sailTypeId]);
+
+  const player2BestTimes = useMemo(() => {
+    const beerLogs = filterTimeLogsByTimeType(
+      player2logsSortedByHeatAndTime,
+      beerTypeId as Id<"time_types">,
+    );
+    const spinnerLogs = filterTimeLogsByTimeType(
+      player2logsSortedByHeatAndTime,
+      spinnerTypeId as Id<"time_types">,
+    );
+    const sailLogs = filterTimeLogsByTimeType(
+      player2logsSortedByHeatAndTime,
+      sailTypeId as Id<"time_types">,
+    );
+
+    return {
+      [TIME_TYPE_BEER]: getBestIntraHeatTime(beerLogs)?.duration || 0,
+      [TIME_TYPE_SPIN]: getBestIntraHeatTime(spinnerLogs)?.duration || 0,
+      [TIME_TYPE_SAIL]: getBestIntraHeatTime(sailLogs)?.duration || 0,
+    };
+  }, [player2logsSortedByHeatAndTime, beerTypeId, spinnerTypeId, sailTypeId]);
+
+  const player1ChartData = useMemo(
+    () =>
+      generateRadarChartData(
+        selectedPlayer1Id,
+        player1BestTimes,
+        players,
+        teams,
+        [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+      ),
+    [selectedPlayer1Id, player1BestTimes, players, teams],
   );
 
-  const player1BestTimes = {
-    [TIME_TYPE_BEER]: getBestIntraHeatTime(player1BeerLogs)?.duration || 0,
-    [TIME_TYPE_SPIN]: getBestIntraHeatTime(player1SpinnerLogs)?.duration || 0,
-    [TIME_TYPE_SAIL]: getBestIntraHeatTime(player1SailLogs)?.duration || 0,
-  };
-
-  const player2BestTimes = {
-    [TIME_TYPE_BEER]: getBestIntraHeatTime(player2BeerLogs)?.duration || 0,
-    [TIME_TYPE_SPIN]: getBestIntraHeatTime(player2SpinnerLogs)?.duration || 0,
-    [TIME_TYPE_SAIL]: getBestIntraHeatTime(player2SailLogs)?.duration || 0,
-  };
-  const player1ChartData = generateRadarChartData(
-    selectedPlayer1Id,
-    player1BestTimes,
-    players,
-    teams,
-    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
-  );
-
-  const player2ChartData = generateRadarChartData(
-    selectedPlayer2Id,
-    player2BestTimes,
-    players,
-    teams,
-    [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+  const player2ChartData = useMemo(
+    () =>
+      generateRadarChartData(
+        selectedPlayer2Id,
+        player2BestTimes,
+        players,
+        teams,
+        [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+      ),
+    [selectedPlayer2Id, player2BestTimes, players, teams],
   );
 
   return (
