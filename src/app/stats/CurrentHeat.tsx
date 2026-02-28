@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Typography, Box, Avatar } from "@mui/material";
-import { Heat, Player, Team, TimeLog, TimeType, AlertObject } from "@/types";
+import { Heat, Player } from "@/types";
 import {
   getCurrentHeat,
   getCurrentPlayer,
@@ -16,15 +16,7 @@ import {
 } from "@/utils/sortFilterUtils";
 import { timeToMilli, formatTime, calcTimeDifference } from "@/utils/timeUtils";
 import { Id } from "convex/_generated/dataModel";
-
-interface CurrentHeatProps {
-  timeLogs: TimeLog[];
-  players: Player[];
-  teams: Team[];
-  heats: Heat[];
-  timeTypes: TimeType[];
-  alert: AlertObject | null;
-}
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface TeamData {
   teamId: Id<"teams">;
@@ -35,19 +27,15 @@ interface TeamData {
   isFinished: boolean;
 }
 
-const CurrentHeat: React.FC<CurrentHeatProps> = ({
-  timeLogs = [],
-  players = [],
-  teams = [],
-  heats = [],
-  timeTypes = [],
-  alert = null,
-}) => {
+const CurrentHeat: React.FC = () => {
   const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
   const [teamsData, setTeamsData] = useState<TeamData[]>([]);
   const [raceTimer, setRaceTimer] = useState<string>("00:00");
   const [raceStartTime, setRaceStartTime] = useState<string | null>(null);
   const [raceFinished, setRaceFinished] = useState<boolean>(false);
+
+  const { alert, heats, players, teams, timeLogs, timeTypes } =
+    useFetchDataConvex();
 
   const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
 

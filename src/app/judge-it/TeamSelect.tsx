@@ -1,14 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { getActiveTeams } from "@/utils/getUtils";
-import type { Team, AlertObject } from "@/types";
+import type { Team } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface TeamSelectProps {
   selectedTeamId: Id<"teams"> | null;
   setSelectedTeam: (value: Id<"teams"> | null) => void;
-  teams: Team[];
-  alert?: AlertObject;
 }
 
 /**
@@ -19,13 +18,12 @@ interface TeamSelectProps {
 const TeamSelect: React.FC<TeamSelectProps> = ({
   selectedTeamId,
   setSelectedTeam,
-  teams,
-  alert,
 }) => {
-  const activeTeams = getActiveTeams(teams);
+  const { alert, teams } = useFetchDataConvex();
+  const activeTeams = useMemo(() => getActiveTeams(teams), [teams]);
 
   useEffect(() => {
-    if (activeTeams.length === 0 && alert) {
+    if (activeTeams.length === 0) {
       alert.setOpen(true);
       alert.setSeverity("warning");
       alert.setText("No active teams found");
@@ -38,7 +36,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({
         },
       });
     }
-  }, [teams, activeTeams]);
+  }, [activeTeams]);
 
   return (
     <FormControl fullWidth margin="normal" variant="filled">

@@ -7,28 +7,17 @@ import { api } from "convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
 import { getCurrentHeat } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
-import type { Team, Player, TimeType, Heat, AlertObject } from "@/types";
+import type { Heat } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface MainJudgeProps {
   parentTeam: string | null;
   parentPlayer: string | null;
-  teams: Team[];
-  players: Player[];
-  time_types: TimeType[];
-  heats: Heat[];
-  alert: AlertObject;
 }
 
-const MainJudge: React.FC<MainJudgeProps> = ({
-  parentTeam,
-  parentPlayer,
-  teams,
-  players,
-  time_types,
-  heats,
-  alert,
-}) => {
+const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
+  const { alert, heats, timeTypes } = useFetchDataConvex();
   const createHeat = useMutation(api.mutations.createHeat);
   const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
   const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
@@ -111,7 +100,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       return; // Error already shown in createAndSetNewHeat
     }
 
-    const sailTimeType = time_types.find((e) => e.time_eng === TIME_TYPE_SAIL);
+    const sailTimeType = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL);
     if (!sailTimeType) {
       alert.setOpen(true);
       alert.setSeverity("error");
@@ -120,7 +109,7 @@ const MainJudge: React.FC<MainJudgeProps> = ({
         operation: "global_start_timer",
         location: "MainJudge.handleGlobalStart",
         metadata: {
-          availableTimeTypes: time_types.map((t) => t.time_eng),
+          availableTimeTypes: timeTypes.map((t) => t.time_eng),
           searchingFor: TIME_TYPE_SAIL,
         },
       });
@@ -251,19 +240,15 @@ const MainJudge: React.FC<MainJudgeProps> = ({
       <TeamSelect
         selectedTeamId={selectedTeamId}
         setSelectedTeam={setSelectedTeamId}
-        teams={teams}
-        alert={alert}
       />
       {/**
        * Show player selection as a group of radio buttons
        * Disable the radio group if there are no players
        */}
       <PlayerSelect
-        teams={teams}
         selectedTeamId={selectedTeamId}
         selectedPlayer={selectedPlayer}
         setSelectedPlayer={setSelectedPlayer}
-        players={players}
         selectPlayerString={selectPlayerString}
         setSelectPlayerString={setSelectPlayerString}
       />

@@ -3,20 +3,12 @@ import { FormControl, TextField, Button } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
-import type { Heat, AlertContext } from "@/types";
+import type { Heat } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
-interface SetHeatProps {
-  heats: Heat[];
-}
-
-const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
-  const [alertOpen, setAlertOpen] = useState<boolean>(false);
-  const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
-    "error",
-  );
-  const [alertText, setAlertText] = useState<string>("");
-  const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
+const SetHeat: React.FC = () => {
+  const { alert, heats } = useFetchDataConvex();
   const [heatNumber, setHeatNumber] = useState<string>("");
 
   const createHeatMutation = useMutation(api.mutations.createHeat);
@@ -61,10 +53,10 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
       return undefined;
     } catch (error) {
       const err = "Error updating current heat: " + (error as Error).message;
-      setAlertOpen(true);
-      setAlertSeverity("error");
-      setAlertText(err);
-      setAlertContext({
+      alert.setOpen(true);
+      alert.setSeverity("error");
+      alert.setText(err);
+      alert.setContext({
         operation: "set_heat",
         location: "SetHeat.setNotCurrentHeat",
         metadata: {
@@ -90,10 +82,10 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
       return undefined;
     } catch (error) {
       const err = "Error creating heat: " + (error as Error).message;
-      setAlertOpen(true);
-      setAlertSeverity("error");
-      setAlertText(err);
-      setAlertContext({
+      alert.setOpen(true);
+      alert.setSeverity("error");
+      alert.setText(err);
+      alert.setContext({
         operation: "set_heat",
         location: "SetHeat.createHeat",
         metadata: {
@@ -119,10 +111,10 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
       return undefined;
     } catch (error) {
       const err = "Error updating heat: " + (error as Error).message;
-      setAlertOpen(true);
-      setAlertSeverity("error");
-      setAlertText(err);
-      setAlertContext({
+      alert.setOpen(true);
+      alert.setSeverity("error");
+      alert.setText(err);
+      alert.setContext({
         operation: "set_heat",
         location: "SetHeat.updateHeat",
         metadata: {
@@ -163,10 +155,10 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
       }
     }
 
-    setAlertOpen(true);
-    setAlertSeverity("success");
-    setAlertText(`Heat ${heatNumber} set`);
-    setAlertContext({
+    alert.setOpen(true);
+    alert.setSeverity("success");
+    alert.setText(`Heat ${heatNumber} set`);
+    alert.setContext({
       operation: "set_heat",
       location: "SetHeat.handleSetHeat",
       metadata: {
@@ -179,11 +171,11 @@ const SetHeat: React.FC<SetHeatProps> = ({ heats = [] }) => {
   return (
     <>
       <AlertComponent
-        severity={alertSeverity}
-        text={alertText}
-        open={alertOpen}
-        setOpen={setAlertOpen}
-        context={alertContext}
+        severity={alert.severity}
+        text={alert.text}
+        open={alert.open}
+        setOpen={alert.setOpen}
+        context={alert.context}
       />
       <FormControl fullWidth margin="normal" variant="filled">
         <TextField

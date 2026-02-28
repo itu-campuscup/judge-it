@@ -30,25 +30,14 @@ import {
 } from "@/utils/sortFilterUtils";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
 import RadarChartComponent from "./components/RadarChartComponent";
-import type { TimeLog, Player, Team, Heat, TimeType } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
-interface ContestantsProps {
-  timeLogs: TimeLog[];
-  players: Player[];
-  teams: Team[];
-  heats: Heat[];
-  timeTypes: TimeType[];
-}
-
-const Contestants: React.FC<ContestantsProps> = ({
-  timeLogs = [],
-  players = [],
-  timeTypes = [],
-  teams = [],
-}) => {
+const Contestants: React.FC = () => {
   const [selectedPlayer1Id, setSelectedPlayer1Id] = useState<string>("");
   const [selectedPlayer2Id, setSelectedPlayer2Id] = useState<string>("");
+
+  const { players, teams, timeLogs, timeTypes } = useFetchDataConvex();
 
   const handlePlayerChange = useCallback(
     (
