@@ -1,6 +1,6 @@
 "use client";
 
-import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
+import { Team, TimeLog } from "@/types";
 import {
   getBestIntraHeatTime,
   getTeamPlayerIds,
@@ -32,22 +32,13 @@ import {
 import RadarChartComponent from "./components/RadarChartComponent";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
-interface TeamsProps {
-  timeLogs: TimeLog[];
-  players: Player[];
-  teams: Team[];
-  heats: Heat[];
-  timeTypes: TimeType[];
-}
-
-const Teams: React.FC<TeamsProps> = ({
-  timeLogs = [],
-  teams = [],
-  timeTypes = [],
-}) => {
+const Teams: React.FC = () => {
   const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>("");
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>("");
+
+  const { teams, timeLogs, timeTypes } = useFetchDataConvex();
 
   const handleTeamChange = useCallback(
     (

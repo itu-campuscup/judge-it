@@ -7,28 +7,26 @@ import {
   Radio,
 } from "@mui/material";
 import { getTeamPlayerIds, getPlayer } from "@/utils/getUtils";
-import type { Team, Player } from "@/types";
+import type { Player } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface PlayerSelectProps {
-  teams: Team[];
   selectedTeamId: Id<"teams"> | null;
   selectedPlayer: string;
   setSelectedPlayer: (value: string) => void;
-  players: Player[];
   selectPlayerString: string;
   setSelectPlayerString: (value: string) => void;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({
-  teams,
   selectedTeamId,
   selectedPlayer,
   setSelectedPlayer,
-  players,
   selectPlayerString,
   setSelectPlayerString,
 }) => {
+  const { players, teams } = useFetchDataConvex();
   const calculatedTeamPlayers = useMemo(() => {
     if (!selectedTeamId) return [];
     const teamPlayerIds = getTeamPlayerIds(selectedTeamId, teams);

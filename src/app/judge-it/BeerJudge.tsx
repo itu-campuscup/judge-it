@@ -13,33 +13,16 @@ import {
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type {
-  Player,
-  TimeLog,
-  TimeType,
-  Heat,
-  AlertObject,
-  Team,
-} from "@/types";
+import type { Team } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface BeerJudgeProps {
-  players: Player[];
-  heats: Heat[];
   selectedTeam: Team | null;
-  timeTypes: TimeType[];
-  timeLogs: TimeLog[];
-  alert: AlertObject;
 }
 
-const BeerJudge: React.FC<BeerJudgeProps> = ({
-  players,
-  heats,
-  selectedTeam,
-  timeTypes = [],
-  timeLogs = [],
-  alert,
-}) => {
+const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
+  const { alert, heats, players, timeLogs, timeTypes } = useFetchDataConvex();
   const createTimeLog = useMutation(api.mutations.createTimeLog);
 
   const latestPlayer =
