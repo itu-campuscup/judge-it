@@ -2,10 +2,10 @@ import { useEffect, useRef } from "react";
 import { Alert, Snackbar } from "@mui/material";
 import { createLogger, AppError } from "@/observability";
 import { useAuth } from "@/AuthContext";
-import type { AlertContext } from "@/types";
+import type { AlertContext, AlertSeverity } from "@/types";
 
 interface AlertComponentProps {
-  severity: "success" | "error" | "warning" | "info";
+  severity: AlertSeverity;
   text: string;
   open: boolean;
   setOpen: (open: boolean) => void;
