@@ -11,6 +11,7 @@ import type {
   TimeLog,
   AlertContext,
   AlertSeverity,
+  TimeTypeKey,
 } from "@/types";
 import { createLogger } from "@/observability";
 import { useAuth } from "@/AuthContext";
@@ -159,7 +160,7 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
       convexTimeTypes?.map((tt) => ({
         id: tt._id,
         name: tt.name,
-        time_eng: tt.time_eng,
+        time_eng: tt.time_eng as TimeTypeKey,
         description: tt.description,
       })) ?? [],
     [convexTimeTypes],
