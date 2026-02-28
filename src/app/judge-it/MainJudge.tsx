@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TeamSelect from "./TeamSelect";
 import PlayerSelect from "./PlayerSelect";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
@@ -10,6 +10,7 @@ import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type { Heat } from "@/types";
 import { Id } from "convex/_generated/dataModel";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
+import JudgeButton from "../components/JudgeButton";
 
 interface MainJudgeProps {
   parentTeam: string | null;
@@ -253,20 +254,9 @@ const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
         setSelectPlayerString={setSelectPlayerString}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          fullWidth
-          sx={{
-            minHeight: 80,
-            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-            padding: 2,
-          }}
-          onClick={() => handleGlobalStart()}
-        >
+        <JudgeButton onClick={() => handleGlobalStart()}>
           Start Heat {nextHeatNumber} & Global Timer
-        </Button>
+        </JudgeButton>
       </Stack>
     </>
   );

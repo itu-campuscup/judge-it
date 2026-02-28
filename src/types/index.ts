@@ -40,7 +40,7 @@ export interface Heat {
 export interface TimeType {
   id: Id<"time_types">;
   name: string;
-  time_eng: string;
+  time_eng: TimeTypeKey;
   description?: string;
 }
 
