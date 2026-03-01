@@ -75,7 +75,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
 
     try {
       await createTimeLog({
-        team_id: (selectedTeam ?? undefined) as Id<"teams"> | undefined,
+        team_id: selectedTeam?.id,
         player_id: latestPlayer as Id<"players">,
         time_type_id: timeTypeId,
         heat_id: currentHeat.id,
