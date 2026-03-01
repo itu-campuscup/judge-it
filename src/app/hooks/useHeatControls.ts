@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
@@ -18,29 +18,16 @@ const useHeatControls = (
   { teamA, playerA, teamB, playerB }: MainJudgeProps,
   alert: AlertObject,
 ) => {
-  const { heats, timeTypes } = useFetchDataConvex();
+  const { heats, timeLogs, timeTypes } = useFetchDataConvex();
   const createHeat = useMutation(api.mutations.createHeat);
   const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
   const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const createTimeLog = useMutation(api.mutations.createTimeLog);
-  const [nextHeatNumber, setNextHeatNumber] = useState<number>(1);
 
-  // Calculate next heat number when component mounts
-  useEffect(() => {
-    const calculateNextHeat = async () => {
-      const nextHeat = await getNextHeatNumber();
-      setNextHeatNumber(nextHeat);
-    };
-    calculateNextHeat();
-  }, [heats]);
-
-  /**
-   * Get the next heat number based on current heat
-   */
-  const getNextHeatNumber = async (): Promise<number> => {
-    const currentHeatData = getCurrentHeat(heats, alert);
-    return currentHeatData ? currentHeatData.heat + 1 : 1;
-  };
+  const nextHeatNumber = useMemo(() => {
+    const current = getCurrentHeat(heats, alert);
+    return current ? current.heat + 1 : 1;
+  }, [timeLogs]);
 
   /**
    * Create and set a new heat as current
@@ -143,10 +130,6 @@ const useHeatControls = (
           teamB,
         },
       });
-
-      // Update next heat number for the button
-      const updatedNextHeat = await getNextHeatNumber();
-      setNextHeatNumber(updatedNextHeat);
     } catch (error) {
       const err = "Error starting global timer: " + (error as Error).message;
       alert.setOpen(true);
