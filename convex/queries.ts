@@ -24,6 +24,27 @@ export const getPlayer = query({
   },
 });
 
+// Get players in a team
+export const getPlayersByTeam = query({
+  args: { team_id: v.id("teams") },
+  handler: async (ctx, args) => {
+    const team = await ctx.db.get(args.team_id);
+    if (!team) return [];
+    const playerIds = [
+      team.player_1_id,
+      team.player_2_id,
+      team.player_3_id,
+      team.player_4_id,
+    ].filter((pid) => pid !== undefined);
+    const players = [];
+    for (const id of playerIds) {
+      const p = await ctx.db.get(id);
+      players.push(p);
+    }
+    return players;
+  },
+});
+
 // Get all teams
 export const getTeams = query({
   args: {},
