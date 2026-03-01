@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import {
@@ -12,7 +12,7 @@ import { TIME_TYPE_SAIL } from "@/utils/constants";
 import type { Team, Player } from "@/types";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import JudgeButton from "../components/JudgeButton";
-import { useHeatControls } from "../hooks";
+import { useCurrentHeat, useHeatControls } from "../hooks";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
@@ -23,7 +23,8 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   selectedTeam,
   selectedPlayer,
 }) => {
-  const { alert, heats, players, timeLogs } = useFetchDataConvex();
+  const { alert, heats, players, reload, timeTypes } = useFetchDataConvex();
+  const { timeLogs } = useCurrentHeat();
   const currentHeat = getCurrentHeat(heats, alert);
 
   const playerName = getPlayerName(selectedPlayer?.id || null, players);
@@ -36,10 +37,18 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
 
   const { handleStartStop } = useHeatControls({}, alert);
 
+  const sailTypeId = timeTypes.find((tt) => tt.time_eng === TIME_TYPE_SAIL)!.id;
+  const teamSailTimeLogs = useMemo(() => {
+    return timeLogs.filter(
+      (l) => l.team_id === selectedTeam?.id && l.time_type_id === sailTypeId,
+    ).length;
+  }, [timeLogs]);
+
   const handleStartStopClick = (isFullStop: boolean) => () => {
     if (isFullStop)
       handleStartStop(prevPlayerId, prevPlayerId, selectedTeam?.id);
     else handleStartStop(prevPlayerId, selectedPlayer?.id, selectedTeam?.id);
+    reload();
   };
 
   return (
@@ -52,14 +61,23 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
         setOpen={alert.setOpen}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
-        {prevPlayerId !== null && (
-          <JudgeButton color="error" onClick={handleStartStopClick(true)}>
+        {teamSailTimeLogs >= 15 && (
+          <JudgeButton
+            color="error"
+            disabled={teamSailTimeLogs > 15}
+            onClick={handleStartStopClick(true)}
+          >
             STOP {prevPlayerName} {TIME_TYPE_SAIL}
           </JudgeButton>
         )}
-        <JudgeButton onClick={handleStartStopClick(false)}>
-          Stop prev and Start {playerName} {TIME_TYPE_SAIL}
-        </JudgeButton>
+        {teamSailTimeLogs < 15 && (
+          <JudgeButton
+            disabled={teamSailTimeLogs % 4 !== 3}
+            onClick={handleStartStopClick(false)}
+          >
+            Stop {prevPlayerName} and Start {playerName} {TIME_TYPE_SAIL}
+          </JudgeButton>
+        )}
       </Stack>
     </>
   );
