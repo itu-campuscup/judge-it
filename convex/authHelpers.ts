@@ -74,3 +74,40 @@ export async function isApprovedUser(
     return false;
   }
 }
+
+/**
+ * Check if the current user is an administrator
+ * Throws an error if the user is not authenticated or not an admin
+ */
+export async function requireAdminUser(
+  ctx: QueryCtx | MutationCtx,
+): Promise<void> {
+  const userId = await getCurrentUserId(ctx);
+
+  const user = await ctx.db.get(userId as Id<"users">);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const isAdmin = (user as { isAdmin?: boolean }).isAdmin === true;
+
+  if (!isAdmin) {
+    throw new Error("Admin access required");
+  }
+}
+
+/**
+ * Check if the current user is an administrator
+ * Returns true if admin, false if not authenticated or not an admin
+ */
+export async function isAdminUser(
+  ctx: QueryCtx | MutationCtx,
+): Promise<boolean> {
+  try {
+    await requireAdminUser(ctx);
+    return true;
+  } catch {
+    return false;
+  }
+}
