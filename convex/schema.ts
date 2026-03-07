@@ -25,6 +25,8 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
     // Custom field for admin approval
     approved: v.optional(v.boolean()),
+    // Custom field for admin status
+    isAdmin: v.optional(v.boolean()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
