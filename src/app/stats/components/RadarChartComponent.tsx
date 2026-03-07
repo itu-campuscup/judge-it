@@ -126,4 +126,4 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
   );
 };
 
-export default RadarChartComponent;
+export default React.memo(RadarChartComponent);
