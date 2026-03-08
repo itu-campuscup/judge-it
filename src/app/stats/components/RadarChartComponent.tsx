@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Box, Avatar, Typography } from "@mui/material";
 import {
   RadarChart,
@@ -22,14 +22,9 @@ interface RadarChartComponentProps {
   data: RadarChartData[];
 }
 
-const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
-  imageUrl,
-  name,
-  altTextType,
-  altText,
-  data,
-}) => {
-  return (
+const RadarChartComponent: React.FC<RadarChartComponentProps> = memo(
+  ({ imageUrl, name, altTextType, altText, data }) => {
+    return (
     <Box
       sx={{
         textAlign: "center",
@@ -123,7 +118,8 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
         </RadarChart>
       </Box>
     </Box>
-  );
-};
+    );
+  },
+);
 
 export default React.memo(RadarChartComponent);

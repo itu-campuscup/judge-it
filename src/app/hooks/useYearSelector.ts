@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getUniqueYearsGivenHeats } from "@/utils/timeUtils";
 import type { Heat } from "@/types";
 
@@ -9,17 +9,14 @@ interface UseYearSelectorReturn {
 }
 
 const useYearSelector = (heats: Heat[] = []): UseYearSelectorReturn => {
-  const uniqueYears = getUniqueYearsGivenHeats(heats);
+  const uniqueYears = useMemo(() => getUniqueYearsGivenHeats(heats), [heats]);
 
-  // Initialize with a proper default value instead of null
-  const getDefaultYear = (): number => {
+  const [selectedYear, setSelectedYear] = useState<number>(() => {
     if (uniqueYears.length === 0) return new Date().getFullYear();
 
     const currentYear = new Date().getFullYear();
     return uniqueYears.includes(currentYear) ? currentYear : uniqueYears[0];
-  };
-
-  const [selectedYear, setSelectedYear] = useState<number>(getDefaultYear());
+  });
 
   useEffect(() => {
     // Only update if we have years and the current selection isn't valid
