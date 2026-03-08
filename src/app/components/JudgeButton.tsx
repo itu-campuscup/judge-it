@@ -18,8 +18,8 @@ const JudgeButton: React.FC<ButtonProps> = (props) => {
       color="primary"
       size="large"
       fullWidth
-      disabled={disabled}
       {...props}
+      disabled={props.disabled || disabled}
       onClick={handleClick}
     >
       {props.children}

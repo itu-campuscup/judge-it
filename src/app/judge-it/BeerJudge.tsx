@@ -1,41 +1,65 @@
-import React from "react";
-import { useMutation } from "convex/react";
-import { api } from "convex/_generated/api";
-import AlertComponent from "../components/AlertComponent";
-import { Stack } from "@mui/material";
+import React, { useMemo } from "react";
 import {
-  getPlayerName,
-  getCurrentHeat,
   getPlayerIdGivenTeamAndTimeLogs,
+  getPlayerName,
 } from "@/utils/getUtils";
 import {
   TIME_TYPE_SAIL,
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type { Team, TimeType } from "@/types";
-import { Id } from "convex/_generated/dataModel";
-import useFetchDataConvex from "../hooks/useFetchDataConvex";
+import type { Team, TimeTypeKey } from "@/types";
+import { useFetchDataConvex, useHeatControls, useCurrentHeat } from "../hooks";
 import JudgeButton from "../components/JudgeButton";
+import AlertComponent from "../components/AlertComponent";
 
 interface BeerJudgeProps {
   selectedTeam: Team | null;
 }
 
+enum BeerSidePhase {
+  SAILING_IN = 1,
+  RUN_TO_BEER = 2,
+  DRINKING_BEER = 3,
+  RUN_TO_SPIN = 4,
+  SPINNING = 5,
+  RUN_TO_BOAT = 6,
+  SAILING_OUT = 7,
+}
+
 const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
-  const { alert, heats, players, timeLogs, timeTypes } = useFetchDataConvex();
-  const createTimeLog = useMutation(api.mutations.createTimeLog);
+  const { alert, timeTypes, players, reload } = useFetchDataConvex();
+  const { timeLogs } = useCurrentHeat();
+  const { insertTimeLog } = useHeatControls({}, alert);
 
-  const latestPlayer =
-    selectedTeam !== null
-      ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam.id, timeLogs)
-      : null;
-  const playerName = latestPlayer
-    ? getPlayerName(latestPlayer, players)
-    : "player null";
+  const latestPlayer = selectedTeam
+    ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam.id, timeLogs)
+    : null;
+  const playerName = getPlayerName(latestPlayer, players);
 
-  const timeTypeEmoji = (timeType: TimeType) => {
-    switch (timeType.time_eng) {
+  const currentPhase = useMemo(() => {
+    const logs = timeLogs.filter((tl) => tl.player_id === latestPlayer);
+    return logs.length;
+  }, [latestPlayer, timeLogs]);
+
+  const currentTimeType = useMemo(() => {
+    switch (currentPhase) {
+      case BeerSidePhase.SAILING_IN:
+      case BeerSidePhase.RUN_TO_BOAT:
+      case BeerSidePhase.SAILING_OUT:
+        return TIME_TYPE_SAIL;
+      case BeerSidePhase.RUN_TO_BEER:
+      case BeerSidePhase.DRINKING_BEER:
+        return TIME_TYPE_BEER;
+      case BeerSidePhase.RUN_TO_SPIN:
+      case BeerSidePhase.SPINNING:
+        return TIME_TYPE_SPIN;
+    }
+    return TIME_TYPE_SAIL;
+  }, [currentPhase]);
+
+  const timeTypeEmoji = () => {
+    switch (currentTimeType) {
       case TIME_TYPE_SAIL:
         return "⛵";
       case TIME_TYPE_BEER:
@@ -47,106 +71,10 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
     }
   };
 
-  /**
-   * Handle button click to start/stop the timers to send a row to the db
-   */
-  const handleTimeTypeClick = async (
-    timeTypeId: Id<"time_types">,
-  ): Promise<void> => {
-    const currentHeat = getCurrentHeat(heats, alert);
-    if (!currentHeat) {
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText("No current heat found");
-      alert.setContext({
-        operation: "record_time",
-        location: "BeerJudge.handleTimeTypeClick",
-        metadata: {
-          timeTypeId,
-          selectedTeam,
-          latestPlayer,
-        },
-      });
-      return;
-    }
-
-    const isValid = validateInputs();
-    if (!isValid) return;
-
-    try {
-      await createTimeLog({
-        team_id: selectedTeam?.id,
-        player_id: latestPlayer as Id<"players">,
-        time_type_id: timeTypeId,
-        heat_id: currentHeat.id,
-      });
-    } catch (error) {
-      const err = "Error inserting time log: " + (error as Error).message;
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText(err);
-      alert.setContext({
-        operation: "record_time",
-        location: "BeerJudge.handleTimeTypeClick",
-        metadata: {
-          step: "insert_time_log",
-          teamId: selectedTeam,
-          playerId: latestPlayer,
-          timeTypeId,
-          heatId: currentHeat.id,
-        },
-      });
-      return;
-    }
-    const timeTypeName =
-      timeTypes.find((e) => e.id === timeTypeId)?.time_eng || "Unknown";
-    alert.setOpen(true);
-    alert.setSeverity("success");
-    alert.setText(`Inserted log of type: ${timeTypeName}`);
-    alert.setContext({
-      operation: "record_time",
-      location: "BeerJudge.handleTimeTypeClick",
-      metadata: {
-        teamId: selectedTeam,
-        playerId: latestPlayer,
-        timeTypeId,
-        timeTypeName,
-        heatId: currentHeat.id,
-      },
-    });
-  };
-  /**
-   * Validate inputs before sending to the database
-   * @returns {boolean} True if inputs are valid, false otherwise
-   */
-  const validateInputs = (): boolean => {
-    let errorTxt: string | null = null;
-
-    if (!selectedTeam) {
-      errorTxt = "Team has not been selected";
-    } else if (!latestPlayer) {
-      errorTxt = "Player has not been selected";
-    } else if (!timeTypes.length) {
-      errorTxt = "No time types available";
-    }
-
-    if (errorTxt) {
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText(errorTxt);
-      alert.setContext({
-        operation: "validate_inputs",
-        location: "BeerJudge.validateInputs",
-        metadata: {
-          selectedTeam,
-          latestPlayer,
-          timeTypesCount: timeTypes.length,
-        },
-      });
-      return false;
-    }
-
-    return true;
+  const handleTimeTypeClick = async (timeTypeKey: TimeTypeKey) => {
+    const timeTypeId = timeTypes.find((tt) => tt.time_eng === timeTypeKey)!.id;
+    await insertTimeLog(timeTypeId, latestPlayer, selectedTeam?.id);
+    reload();
   };
 
   return (
@@ -157,17 +85,15 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
         open={alert.open}
         setOpen={alert.setOpen}
       />
-      <Stack spacing={2} sx={{ width: "100%" }}>
-        {timeTypes.map((timeType, idx) => (
-          <JudgeButton
-            key={idx}
-            onClick={() => handleTimeTypeClick(timeType.id)}
-          >
-            Start/Stop {playerName} {timeType.time_eng}{" "}
-            {timeTypeEmoji(timeType)}
-          </JudgeButton>
-        ))}
-      </Stack>
+      {playerName !== "" && (
+        <JudgeButton
+          disabled={currentPhase >= BeerSidePhase.SAILING_OUT}
+          onClick={() => handleTimeTypeClick(currentTimeType)}
+        >
+          {currentPhase % 2 == 0 ? "Start" : "Stop"} {playerName}{" "}
+          {currentTimeType} {timeTypeEmoji()}
+        </JudgeButton>
+      )}
     </>
   );
 };
