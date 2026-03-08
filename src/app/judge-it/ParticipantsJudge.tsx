@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import AlertComponent from "../components/AlertComponent";
 import {
   getPlayerName,
@@ -12,40 +12,23 @@ import {
   getTimeType,
 } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
-import type {
-  Team,
-  Player,
-  TimeType,
-  TimeLog,
-  Heat,
-  AlertContext,
-  AlertObject,
-} from "@/types";
+import type { Team, Player, Heat, AlertContext, AlertSeverity } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
+import JudgeButton from "../components/JudgeButton";
 
 interface ParticipantsJudgeProps {
   selectedTeam: Team | null;
   selectedPlayer: Player | null;
-  heats: Heat[];
-  timeTypes?: TimeType[];
-  players?: Player[];
-  timeLogs?: TimeLog[];
-  alert: AlertObject;
 }
 
 const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
   selectedTeam,
   selectedPlayer,
-  heats,
-  timeTypes = [],
-  players = [],
-  timeLogs = [],
-  alert,
 }) => {
+  const { alert, heats, players, timeTypes, timeLogs } = useFetchDataConvex();
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
-  const [alertSeverity, setAlertSeverity] = useState<"error" | "success">(
-    "error",
-  );
+  const [alertSeverity, setAlertSeverity] = useState<AlertSeverity>("error");
   const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const [alertText, setAlertText] = useState<string>("");
   const [alertContext, setAlertContext] = useState<AlertContext | undefined>();
@@ -163,34 +146,17 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
         setOpen={setAlertOpen}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
-        <Button
-          variant="contained"
+        <JudgeButton
           color="error"
-          size="large"
-          fullWidth
-          sx={{
-            minHeight: 80,
-            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-            padding: 2,
-          }}
           onClick={() => handleStartStop(prevPlayerId)}
         >
           STOP {prevPlayerName} {TIME_TYPE_SAIL}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          fullWidth
-          sx={{
-            minHeight: 80,
-            fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-            padding: 2,
-          }}
+        </JudgeButton>
+        <JudgeButton
           onClick={() => handleStartStop(selectedPlayer?.id || null)}
         >
           Stop prev and Start {playerName} {TIME_TYPE_SAIL}
-        </Button>
+        </JudgeButton>
       </Stack>
     </>
   );

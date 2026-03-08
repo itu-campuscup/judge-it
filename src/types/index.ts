@@ -40,7 +40,7 @@ export interface Heat {
 export interface TimeType {
   id: Id<"time_types">;
   name: string;
-  time_eng: string;
+  time_eng: TimeTypeKey;
   description?: string;
 }
 
@@ -92,6 +92,9 @@ export type JudgeType = "main" | "participants" | "beer";
 // Time types
 export type TimeTypeKey = "Beer" | "Sail" | "Spin";
 
+// Alert severities
+export type AlertSeverity = "success" | "error" | "warning" | "info";
+
 // Utility function types
 export interface SortFilterOptions {
   sortBy: "time" | "name" | "team";
@@ -101,11 +104,11 @@ export interface SortFilterOptions {
 
 export interface AlertObject {
   open: boolean;
-  severity: "success" | "error" | "warning" | "info";
+  severity: AlertSeverity;
   text: string;
   context?: AlertContext;
   setOpen: (open: boolean) => void;
-  setSeverity: (severity: "success" | "error" | "warning" | "info") => void;
+  setSeverity: (severity: AlertSeverity) => void;
   setText: (text: string) => void;
   setContext: (context: AlertContext | undefined) => void;
 }

@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import AlertComponent from "../components/AlertComponent";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import {
   getPlayerName,
   getCurrentHeat,
@@ -13,33 +13,17 @@ import {
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type {
-  Player,
-  TimeLog,
-  TimeType,
-  Heat,
-  AlertObject,
-  Team,
-} from "@/types";
+import type { Team, TimeType } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
+import JudgeButton from "../components/JudgeButton";
 
 interface BeerJudgeProps {
-  players: Player[];
-  heats: Heat[];
   selectedTeam: Team | null;
-  timeTypes: TimeType[];
-  timeLogs: TimeLog[];
-  alert: AlertObject;
 }
 
-const BeerJudge: React.FC<BeerJudgeProps> = ({
-  players,
-  heats,
-  selectedTeam,
-  timeTypes = [],
-  timeLogs = [],
-  alert,
-}) => {
+const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
+  const { alert, heats, players, timeLogs, timeTypes } = useFetchDataConvex();
   const createTimeLog = useMutation(api.mutations.createTimeLog);
 
   const latestPlayer =
@@ -49,66 +33,20 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
   const playerName = latestPlayer
     ? getPlayerName(latestPlayer, players)
     : "player null";
-  /**
-   * Create buttons for each time type
-   *
-   * @returns {Array} Array of buttons
-   */
-  const timeTypeButtons = useCallback(
-    () =>
-      timeTypes.map((timeType) => {
-        const sailingText = `${"Start/Stop "}${playerName} ${
-          timeType.time_eng
-        } ⛵`;
-        const beerText = `${"Start/Stop "}${playerName} ${
-          timeType.time_eng
-        } 🍺`;
-        const spinText = `${"Start/Stop "}${playerName} ${
-          timeType.time_eng
-        } 🌪️`;
 
-        const text = (name: string): string => {
-          if (name === TIME_TYPE_SAIL) return sailingText;
-          if (name === TIME_TYPE_BEER) return beerText;
-          if (name === TIME_TYPE_SPIN) return spinText;
-          alert.setOpen(true);
-          alert.setSeverity("error");
-          alert.setText("Unknown time type");
-          alert.setContext({
-            operation: "render_time_type_buttons",
-            location: "BeerJudge.timeTypeButtons.text",
-            metadata: {
-              unknownTimeType: name,
-              availableTimeTypes: [
-                TIME_TYPE_SAIL,
-                TIME_TYPE_BEER,
-                TIME_TYPE_SPIN,
-              ],
-            },
-          });
-          return "";
-        };
+  const timeTypeEmoji = (timeType: TimeType) => {
+    switch (timeType.time_eng) {
+      case TIME_TYPE_SAIL:
+        return "⛵";
+      case TIME_TYPE_BEER:
+        return "🍺";
+      case TIME_TYPE_SPIN:
+        return "🌪️";
+      default:
+        return "";
+    }
+  };
 
-        return (
-          <Button
-            key={timeType.id}
-            variant="contained"
-            color="primary"
-            size="large"
-            fullWidth
-            sx={{
-              minHeight: 80,
-              fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
-              padding: 2,
-            }}
-            onClick={() => handleTimeTypeClick(timeType.id)}
-          >
-            {text(timeType.time_eng)}
-          </Button>
-        );
-      }),
-    [timeTypes, playerName],
-  );
   /**
    * Handle button click to start/stop the timers to send a row to the db
    */
@@ -137,7 +75,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
 
     try {
       await createTimeLog({
-        team_id: (selectedTeam ?? undefined) as Id<"teams"> | undefined,
+        team_id: selectedTeam?.id,
         player_id: latestPlayer as Id<"players">,
         time_type_id: timeTypeId,
         heat_id: currentHeat.id,
@@ -220,7 +158,15 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({
         setOpen={alert.setOpen}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
-        {timeTypeButtons()}
+        {timeTypes.map((timeType, idx) => (
+          <JudgeButton
+            key={idx}
+            onClick={() => handleTimeTypeClick(timeType.id)}
+          >
+            Start/Stop {playerName} {timeType.time_eng}{" "}
+            {timeTypeEmoji(timeType)}
+          </JudgeButton>
+        ))}
       </Stack>
     </>
   );

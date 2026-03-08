@@ -1,6 +1,6 @@
 "use client";
 
-import { Heat, Player, Team, TimeLog, TimeType } from "@/types";
+import { Team, TimeLog } from "@/types";
 import {
   getBestIntraHeatTime,
   getTeamPlayerIds,
@@ -32,22 +32,22 @@ import {
 import RadarChartComponent from "./components/RadarChartComponent";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
 import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
-interface TeamsProps {
-  timeLogs: TimeLog[];
-  players: Player[];
-  teams: Team[];
-  heats: Heat[];
-  timeTypes: TimeType[];
-}
+/**
+ * Helper to filter multiple players' log arrays by a specific time type.
+ * Moved outside component to maintain referential stability.
+ */
+const filterPlayerLogsByType = (logs: TimeLog[][], typeId: Id<"time_types">) =>
+  logs.map((playerLogs: TimeLog[]) =>
+    filterTimeLogsByTimeType(playerLogs, typeId),
+  );
 
-const Teams: React.FC<TeamsProps> = ({
-  timeLogs = [],
-  teams = [],
-  timeTypes = [],
-}) => {
+const Teams: React.FC = () => {
   const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>("");
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>("");
+
+  const { teams, timeLogs, timeTypes } = useFetchDataConvex();
 
   const handleTeamChange = useCallback(
     (
@@ -65,18 +65,9 @@ const Teams: React.FC<TeamsProps> = ({
     [],
   );
 
-  const beerTypeId = useMemo(
-    () => getTimeTypeBeer(timeTypes)?.id || "",
-    [timeTypes],
-  );
-  const spinnerTypeId = useMemo(
-    () => getTimeTypeSpinner(timeTypes)?.id || "",
-    [timeTypes],
-  );
-  const sailTypeId = useMemo(
-    () => getTimeTypeSail(timeTypes)?.id || "",
-    [timeTypes],
-  );
+  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || "";
+  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || "";
+  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
 
   const team1Players = useMemo(
     () => getTeamPlayerIds(selectedTeam1Id as Id<"teams">, teams),
@@ -114,85 +105,96 @@ const Teams: React.FC<TeamsProps> = ({
     [team2Players, timeLogs],
   );
 
-  const team1BestTimes = useMemo(() => {
-    const filterPlayerLogsByType = (
-      logs: TimeLog[][],
-      typeId: Id<"time_types">,
-    ) =>
-      logs.map((playerLogs: TimeLog[]) =>
-        filterTimeLogsByTimeType(playerLogs, typeId),
-      );
+  // Performance Optimization: Memoize all data transformations to prevent
+  // redundant O(N) operations and heavy visualization re-renders.
 
-    const beerLogs = filterPlayerLogsByType(
-      team1LogsSortedByHeatAndTime,
-      beerTypeId as Id<"time_types">,
-    );
-    const spinnerLogs = filterPlayerLogsByType(
-      team1LogsSortedByHeatAndTime,
-      spinnerTypeId as Id<"time_types">,
-    );
-    const sailLogs = filterPlayerLogsByType(
-      team1LogsSortedByHeatAndTime,
-      sailTypeId as Id<"time_types">,
-    );
+  const team1BeerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team1LogsSortedByHeatAndTime,
+        beerTypeId as Id<"time_types">,
+      ),
+    [team1LogsSortedByHeatAndTime, beerTypeId],
+  );
+  const team1SpinnerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team1LogsSortedByHeatAndTime,
+        spinnerTypeId as Id<"time_types">,
+      ),
+    [team1LogsSortedByHeatAndTime, spinnerTypeId],
+  );
+  const team1SailLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team1LogsSortedByHeatAndTime,
+        sailTypeId as Id<"time_types">,
+      ),
+    [team1LogsSortedByHeatAndTime, sailTypeId],
+  );
+  const team2BeerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team2LogsSortedByHeatAndTime,
+        beerTypeId as Id<"time_types">,
+      ),
+    [team2LogsSortedByHeatAndTime, beerTypeId],
+  );
+  const team2SpinnerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team2LogsSortedByHeatAndTime,
+        spinnerTypeId as Id<"time_types">,
+      ),
+    [team2LogsSortedByHeatAndTime, spinnerTypeId],
+  );
+  const team2SailLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team2LogsSortedByHeatAndTime,
+        sailTypeId as Id<"time_types">,
+      ),
+    [team2LogsSortedByHeatAndTime, sailTypeId],
+  );
 
-    const getBestIntraHeatTimeAverage = (logs: TimeLog[][]): number =>
+  const getBestIntraHeatTimeAverage = useCallback(
+    (logs: TimeLog[][]): number =>
       logs
         .map(
           (playerLog: TimeLog[]) =>
             getBestIntraHeatTime(playerLog)?.duration || 0,
         )
-        .reduce(
-          (acc, cur, _, arr) => acc + (arr.length > 0 ? cur / arr.length : 0),
-          0,
-        );
+        .reduce((acc, cur, _, arr) => acc + cur / (arr.length || 1), 0),
+    [],
+  );
 
-    return {
-      [TIME_TYPE_BEER]: getBestIntraHeatTimeAverage(beerLogs),
-      [TIME_TYPE_SPIN]: getBestIntraHeatTimeAverage(spinnerLogs),
-      [TIME_TYPE_SAIL]: getBestIntraHeatTimeAverage(sailLogs),
-    };
-  }, [team1LogsSortedByHeatAndTime, beerTypeId, spinnerTypeId, sailTypeId]);
+  const team1BestTimes = useMemo(
+    () => ({
+      [TIME_TYPE_BEER]: getBestIntraHeatTimeAverage(team1BeerLogs),
+      [TIME_TYPE_SPIN]: getBestIntraHeatTimeAverage(team1SpinnerLogs),
+      [TIME_TYPE_SAIL]: getBestIntraHeatTimeAverage(team1SailLogs),
+    }),
+    [
+      team1BeerLogs,
+      team1SpinnerLogs,
+      team1SailLogs,
+      getBestIntraHeatTimeAverage,
+    ],
+  );
 
-  const team2BestTimes = useMemo(() => {
-    const filterPlayerLogsByType = (
-      logs: TimeLog[][],
-      typeId: Id<"time_types">,
-    ) =>
-      logs.map((playerLogs: TimeLog[]) =>
-        filterTimeLogsByTimeType(playerLogs, typeId),
-      );
-
-    const beerLogs = filterPlayerLogsByType(
-      team2LogsSortedByHeatAndTime,
-      beerTypeId as Id<"time_types">,
-    );
-    const spinnerLogs = filterPlayerLogsByType(
-      team2LogsSortedByHeatAndTime,
-      spinnerTypeId as Id<"time_types">,
-    );
-    const sailLogs = filterPlayerLogsByType(
-      team2LogsSortedByHeatAndTime,
-      sailTypeId as Id<"time_types">,
-    );
-
-    const getBestIntraHeatTimeAverage = (logs: TimeLog[][]): number =>
-      logs
-        .map(
-          (playerLog: TimeLog[]) =>
-            getBestIntraHeatTime(playerLog)?.duration || 0,
-        )
-        .reduce(
-          (acc, cur, _, arr) => acc + (arr.length > 0 ? cur / arr.length : 0),
-          0,
-        );
-
-    return {
-      [TIME_TYPE_BEER]: getBestIntraHeatTimeAverage(beerLogs),
-      [TIME_TYPE_SPIN]: getBestIntraHeatTimeAverage(spinnerLogs),
-      [TIME_TYPE_SAIL]: getBestIntraHeatTimeAverage(sailLogs),
-    };
-  }, [team2LogsSortedByHeatAndTime, beerTypeId, spinnerTypeId, sailTypeId]);
+  const team2BestTimes = useMemo(
+    () => ({
+      [TIME_TYPE_BEER]: getBestIntraHeatTimeAverage(team2BeerLogs),
+      [TIME_TYPE_SPIN]: getBestIntraHeatTimeAverage(team2SpinnerLogs),
+      [TIME_TYPE_SAIL]: getBestIntraHeatTimeAverage(team2SailLogs),
+    }),
+    [
+      team2BeerLogs,
+      team2SpinnerLogs,
+      team2SailLogs,
+      getBestIntraHeatTimeAverage,
+    ],
+  );
 
   const team1ChartData = useMemo(
     () =>
