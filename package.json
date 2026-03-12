@@ -23,7 +23,7 @@
     "test:update-snapshots": "playwright test --update-snapshots"
   },
   "dependencies": {
-    "@auth/core": "^0.37.0",
+    "@auth/core": "^0.41.1",
     "@convex-dev/auth": "^0.0.91",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
