@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useConvexAuth } from "convex/react";
 import { useQuery } from "convex/react";
-import { api } from "../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import type { User } from "@/types";
 
 interface AuthContextType {
