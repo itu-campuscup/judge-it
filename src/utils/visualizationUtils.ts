@@ -28,19 +28,19 @@ export const filterAndSortTimeLogs = (
   selectedYear: number,
   timeTypeId: string,
 ): TimeLog[] => {
-  const heatsInYear = heats.filter(
-    (heat) => new Date(heat.date).getFullYear() === selectedYear,
+  // BOLT OPTIMIZATION: Using a Set for O(1) lookup and filtering in a single pass.
+  // This improves algorithmic complexity from O(H*L) to O(H+L).
+  const heatIdsInYear = new Set(
+    heats
+      .filter((heat) => new Date(heat.date).getFullYear() === selectedYear)
+      .map((heat) => heat.id),
   );
-  const logsForHeats: TimeLog[] = [];
-  for (const heat of heatsInYear) {
-    const filteredTimeLogs = timeLogs.filter(
-      (tl) => tl.heat_id === heat.id && tl.time_type_id === timeTypeId,
-    );
-    logsForHeats.push(...filteredTimeLogs);
-  }
-  return logsForHeats.sort(
-    (a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || ""),
-  );
+
+  return timeLogs
+    .filter(
+      (tl) => tl.time_type_id === timeTypeId && heatIdsInYear.has(tl.heat_id),
+    )
+    .sort((a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || ""));
 };
 
 interface TimeEntry {

@@ -212,18 +212,33 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
     logger,
   ]);
 
-  return {
-    players,
-    heats,
-    teams,
-    timeTypes,
-    timeLogs,
-    alert,
-    loading,
-    error: null,
-    reload,
-    lastReloaded,
-  };
+  // BOLT OPTIMIZATION: Memoize the return object to ensure referential stability.
+  // This prevents unnecessary re-renders in all components using this central data hook.
+  return useMemo(
+    () => ({
+      players,
+      heats,
+      teams,
+      timeTypes,
+      timeLogs,
+      alert,
+      loading,
+      error: null,
+      reload,
+      lastReloaded,
+    }),
+    [
+      players,
+      heats,
+      teams,
+      timeTypes,
+      timeLogs,
+      alert,
+      loading,
+      reload,
+      lastReloaded,
+    ],
+  );
 };
 
 // Default export for backwards compatibility

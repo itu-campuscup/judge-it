@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getUniqueYearsGivenHeats } from "@/utils/timeUtils";
 import type { Heat } from "@/types";
 
@@ -9,7 +9,9 @@ interface UseYearSelectorReturn {
 }
 
 const useYearSelector = (heats: Heat[] = []): UseYearSelectorReturn => {
-  const uniqueYears = getUniqueYearsGivenHeats(heats);
+  // BOLT OPTIMIZATION: Memoize uniqueYears to prevent unnecessary re-calculations
+  // and stable dependency for effects and downstream consumers.
+  const uniqueYears = useMemo(() => getUniqueYearsGivenHeats(heats), [heats]);
 
   // Initialize with a proper default value instead of null
   const getDefaultYear = (): number => {
