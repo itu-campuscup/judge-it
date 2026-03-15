@@ -212,8 +212,6 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
     logger,
   ]);
 
-  // BOLT OPTIMIZATION: Memoize the return object to ensure referential stability.
-  // This prevents unnecessary re-renders in all components using this central data hook.
   return useMemo(
     () => ({
       players,

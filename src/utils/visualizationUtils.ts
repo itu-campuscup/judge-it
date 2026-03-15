@@ -28,8 +28,6 @@ export const filterAndSortTimeLogs = (
   selectedYear: number,
   timeTypeId: string,
 ): TimeLog[] => {
-  // BOLT OPTIMIZATION: Using a Set for O(1) lookup and filtering in a single pass.
-  // This improves algorithmic complexity from O(H*L) to O(H+L).
   const heatIdsInYear = new Set(
     heats
       .filter((heat) => new Date(heat.date).getFullYear() === selectedYear)
