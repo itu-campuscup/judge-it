@@ -212,18 +212,31 @@ export const useFetchDataConvex = (): UseFetchDataReturn => {
     logger,
   ]);
 
-  return {
-    players,
-    heats,
-    teams,
-    timeTypes,
-    timeLogs,
-    alert,
-    loading,
-    error: null,
-    reload,
-    lastReloaded,
-  };
+  return useMemo(
+    () => ({
+      players,
+      heats,
+      teams,
+      timeTypes,
+      timeLogs,
+      alert,
+      loading,
+      error: null,
+      reload,
+      lastReloaded,
+    }),
+    [
+      players,
+      heats,
+      teams,
+      timeTypes,
+      timeLogs,
+      alert,
+      loading,
+      reload,
+      lastReloaded,
+    ],
+  );
 };
 
 // Default export for backwards compatibility
