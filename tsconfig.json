@@ -32,8 +32,7 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "**/*.{ts,tsx,js,jsx}",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
