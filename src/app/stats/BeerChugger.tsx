@@ -36,7 +36,12 @@ const BeerChugger: React.FC = () => {
     setSelectedYear(e.target.value as number);
     setAnimationCycleKey((prev) => prev + 1);
   };
-  const beerTypeId = getTimeTypeId(TIME_TYPE_BEER, timeTypes);
+
+  // Performance Optimization: Memoize beerTypeId to avoid repeated searches on every render
+  const beerTypeId = useMemo(
+    () => getTimeTypeId(TIME_TYPE_BEER, timeTypes),
+    [timeTypes],
+  );
 
   const logsForHeatsSortByTime = useMemo(
     () =>

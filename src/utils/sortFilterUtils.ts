@@ -30,11 +30,12 @@ export const filterTimeLogsByTeamId = (
 
 /**
  * Sorts time logs by heat ID in ascending order.
+ * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by heat ID.
  */
 export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
-  return timeLogs.sort((a: TimeLog, b: TimeLog) => {
+  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
     const aHeat = String(a.heat_id ?? "");
     const bHeat = String(b.heat_id ?? "");
     return aHeat.localeCompare(bHeat);
@@ -43,14 +44,34 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 
 /**
  * Sorts time logs by time in ascending order.
+ * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return timeLogs.sort(
+  return [...timeLogs].sort(
     (a: TimeLog, b: TimeLog) =>
       timeToMilli(a.time || "") - timeToMilli(b.time || ""),
   );
+};
+
+/**
+ * Performance Optimization: Sorts time logs by heat ID then by time in a single pass.
+ * This replaces redundant double-sorts in statistics components.
+ * Note: Returns a new array to avoid in-place mutation.
+ * @param {Array} timeLogs - The list of time logs.
+ * @returns {Array} The sorted time logs.
+ */
+export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
+  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
+    const aHeat = String(a.heat_id ?? "");
+    const bHeat = String(b.heat_id ?? "");
+    const heatComparison = aHeat.localeCompare(bHeat);
+
+    if (heatComparison !== 0) return heatComparison;
+
+    return timeToMilli(a.time || "") - timeToMilli(b.time || "");
+  });
 };
 
 /**

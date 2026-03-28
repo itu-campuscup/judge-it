@@ -34,10 +34,14 @@ const Spinner: React.FC = () => {
     setSelectedYear(e.target.value as number);
     setAnimationCycleKey((prevKey) => prevKey + 1);
   };
-  const spinnerType = timeTypes.find(
-    (timeType) => timeType.time_eng === TIME_TYPE_SPIN,
-  );
-  const spinnerTypeId = spinnerType ? spinnerType.id : null;
+
+  // Performance Optimization: Memoize spinnerTypeId to avoid repeated searches on every render
+  const spinnerTypeId = useMemo(() => {
+    const spinnerType = timeTypes.find(
+      (timeType) => timeType.time_eng === TIME_TYPE_SPIN,
+    );
+    return spinnerType ? spinnerType.id : null;
+  }, [timeTypes]);
 
   const logsForHeatsSortByTime = useMemo(
     () =>
