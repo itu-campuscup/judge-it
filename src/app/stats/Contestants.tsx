@@ -20,13 +20,11 @@ import {
   getTimeTypeBeer,
   getTimeTypeSail,
   getTimeTypeSpinner,
-  getPlayerNameWithTeam,
 } from "@/utils/getUtils";
 import {
   filterTimeLogsByPlayerId,
-  sortTimeLogsByTime,
-  sortTimeLogsByHeat,
   filterTimeLogsByTimeType,
+  sortTimeLogsByHeatAndTime,
 } from "@/utils/sortFilterUtils";
 import { generateRadarChartData } from "@/utils/visualizationUtils";
 import RadarChartComponent from "./components/RadarChartComponent";
@@ -55,9 +53,40 @@ const Contestants: React.FC = () => {
     [],
   );
 
-  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || "";
-  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || "";
-  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
+  const beerTypeId = useMemo(
+    () => getTimeTypeBeer(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const spinnerTypeId = useMemo(
+    () => getTimeTypeSpinner(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const sailTypeId = useMemo(
+    () => getTimeTypeSail(timeTypes)?.id || "",
+    [timeTypes],
+  );
+
+  // Performance Optimization: Create a player-to-team lookup Map to reduce
+  // dropdown option generation complexity from O(P*T) to O(P+T).
+  const playerOptions = useMemo(() => {
+    // 1. Build team lookup map (PlayerID -> TeamName)
+    const playerToTeamMap = new Map<string, string>();
+    teams.forEach((team) => {
+      if (team.player_1_id) playerToTeamMap.set(team.player_1_id, team.name);
+      if (team.player_2_id) playerToTeamMap.set(team.player_2_id, team.name);
+      if (team.player_3_id) playerToTeamMap.set(team.player_3_id, team.name);
+      if (team.player_4_id) playerToTeamMap.set(team.player_4_id, team.name);
+    });
+
+    // 2. Generate options using O(1) lookups
+    return players.map((player) => {
+      const teamName = playerToTeamMap.get(player.id) || "No Team";
+      return {
+        id: player.id,
+        label: `${player.name} - ${teamName}`,
+      };
+    });
+  }, [players, teams]);
 
   // Performance Optimization: Memoize all data transformations to prevent
   // expensive re-computations and radar chart re-renders when parent state updates.
@@ -76,12 +105,12 @@ const Contestants: React.FC = () => {
   );
 
   const player1logsSortedByHeatAndTime = useMemo(
-    () => sortTimeLogsByHeat(sortTimeLogsByTime(logsFilteredByPlayer1)),
+    () => sortTimeLogsByHeatAndTime(logsFilteredByPlayer1),
     [logsFilteredByPlayer1],
   );
 
   const player2logsSortedByHeatAndTime = useMemo(
-    () => sortTimeLogsByHeat(sortTimeLogsByTime(logsFilteredByPlayer2)),
+    () => sortTimeLogsByHeatAndTime(logsFilteredByPlayer2),
     [logsFilteredByPlayer2],
   );
 
@@ -211,13 +240,13 @@ const Contestants: React.FC = () => {
             label="Select Player 1"
             sx={{ fontSize: "1.2rem", minHeight: "60px" }}
           >
-            {players.map((player) => (
+            {playerOptions.map((option) => (
               <MenuItem
-                key={player.id}
-                value={player.id}
+                key={option.id}
+                value={option.id}
                 sx={{ fontSize: "1.1rem" }}
               >
-                {getPlayerNameWithTeam(player.id, players, teams)}
+                {option.label}
               </MenuItem>
             ))}
           </Select>
@@ -234,13 +263,13 @@ const Contestants: React.FC = () => {
             label="Select Player 2"
             sx={{ fontSize: "1.2rem", minHeight: "60px" }}
           >
-            {players.map((player) => (
+            {playerOptions.map((option) => (
               <MenuItem
-                key={player.id}
-                value={player.id}
+                key={option.id}
+                value={option.id}
                 sx={{ fontSize: "1.1rem" }}
               >
-                {getPlayerNameWithTeam(player.id, players, teams)}
+                {option.label}
               </MenuItem>
             ))}
           </Select>

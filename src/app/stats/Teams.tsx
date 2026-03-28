@@ -12,8 +12,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import {
   filterTimeLogsByPlayerId,
   filterTimeLogsByTimeType,
-  sortTimeLogsByHeat,
-  sortTimeLogsByTime,
+  sortTimeLogsByHeatAndTime,
 } from "@/utils/sortFilterUtils";
 import {
   PERFORMANCE_SCALES,
@@ -65,9 +64,18 @@ const Teams: React.FC = () => {
     [],
   );
 
-  const beerTypeId = getTimeTypeBeer(timeTypes)?.id || "";
-  const spinnerTypeId = getTimeTypeSpinner(timeTypes)?.id || "";
-  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
+  const beerTypeId = useMemo(
+    () => getTimeTypeBeer(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const spinnerTypeId = useMemo(
+    () => getTimeTypeSpinner(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const sailTypeId = useMemo(
+    () => getTimeTypeSail(timeTypes)?.id || "",
+    [timeTypes],
+  );
 
   const team1Players = useMemo(
     () => getTeamPlayerIds(selectedTeam1Id as Id<"teams">, teams),
@@ -86,8 +94,7 @@ const Teams: React.FC = () => {
           timeLogs,
           playerId as Id<"players">,
         );
-        const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
-        return sortTimeLogsByHeat(sortedByTime);
+        return sortTimeLogsByHeatAndTime(logsFilteredByPlayer);
       }),
     [team1Players, timeLogs],
   );
@@ -99,8 +106,7 @@ const Teams: React.FC = () => {
           timeLogs,
           playerId as Id<"players">,
         );
-        const sortedByTime = sortTimeLogsByTime(logsFilteredByPlayer);
-        return sortTimeLogsByHeat(sortedByTime);
+        return sortTimeLogsByHeatAndTime(logsFilteredByPlayer);
       }),
     [team2Players, timeLogs],
   );

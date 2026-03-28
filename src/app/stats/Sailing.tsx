@@ -35,8 +35,12 @@ const Sailing: React.FC = () => {
     setSelectedYear(e.target.value as number);
     setAnimationCycleKey((prev) => prev + 1);
   };
-  const sailingType = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL);
-  const sailingTypeId = sailingType ? sailingType.id : null;
+
+  // Performance Optimization: Memoize sailingTypeId to avoid repeated searches on every render
+  const sailingTypeId = useMemo(() => {
+    const sailingType = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL);
+    return sailingType ? sailingType.id : null;
+  }, [timeTypes]);
 
   const logsForHeatsSortByTime = useMemo(
     () =>
