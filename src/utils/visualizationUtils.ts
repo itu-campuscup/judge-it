@@ -55,35 +55,47 @@ interface TimeEntry {
 
 /**
  * Calculates the chug or sail times for the given logs.
+ * Performance Optimization: Refactored from O(N^2) to O(N) using a Map to pair start/end logs.
  */
 export const calculateTimes = (
   logsForHeatsSortByTime: TimeLog[],
 ): TimeEntry[] => {
   const times: TimeEntry[] = [];
-  const endTimeIds = new Set<number>();
-  for (let i = 0; i < logsForHeatsSortByTime.length; i++) {
-    if (endTimeIds.has(i)) {
-      continue;
+  // Use a Map to track pending start logs: "playerId-heatId" -> { startTime, teamId }
+  const pendingStarts = new Map<
+    string,
+    { startTime: string; teamId?: Id<"teams"> }
+  >();
+
+  for (const log of logsForHeatsSortByTime) {
+    const key = `${log.player_id}-${log.heat_id}`;
+    const startTimeData = pendingStarts.get(key);
+
+    if (startTimeData) {
+      // If we have a pending start for this player/heat, this log is the end time
+      const duration = calcTimeDifference(
+        startTimeData.startTime,
+        log.time || "",
+      );
+      const formattedTime = formatTime(duration);
+      times.push({
+        playerId: log.player_id,
+        heatId: log.heat_id,
+        teamId: startTimeData.teamId,
+        formattedTime,
+        duration,
+      });
+      // Clear the pending start after pairing
+      pendingStarts.delete(key);
+    } else {
+      // Otherwise, this log is the start time
+      pendingStarts.set(key, {
+        startTime: log.time || "",
+        teamId: log.team_id,
+      });
     }
-    const curLog = logsForHeatsSortByTime[i];
-    const startTime = curLog.time || "";
-    const playerId = curLog.player_id;
-    const heatId = curLog.heat_id;
-    const teamId = curLog.team_id;
-    const endTime = getEndTime(
-      playerId,
-      heatId,
-      i,
-      logsForHeatsSortByTime,
-      endTimeIds,
-    );
-    if (endTime === null) {
-      continue;
-    }
-    const duration = calcTimeDifference(startTime, endTime);
-    const formattedTime = formatTime(duration);
-    times.push({ playerId, heatId, teamId, formattedTime, duration });
   }
+
   return times.sort((a, b) => (a.duration ?? 0) - (b.duration ?? 0));
 };
 
@@ -130,36 +142,6 @@ export const removeDuplicateTimeEntries = (
     filteredEntries.push(entry);
   }
   return filteredEntries;
-};
-
-/**
- * Get end time of a players activity in a heat.
- * @param {number} playerId - The player ID.
- * @param {number} heatId - The heat ID.
- * @param {number} startIdx - The start index of the given activity.
- * @param {Array} logsForHeatsSortByTime - The sorted time logs.
- * @param {Set} endTimeIds - The set of end time IDs.
- * @returns {string|null} The end time id or null if not found.
- */
-export const getEndTime = (
-  playerId: string,
-  heatId: string,
-  startIdx: number,
-  logsForHeatsSortByTime: TimeLog[],
-  endTimeIds: Set<number>,
-): string | null => {
-  for (let i = startIdx + 1; i < logsForHeatsSortByTime.length; i++) {
-    const curLog = logsForHeatsSortByTime[i];
-    if (
-      curLog.player_id === playerId &&
-      curLog.heat_id === heatId &&
-      !endTimeIds.has(i)
-    ) {
-      endTimeIds.add(i);
-      return curLog.time || null;
-    }
-  }
-  return null;
 };
 
 /**
