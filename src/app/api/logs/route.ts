@@ -17,11 +17,16 @@ export async function POST(request: NextRequest) {
 
     // Basic validation and sanitization to prevent log injection and resource abuse
     if (!rawData || typeof rawData !== "object") {
-      return NextResponse.json({ error: "Invalid log format" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid log format" },
+        { status: 400 },
+      );
     }
 
     const allowedLevels = ["info", "warn", "error", "debug"];
-    const level = allowedLevels.includes(rawData.level) ? rawData.level : "info";
+    const level = allowedLevels.includes(rawData.level)
+      ? rawData.level
+      : "info";
 
     // Security: Sanitize and limit input to prevent log injection and resource abuse (DoS)
     const logData = {
