@@ -9,3 +9,8 @@
 **Learning:** Pairing start/end events in a chronologically sorted list was implemented as O(N^2) using a nested search (`getEndTime`). This is a common performance bottleneck in event-driven UIs.
 
 **Action:** Use a Map with composite keys (e.g., `playerId-heatId`) to store pending start events and pair them with incoming end events in a single O(N) pass. Always ensure the original sorting and behavior are preserved during such refactors.
+
+## 2025-05-24 - [Avoid Shadowing Memoized Values]
+**Learning:** Shadowing memoized values with locally scoped variables (e.g., re-filtering data within a component body that was already memoized at the top level) bypasses performance benefits and causes redundant calculations on every render. This was specifically found in `CurrentHeat.tsx` where a timer-driven re-render was triggering heavy O(N) filtering logic.
+
+**Action:** Always prefer memoized variables over local re-computations. In components with active timers, ensure ALL heavy derived state is memoized to keep the 1s render loop lightweight.
