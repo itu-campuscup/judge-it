@@ -104,7 +104,7 @@ const CurrentHeat: React.FC = () => {
     const processHeatData = () => {
       // Performance Optimization: Group sail logs by team_id in a single pass O(N)
       // instead of multiple filter calls O(T*N)
-      const logsByTeam = new Map<string, typeof allSailLogs>();
+      const logsByTeam = new Map<Id<"teams">, typeof allSailLogs>();
       allSailLogs.forEach((log) => {
         if (!log.team_id) return;
         const teamLogs = logsByTeam.get(log.team_id) || [];
@@ -114,7 +114,7 @@ const CurrentHeat: React.FC = () => {
 
       const teamIds = Array.from(logsByTeam.keys());
       let raceComplete = false;
-      let winningTeamId: string | null = null;
+      let winningTeamId: Id<"teams"> | null = null;
 
       for (const teamId of teamIds) {
         const teamSailLogs = logsByTeam.get(teamId) || [];
@@ -167,26 +167,27 @@ const CurrentHeat: React.FC = () => {
       }
 
       // Performance Optimization: Pre-calculate lookup Map for teams for O(1) access
-      const teamsMap = new Map<string, (typeof teams)[0]>();
+      const teamsMap = new Map<Id<"teams">, (typeof teams)[0]>();
       teams.forEach((t) => teamsMap.set(t.id, t));
 
-      const processedTeams: TeamData[] = teamIds.map((teamId) => {
-        const team = teamsMap.get(teamId);
-        const teamPlayers = getTeamPlayer(teamId, teams, players);
+      const processedTeams: TeamData[] = teamIds
+        .map((teamId) => {
+          const team = teamsMap.get(teamId);
+          const teamPlayers = getTeamPlayer(teamId, teams, players);
 
-        // Get only sail logs for this team from our pre-computed Map
-        const teamSailLogs = logsByTeam.get(teamId) || [];
-        const sailCount = teamSailLogs.length;
+          // Get only sail logs for this team from our pre-computed Map
+          const teamSailLogs = logsByTeam.get(teamId) || [];
+          const sailCount = teamSailLogs.length;
 
-        return {
-          teamId,
-          teamName: team?.name || `Team ${teamId}`,
-          teamImage: team?.image_url,
-          currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
-          sailCount,
-          isFinished: raceComplete,
-        };
-      });
+          return {
+            teamId,
+            teamName: team?.name || `Team ${teamId}`,
+            teamImage: team?.image_url,
+            currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
+            sailCount,
+            isFinished: raceComplete,
+          };
+        });
 
       setTeamsData(processedTeams);
 
