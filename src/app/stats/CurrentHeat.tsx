@@ -102,21 +102,26 @@ const CurrentHeat: React.FC = () => {
     if (!currentHeat?.id) return;
 
     const processHeatData = () => {
-      // Check if any team has reached 16 sail logs
-      const teamIds = [...new Set(allSailLogs.map((log) => log.team_id))];
+      // Performance Optimization: Group sail logs by team_id in a single pass O(N)
+      // instead of multiple filter calls O(T*N)
+      const logsByTeam = new Map<Id<"teams">, typeof allSailLogs>();
+      allSailLogs.forEach((log) => {
+        if (!log.team_id) return;
+        const teamLogs = logsByTeam.get(log.team_id) || [];
+        teamLogs.push(log);
+        logsByTeam.set(log.team_id, teamLogs);
+      });
+
+      const teamIds = Array.from(logsByTeam.keys());
       let raceComplete = false;
-      let winningTeamId: string | null = null;
+      let winningTeamId: Id<"teams"> | null = null;
 
       for (const teamId of teamIds) {
-        if (teamId) {
-          const teamSailLogs = allSailLogs.filter(
-            (log) => log.team_id === teamId,
-          );
-          if (teamSailLogs.length >= 16) {
-            raceComplete = true;
-            winningTeamId = teamId;
-            break;
-          }
+        const teamSailLogs = logsByTeam.get(teamId) || [];
+        if (teamSailLogs.length >= 16) {
+          raceComplete = true;
+          winningTeamId = teamId;
+          break;
         }
       }
 
@@ -125,16 +130,18 @@ const CurrentHeat: React.FC = () => {
         setRaceFinished(true);
       }
 
+      // Performance Optimization: Sort sail logs once and reuse
+      const sortedAllSailLogs =
+        allSailLogs.length > 0 ? sortTimeLogsByTime(allSailLogs) : [];
+
       // Calculate final time from when winning team got their 16th sail log
       let finalTime: string | null = null;
       if (raceComplete && winningTeamId) {
-        const winningSailLogs = allSailLogs.filter(
-          (log) => log.team_id === winningTeamId,
-        );
+        const winningSailLogs = logsByTeam.get(winningTeamId) || [];
         if (winningSailLogs.length >= 16) {
           const sortedWinningSailLogs = sortTimeLogsByTime(winningSailLogs);
           const sixteenthSailLog = sortedWinningSailLogs[15]; // 16th log (0-indexed)
-          const firstSailLog = sortTimeLogsByTime(allSailLogs)[0]; // First sail log of the race
+          const firstSailLog = sortedAllSailLogs[0]; // First sail log of the race
 
           if (firstSailLog?.time && sixteenthSailLog?.time) {
             const elapsedMs = calcTimeDifference(
@@ -152,23 +159,24 @@ const CurrentHeat: React.FC = () => {
       }
 
       // Set race start time from first sail log
-      if (allSailLogs.length > 0 && !raceStartTime) {
-        const firstSailLog = sortTimeLogsByTime(allSailLogs)[0];
+      if (sortedAllSailLogs.length > 0 && !raceStartTime) {
+        const firstSailLog = sortedAllSailLogs[0];
         if (firstSailLog?.time) {
           setRaceStartTime(firstSailLog.time);
         }
       }
 
+      // Performance Optimization: Pre-calculate lookup Map for teams for O(1) access
+      const teamsMap = new Map<Id<"teams">, (typeof teams)[0]>();
+      teams.forEach((t) => teamsMap.set(t.id, t));
+
       const processedTeams: TeamData[] = teamIds
-        .filter((teamId): teamId is Id<"teams"> => Boolean(teamId))
         .map((teamId) => {
-          const team = teams.find((t) => t.id === teamId);
+          const team = teamsMap.get(teamId);
           const teamPlayers = getTeamPlayer(teamId, teams, players);
 
-          // Get only sail logs for this team
-          const teamSailLogs = allSailLogs.filter(
-            (log) => log.team_id === teamId,
-          );
+          // Get only sail logs for this team from our pre-computed Map
+          const teamSailLogs = logsByTeam.get(teamId) || [];
           const sailCount = teamSailLogs.length;
 
           return {
@@ -218,17 +226,8 @@ const CurrentHeat: React.FC = () => {
   const team1 = teamsData[0];
   const team2 = teamsData[1];
 
-  let winningTeam: TeamData | null = null;
-  if (team1 && team2) {
-    // Get all sail logs for the current heat
-    const currentHeatTimeLogs = filterTimeLogsByHeatId(
-      timeLogs,
-      currentHeat.id,
-    );
-    const allSailLogs = filterTimeLogsByTimeType(
-      currentHeatTimeLogs,
-      sailTypeId as Id<"time_types">,
-    );
+  const winningTeam: TeamData | null = useMemo(() => {
+    if (!team1 || !team2) return null;
 
     // Check if either team has 16+ sail logs
     const team1SailLogs = allSailLogs.filter(
@@ -260,16 +259,17 @@ const CurrentHeat: React.FC = () => {
         // Both teams finished - compare times
         const team1Time = timeToMilli(team1SixteenthTime);
         const team2Time = timeToMilli(team2SixteenthTime);
-        winningTeam = team1Time <= team2Time ? team1 : team2;
+        return team1Time <= team2Time ? team1 : team2;
       } else if (team1SixteenthTime) {
         // Only team1 finished
-        winningTeam = team1;
+        return team1;
       } else if (team2SixteenthTime) {
         // Only team2 finished
-        winningTeam = team2;
+        return team2;
       }
     }
-  }
+    return null;
+  }, [team1, team2, allSailLogs]);
 
   return (
     <Box
