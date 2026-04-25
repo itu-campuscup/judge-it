@@ -30,6 +30,8 @@ export const filterTimeLogsByTeamId = (
 
 /**
  * Sorts time logs by heat ID in ascending order.
+ * Performance Optimization: Replaces localeCompare with direct string comparison
+ * to avoid internationalization overhead for ID strings.
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by heat ID.
@@ -38,40 +40,47 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
   return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
     const aHeat = String(a.heat_id ?? "");
     const bHeat = String(b.heat_id ?? "");
-    return aHeat.localeCompare(bHeat);
+    return aHeat < bHeat ? -1 : aHeat > bHeat ? 1 : 0;
   });
 };
 
 /**
  * Sorts time logs by time in ascending order.
+ * Performance Optimization: Uses a Schwartzian transform (map-sort-map) to ensure
+ * each time string is parsed to milliseconds exactly once (O(N)) rather than
+ * repeatedly during comparisons (O(N log N)).
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort(
-    (a: TimeLog, b: TimeLog) =>
-      timeToMilli(a.time || "") - timeToMilli(b.time || ""),
-  );
+  return timeLogs
+    .map((log) => ({ log, ms: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.ms - b.ms)
+    .map(({ log }) => log);
 };
 
 /**
  * Performance Optimization: Sorts time logs by heat ID then by time in a single pass.
  * This replaces redundant double-sorts in statistics components.
+ * Performance Optimization: Uses Schwartzian transform and avoids localeCompare.
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs.
  */
 export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
-    const aHeat = String(a.heat_id ?? "");
-    const bHeat = String(b.heat_id ?? "");
-    const heatComparison = aHeat.localeCompare(bHeat);
-
-    if (heatComparison !== 0) return heatComparison;
-
-    return timeToMilli(a.time || "") - timeToMilli(b.time || "");
-  });
+  return timeLogs
+    .map((log) => ({
+      log,
+      heat: String(log.heat_id ?? ""),
+      ms: timeToMilli(log.time || ""),
+    }))
+    .sort((a, b) => {
+      if (a.heat < b.heat) return -1;
+      if (a.heat > b.heat) return 1;
+      return a.ms - b.ms;
+    })
+    .map(({ log }) => log);
 };
 
 /**

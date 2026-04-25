@@ -3,19 +3,35 @@ import type { Heat } from "../types";
 
 /**
  * Converts a time string to milliseconds.
+ * Performance Optimization: Uses direct string slicing and Number() to avoid
+ * multiple split() calls and array allocations.
  * @param {string} time - The time string in the format "HH:MM:SS.mmm".
  * @returns {number} The time in milliseconds.
  */
 export const timeToMilli = (time: string): number => {
-  const [hours, minutes, seconds] = time.split(":");
-  const [secs, millis] = seconds.split(".");
-  const millisValue = parseInt(millis ? millis.substring(0, 3) : "0");
-  return (
-    parseInt(hours) * 60 * 60 * 1000 +
-    parseInt(minutes) * 60 * 1000 +
-    parseInt(secs) * 1000 +
-    millisValue
-  );
+  if (!time) return 0;
+
+  // Format: HH:MM:SS.mmm
+  const firstColon = time.indexOf(":");
+  const secondColon = time.indexOf(":", firstColon + 1);
+  const dot = time.indexOf(".", secondColon + 1);
+
+  const hours = Number(time.slice(0, firstColon));
+  const minutes = Number(time.slice(firstColon + 1, secondColon));
+
+  let seconds: number;
+  let millis = 0;
+
+  if (dot === -1) {
+    seconds = Number(time.slice(secondColon + 1));
+  } else {
+    seconds = Number(time.slice(secondColon + 1, dot));
+    // Ensure we only take up to 3 digits of milliseconds and pad if necessary
+    const millisStr = time.slice(dot + 1);
+    millis = Number(millisStr.padEnd(3, "0").slice(0, 3));
+  }
+
+  return hours * 3600000 + minutes * 60000 + seconds * 1000 + millis;
 };
 
 /**
