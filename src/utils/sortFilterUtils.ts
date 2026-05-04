@@ -38,7 +38,8 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
   return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
     const aHeat = String(a.heat_id ?? "");
     const bHeat = String(b.heat_id ?? "");
-    return aHeat.localeCompare(bHeat);
+    // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
+    return aHeat < bHeat ? -1 : aHeat > bHeat ? 1 : 0;
   });
 };
 
@@ -66,9 +67,10 @@ export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
   return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
     const aHeat = String(a.heat_id ?? "");
     const bHeat = String(b.heat_id ?? "");
-    const heatComparison = aHeat.localeCompare(bHeat);
 
-    if (heatComparison !== 0) return heatComparison;
+    // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
+    if (aHeat < bHeat) return -1;
+    if (aHeat > bHeat) return 1;
 
     return timeToMilli(a.time || "") - timeToMilli(b.time || "");
   });

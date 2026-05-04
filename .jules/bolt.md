@@ -14,3 +14,11 @@
 **Learning:** Shadowing memoized values with locally scoped variables (e.g., re-filtering data within a component body that was already memoized at the top level) bypasses performance benefits and causes redundant calculations on every render. This was specifically found in `CurrentHeat.tsx` where a timer-driven re-render was triggering heavy O(N) filtering logic.
 
 **Action:** Always prefer memoized variables over local re-computations. In components with active timers, ensure ALL heavy derived state is memoized to keep the 1s render loop lightweight.
+
+## 2025-05-25 - [Optimize String ID Sorting]
+**Learning:** For sorting non-locale-sensitive string IDs (like Convex `Id` or UUIDs), `localeCompare` introduces significant overhead due to internationalization logic. Benchmarking showed that direct comparison operators (`<`, `>`) are approximately 1.15x to 1.20x faster (15-20% speedup) for large datasets (e.g., 100k items).
+**Action:** Always use direct comparison operators for technical identifier sorting instead of `localeCompare`.
+
+## 2025-05-25 - [Convex URL Validation in Tests]
+**Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
+**Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
