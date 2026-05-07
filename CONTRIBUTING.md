@@ -131,6 +131,11 @@ Continue with [Getting Started](#getting-started) to set up your own Convex proj
 **Installation:**
 
 1. Clone the repository
+
+   ```bash
+   git clone --recurse-submodules <repository-url>
+   ```
+
 2. `cd` into the project directory
 3. Install dependencies:
 

@@ -77,22 +77,26 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 > It will need modifications to run with npm or yarn, due to Bun-specific features like.
 
 ```bash
-# 1. Install dependencies
+# 1. Clone repository
+
+git clone --recurse-submodules <repository-url>
+
+# 2. Install dependencies
 bun install
 
-# 2. Initialize Convex (if not already set up)
+# 3. Initialize Convex (if not already set up)
 bun cli.ts init
 
-# 3. Connect to Convex project
+# 4. Connect to Convex project
 bun auth:run
 
-# 4. Start development
+# 5. Start development
 bun dev
 
-# 4a. Start with production credentials
+# 5a. Start with production credentials
 bun dev --prod
 
-# 4b. Start with staging credentials
+# 5b. Start with staging credentials
 bun dev --stage
 ```
 
