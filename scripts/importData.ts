@@ -116,6 +116,22 @@ async function importData() {
   console.log("Starting data import...\n");
 
   try {
+    // Step 0: Bootstrap - ensure the current user is approved and admin
+    console.log("🔑 Bootstrapping admin approval...");
+    try {
+      const result = await client.mutation(api.admin.bootstrapFirstAdmin, {});
+      if (result.success) {
+        console.log("  ✓ User bootstrapped as admin\n");
+      }
+    } catch (e: any) {
+      const msg = e?.message ?? String(e);
+      if (msg.includes("An admin already exists")) {
+        console.log("  ℹ Admin already exists, skipping bootstrap\n");
+      } else {
+        throw e;
+      }
+    }
+
     // Step 1: Import Players
     console.log("📝 Importing players...");
     const players = readCSV<PlayerRow>("players_rows.csv");
