@@ -44,36 +44,39 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 };
 
 /**
- * Sorts time logs by time in ascending order.
+ * Performance Optimization: Sorts time logs by time in ascending order using Schwartzian Transform.
+ * This reduces the number of expensive `timeToMilli` calls from O(N log N) to O(N).
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort(
-    (a: TimeLog, b: TimeLog) =>
-      timeToMilli(a.time || "") - timeToMilli(b.time || ""),
-  );
+  return timeLogs
+    .map((log) => ({ log, ms: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.ms - b.ms)
+    .map(({ log }) => log);
 };
 
 /**
- * Performance Optimization: Sorts time logs by heat ID then by time in a single pass.
- * This replaces redundant double-sorts in statistics components.
+ * Performance Optimization: Sorts time logs by heat ID then by time in a single pass using Schwartzian Transform.
+ * This reduces expensive computations (String conversion and `timeToMilli`) from O(N log N) to O(N).
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs.
  */
 export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
-    const aHeat = String(a.heat_id ?? "");
-    const bHeat = String(b.heat_id ?? "");
-
-    // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
-    if (aHeat < bHeat) return -1;
-    if (aHeat > bHeat) return 1;
-
-    return timeToMilli(a.time || "") - timeToMilli(b.time || "");
-  });
+  return timeLogs
+    .map((log) => ({
+      log,
+      heatId: String(log.heat_id ?? ""),
+      ms: timeToMilli(log.time || ""),
+    }))
+    .sort((a, b) => {
+      if (a.heatId < b.heatId) return -1;
+      if (a.heatId > b.heatId) return 1;
+      return a.ms - b.ms;
+    })
+    .map(({ log }) => log);
 };
 
 /**

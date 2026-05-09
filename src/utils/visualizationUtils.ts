@@ -1,6 +1,5 @@
 // filepath: c:\projects\judge-it\src\utils\visualizationUtils.ts
 import {
-  timeToMilli,
   formatTime,
   calcTimeDifference,
   calcRPM,
@@ -18,6 +17,7 @@ import {
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
 import type { TimeLog, Heat, Player, Team } from "../types";
 import { Id } from "convex/_generated/dataModel";
+import { sortTimeLogsByTime } from "./sortFilterUtils";
 
 /**
  * Filters and sorts time logs for a given year and time type.
@@ -35,11 +35,12 @@ export const filterAndSortTimeLogs = (
       .map((heat) => heat.id),
   );
 
-  return timeLogs
-    .filter(
-      (tl) => tl.time_type_id === timeTypeId && heatIdsInYear.has(tl.heat_id),
-    )
-    .sort((a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || ""));
+  const filteredLogs = timeLogs.filter(
+    (tl) => tl.time_type_id === timeTypeId && heatIdsInYear.has(tl.heat_id),
+  );
+
+  // Performance Optimization: Use the optimized sort function with Schwartzian Transform
+  return sortTimeLogsByTime(filteredLogs);
 };
 
 interface TimeEntry {
