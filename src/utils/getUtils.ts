@@ -38,15 +38,20 @@ export const getPlayerName = (
  * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
+ * @param {Map<string, Team>} [playerToTeamMap] - Optional pre-computed map of player ID to team for O(1) lookup.
  * @returns {string} The player name - team name.
  */
 export const getPlayerNameWithTeam = (
   playerId: Id<"players"> | null,
   players: Player[],
   teams: Team[],
+  playerToTeamMap?: Map<string, Team>,
 ): string => {
   const player = players.find((p) => p.id === playerId);
-  const team = getPlayerTeam(playerId as Player["id"], teams);
+  const team =
+    playerToTeamMap && playerId
+      ? playerToTeamMap.get(playerId)
+      : getPlayerTeam(playerId as Player["id"], teams);
   return player && team ? `${player.name} - ${team.name}` : "";
 };
 
@@ -76,10 +81,17 @@ export const getHeatYear = (heatId: Id<"heats">, heats: Heat[]): string => {
  * Gets the team name given the team ID.
  * @param {Id<"teams">} teamId - The team ID.
  * @param {Array} teams - The list of teams.
+ * @param {Map<string, Team>} [teamsMap] - Optional pre-computed map of team ID to team for O(1) lookup.
  * @returns {string} The team name.
  */
-export const getTeamName = (teamId: Id<"teams">, teams: Team[]): string => {
-  const team = teams.find((t: Team) => t.id === teamId);
+export const getTeamName = (
+  teamId: Id<"teams">,
+  teams: Team[],
+  teamsMap?: Map<string, Team>,
+): string => {
+  const team = teamsMap
+    ? teamsMap.get(teamId)
+    : teams.find((t: Team) => t.id === teamId);
   return team ? team.name : "";
 };
 
@@ -101,10 +113,17 @@ export const getPlayerImageUrl = (
  * Gets the team image URL given the team ID.
  * @param {Id<"teams">} teamId - The team ID.
  * @param {Array} teams - The list of teams.
+ * @param {Map<string, Team>} [teamsMap] - Optional pre-computed map of team ID to team for O(1) lookup.
  * @returns {string} The team image URL.
  */
-export const getTeamImageUrl = (teamId: Id<"teams">, teams: Team[]): string => {
-  const team = teams.find((t: Team) => t.id === teamId);
+export const getTeamImageUrl = (
+  teamId: Id<"teams">,
+  teams: Team[],
+  teamsMap?: Map<string, Team>,
+): string => {
+  const team = teamsMap
+    ? teamsMap.get(teamId)
+    : teams.find((t: Team) => t.id === teamId);
   return team?.image_url || "";
 };
 
@@ -364,14 +383,18 @@ export const getPlayerFunFact = (
 /**
  * Gets the team for a player given their ID
  * @param {Id<"players">} playerId - The player ID.
- * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
+ * @param {Map<string, Team>} [playerToTeamMap] - Optional pre-computed map of player ID to team for O(1) lookup.
  * @returns {Team|null} - The team for the player or null if not found.
  */
 export const getPlayerTeam = (
   playerId: Id<"players">,
   teams: Team[],
+  playerToTeamMap?: Map<string, Team>,
 ): Team | null => {
+  if (playerToTeamMap) {
+    return playerToTeamMap.get(playerId) || null;
+  }
   const team = teams.find(
     (t: Team) =>
       t.player_1_id === (playerId as Player["id"]) ||
@@ -388,12 +411,14 @@ export const getPlayerTeam = (
  * @param {Id<"players">} playerId - The player ID.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
+ * @param {Map<string, Team>} [playerToTeamMap] - Optional pre-computed map of player ID to team for O(1) lookup.
  * @returns {string} The player image URL or team image URL as fallback.
  */
 export const getPlayerImageWithFallback = (
   playerId: Id<"players">,
   players: Player[],
   teams: Team[],
+  playerToTeamMap?: Map<string, Team>,
 ): string => {
   const player = players.find((p: Player) => p.id === playerId);
 
@@ -403,7 +428,7 @@ export const getPlayerImageWithFallback = (
   }
 
   // Otherwise, get the team's image as fallback
-  const team = getPlayerTeam(playerId, teams);
+  const team = getPlayerTeam(playerId, teams, playerToTeamMap);
   return team?.image_url || "";
 };
 

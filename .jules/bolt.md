@@ -22,3 +22,7 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2026-05-16 - [O(1) Map-based Lookups for Entity Relationships]
+**Learning:** Functions that traverse arrays to find related entities (e.g., finding a player's team) become (N^2)$ when used inside component loops or frequently triggered render cycles.
+**Action:** Enhance core utility functions to optionally accept pre-computed Maps. In components, use `useMemo` to build these Maps once per data update, transforming (N)$ searches into (1)$ lookups.
