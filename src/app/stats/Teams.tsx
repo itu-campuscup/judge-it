@@ -87,6 +87,13 @@ const Teams: React.FC = () => {
     [selectedTeam2Id, teams],
   );
 
+  // Performance Optimization: Pre-calculate a Team lookup Map for O(1) access
+  const teamsMap = useMemo(() => {
+    const map = new Map<string, Team>();
+    teams.forEach((team) => map.set(team.id, team));
+    return map;
+  }, [teams]);
+
   const team1LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
     () =>
       team1Players.map((playerId: string) => {
@@ -211,8 +218,10 @@ const Teams: React.FC = () => {
         teams,
         [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
         false,
+        undefined,
+        teamsMap,
       ),
-    [selectedTeam1Id, team1BestTimes, teams],
+    [selectedTeam1Id, team1BestTimes, teams, teamsMap],
   );
 
   const team2ChartData = useMemo(
@@ -224,8 +233,10 @@ const Teams: React.FC = () => {
         teams,
         [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
         false,
+        undefined,
+        teamsMap,
       ),
-    [selectedTeam2Id, team2BestTimes, teams],
+    [selectedTeam2Id, team2BestTimes, teams, teamsMap],
   );
 
   return (

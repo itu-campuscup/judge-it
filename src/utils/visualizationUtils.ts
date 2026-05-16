@@ -212,6 +212,8 @@ export const generateRPMData = (
  * @param {Array} teams - The list of teams.
  * @param {Array} timeTypes - The list of time types.
  * @param {boolean} isPlayer - Whether the ID belongs to a player or a team (default is true).
+ * @param {Map<string, Team>} [playerToTeamMap] - Optional pre-computed map of player ID to team for O(1) lookup.
+ * @param {Map<string, Team>} [teamsMap] - Optional pre-computed map of team ID to team for O(1) lookup.
  * @returns {Object} The radar chart data including player/team name, fun fact, image URL, and radar data.
  */
 export const generateRadarChartData = (
@@ -221,10 +223,17 @@ export const generateRadarChartData = (
   teams: Team[],
   timeTypes: string[],
   isPlayer: boolean = true,
+  playerToTeamMap?: Map<string, Team>,
+  teamsMap?: Map<string, Team>,
 ) => {
   const name = isPlayer
-    ? getPlayerNameWithTeam(playerOrTeamId as Id<"players">, players, teams)
-    : getTeamName(playerOrTeamId as Id<"teams">, teams);
+    ? getPlayerNameWithTeam(
+        playerOrTeamId as Id<"players">,
+        players,
+        teams,
+        playerToTeamMap,
+      )
+    : getTeamName(playerOrTeamId as Id<"teams">, teams, teamsMap);
   const funFact = isPlayer
     ? getPlayerFunFact(playerOrTeamId as Id<"players">, players)
     : "";
@@ -233,8 +242,9 @@ export const generateRadarChartData = (
         playerOrTeamId as Id<"players">,
         players,
         teams,
+        playerToTeamMap,
       )
-    : getTeamImageUrl(playerOrTeamId as Id<"teams">, teams);
+    : getTeamImageUrl(playerOrTeamId as Id<"teams">, teams, teamsMap);
 
   const timeToPercentage = (
     time: number,
