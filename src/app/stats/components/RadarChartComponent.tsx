@@ -266,7 +266,10 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
               outerRadius={160}
               width={600}
               height={400}
-              data={data1}
+              data={data1.map((item, index) => ({
+                ...item,
+                Performance2: data2?.[index]?.Performance || 0,
+              }))}
             >
               <PolarGrid gridType="circle" />
               <PolarAngleAxis
@@ -289,8 +292,7 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
               />
               <Radar
                 name={entity2!.name}
-                dataKey="Performance"
-                data={data2}
+                dataKey="Performance2"
                 stroke="#4fc3f7"
                 fill="#4fc3f7"
                 fillOpacity={0.4}
