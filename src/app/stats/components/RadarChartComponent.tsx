@@ -29,11 +29,10 @@ interface RadarChartComponentProps {
 }
 
 const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
-  imageUrl,
-  name,
-  altTextType,
-  altText,
-  data,
+  entity1,
+  data1,
+  entity2,
+  data2,
 }) => {
   return (
     <Box
