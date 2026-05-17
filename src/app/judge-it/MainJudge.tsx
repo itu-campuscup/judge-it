@@ -18,7 +18,9 @@ const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
   const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(
     null,
   );
-  const [selectedPlayer, setSelectedPlayer] = useState<string>("");
+  const [selectedPlayer, setSelectedPlayer] = useState<Id<"players"> | null>(
+    null,
+  );
 
   const { handleGlobalStart, nextHeatNumber } = useHeatControls(
     {
