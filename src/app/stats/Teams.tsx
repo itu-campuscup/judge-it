@@ -303,32 +303,27 @@ const Teams: React.FC = () => {
         sx={{
           flex: 1,
           display: "flex",
-          justifyContent: "space-around",
-          alignItems: "stretch",
-          gap: 3,
+          justifyContent: "center",
           overflow: "hidden",
           minHeight: 0,
         }}
       >
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <RadarChartComponent
-            imageUrl={team1ChartData.imageUrl}
-            name={team1ChartData.name}
-            altTextType=""
-            altText=""
-            data={team1ChartData.data}
-          />
-        </Box>
-
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <RadarChartComponent
-            imageUrl={team2ChartData.imageUrl}
-            name={team2ChartData.name}
-            altTextType=""
-            altText=""
-            data={team2ChartData.data}
-          />
-        </Box>
+        <RadarChartComponent
+          entity1={{
+            imageUrl: team1ChartData.imageUrl,
+            name: team1ChartData.name,
+            altTextType: "",
+            altText: ""
+          }}
+          data1={team1ChartData.data}
+          entity2={{
+            imageUrl: team2ChartData.imageUrl,
+            name: team2ChartData.name,
+            altTextType: "",
+            altText: ""
+          }}
+          data2={team2ChartData.data}
+        />
       </Box>
 
       <Typography
