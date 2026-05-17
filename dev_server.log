@@ -1,0 +1,21 @@
+$ bun cli.ts dev
+[INFO]	 Loading credentials...
+
+[INFO]	 Loaded NEXT_PUBLIC_CONVEX_URL from environment (CI)
+[INFO]	 Starting Next.js development server...
+
+▲ Next.js 16.2.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 535ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+○ Compiling / ...
+ GET / 200 in 5.7s (next.js: 4.7s, proxy.ts: 289ms, application-code: 713ms)
+○ Compiling /stats ...
+ GET /stats 200 in 4.3s (next.js: 3.7s, proxy.ts: 11ms, application-code: 533ms)
+ GET / 200 in 101ms (next.js: 11ms, proxy.ts: 19ms, application-code: 71ms)
