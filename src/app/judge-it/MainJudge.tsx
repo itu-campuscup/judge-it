@@ -19,8 +19,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
     null,
   );
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
-  const [selectPlayerString, setSelectPlayerString] =
-    useState<string>("Select Player");
 
   const { handleGlobalStart, nextHeatNumber } = useHeatControls(
     {
@@ -57,8 +55,6 @@ const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
         selectedTeamId={selectedTeamId}
         selectedPlayer={selectedPlayer}
         setSelectedPlayer={setSelectedPlayer}
-        selectPlayerString={selectPlayerString}
-        setSelectPlayerString={setSelectPlayerString}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
         <JudgeButton onClick={() => handleGlobalStart()}>

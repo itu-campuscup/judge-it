@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   FormControl,
-  Typography,
   RadioGroup,
   FormControlLabel,
   Radio,
@@ -15,16 +14,12 @@ interface PlayerSelectProps {
   selectedTeamId: Id<"teams"> | null;
   selectedPlayer: string;
   setSelectedPlayer: (value: string) => void;
-  selectPlayerString: string;
-  setSelectPlayerString: (value: string) => void;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({
   selectedTeamId,
   selectedPlayer,
   setSelectedPlayer,
-  selectPlayerString,
-  setSelectPlayerString,
 }) => {
   const { players, teams } = useFetchDataConvex();
   const calculatedTeamPlayers = useMemo(() => {
@@ -35,14 +30,6 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
       .filter((player): player is Player => player !== undefined);
   }, [selectedTeamId, teams, players]);
 
-  useEffect(() => {
-    if (calculatedTeamPlayers.length === 0) {
-      setSelectPlayerString("No players found");
-    } else {
-      setSelectPlayerString("Select Player");
-    }
-  }, [calculatedTeamPlayers.length, setSelectPlayerString]);
-
   return (
     <FormControl
       fullWidth
@@ -50,7 +37,6 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
       variant="filled"
       disabled={calculatedTeamPlayers.length === 0}
     >
-      <Typography id="player-select-label">{selectPlayerString}</Typography>
       <RadioGroup
         row
         aria-labelledby="player-select-label"
