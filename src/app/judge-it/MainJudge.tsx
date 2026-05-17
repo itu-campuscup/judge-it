@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Stack } from "@mui/material";
 import { Id } from "convex/_generated/dataModel";
 import { useFetchDataConvex, useHeatControls } from "../hooks";
-import TeamSelect from "./TeamSelect";
-import PlayerSelect from "./PlayerSelect";
+import TeamSelect from "../components/TeamSelect";
+import PlayerSelect from "../components/PlayerSelect";
 import AlertComponent from "../components/AlertComponent";
 import JudgeButton from "../components/JudgeButton";
 
