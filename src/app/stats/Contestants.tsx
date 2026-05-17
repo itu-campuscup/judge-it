@@ -280,32 +280,27 @@ const Contestants: React.FC = () => {
         sx={{
           flex: 1,
           display: "flex",
-          justifyContent: "space-around",
-          alignItems: "stretch",
-          gap: 3,
+          justifyContent: "center",
           overflow: "hidden",
           minHeight: 0,
         }}
       >
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <RadarChartComponent
-            imageUrl={player1ChartData.imageUrl}
-            name={player1ChartData.name}
-            altTextType="Fun Fact"
-            altText={player1ChartData.funFact || ""}
-            data={player1ChartData.data}
-          />
-        </Box>
-
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <RadarChartComponent
-            imageUrl={player2ChartData.imageUrl}
-            name={player2ChartData.name}
-            altTextType="Fun Fact"
-            altText={player2ChartData.funFact || ""}
-            data={player2ChartData.data}
-          />
-        </Box>
+        <RadarChartComponent
+          entity1={{
+            imageUrl: player1ChartData.imageUrl,
+            name: player1ChartData.name,
+            altTextType: "Fun Fact",
+            altText: player1ChartData.funFact || ""
+          }}
+          data1={player1ChartData.data}
+          entity2={{
+            imageUrl: player2ChartData.imageUrl,
+            name: player2ChartData.name,
+            altTextType: "Fun Fact",
+            altText: player2ChartData.funFact || ""
+          }}
+          data2={player2ChartData.data}
+        />
       </Box>
 
       <Typography
