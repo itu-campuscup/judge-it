@@ -33,7 +33,9 @@ export const dynamic = "force-dynamic";
 function Judge(): React.ReactElement {
   const { user } = useAuth();
   const [selectedTeamId, setSelectedTeam] = useState<Id<"teams"> | null>(null);
-  const [selectedPlayer, setSelectedPlayer] = useState<string>("");
+  const [selectedPlayer, setSelectedPlayer] = useState<Id<"players"> | null>(
+    null,
+  );
   const [judgeType, setJudgeType] = useState<string>("");
   const { players, teams, alert, reload, lastReloaded } = useFetchDataConvex();
 

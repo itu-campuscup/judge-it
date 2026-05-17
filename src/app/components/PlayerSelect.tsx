@@ -12,8 +12,8 @@ import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface PlayerSelectProps {
   selectedTeamId: Id<"teams"> | null;
-  selectedPlayer: string;
-  setSelectedPlayer: (value: string) => void;
+  selectedPlayer: Id<"players"> | null;
+  setSelectedPlayer: (value: Id<"players">) => void;
 }
 
 const PlayerSelect: React.FC<PlayerSelectProps> = ({
@@ -41,7 +41,7 @@ const PlayerSelect: React.FC<PlayerSelectProps> = ({
         row
         aria-labelledby="player-select-label"
         value={selectedPlayer}
-        onChange={(e) => setSelectedPlayer(e.target.value)}
+        onChange={(e) => setSelectedPlayer(e.target.value as Id<"players">)}
       >
         {calculatedTeamPlayers.map((player) => (
           <FormControlLabel
