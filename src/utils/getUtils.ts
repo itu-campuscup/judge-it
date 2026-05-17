@@ -234,15 +234,14 @@ export const getCurrentHeat = (
  * @param {Id<"teams">} teamId - The team ID.
  * @param {Object} heat - The heat object.
  * @param {Array} timeLogs - The list of time logs.
- * @returns {Id<"players">| '"No previous player"'} The previous player ID or a message if not found.
+ * @returns {Id<"players">} The previous player ID or a message if not found.
  */
 export const getPrevPlayerId = (
   teamId: Id<"teams"> | null,
-  heat: Heat,
+  heat: Heat | null,
   timeLogs: TimeLog[],
-): Player["id"] | '"No previous player"' => {
-  const prevNotFound = '"No previous player"';
-  if (!teamId || !heat || !timeLogs) return prevNotFound;
+): Player["id"] | null => {
+  if (!teamId || !heat || !timeLogs) return null;
 
   const logs = timeLogs.filter(
     (e: TimeLog) => e.team_id === teamId && e.heat_id === heat.id,
@@ -256,7 +255,7 @@ export const getPrevPlayerId = (
   });
 
   const prevPlayer = !sortedByTimeDesc[0]
-    ? prevNotFound
+    ? null
     : sortedByTimeDesc[0].player_id;
 
   return prevPlayer;
