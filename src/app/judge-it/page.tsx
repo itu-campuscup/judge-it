@@ -34,8 +34,6 @@ function Judge(): React.ReactElement {
   const { user } = useAuth();
   const [selectedTeamId, setSelectedTeam] = useState<Id<"teams"> | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string>("");
-  const [selectPlayerString, setSelectPlayerString] =
-    useState<string>("Select player");
   const [judgeType, setJudgeType] = useState<string>("");
   const { players, teams, alert, reload, lastReloaded } = useFetchDataConvex();
 
@@ -135,8 +133,6 @@ function Judge(): React.ReactElement {
               selectedTeamId={selectedTeamId}
               selectedPlayer={selectedPlayer}
               setSelectedPlayer={setSelectedPlayer}
-              selectPlayerString={selectPlayerString}
-              setSelectPlayerString={setSelectPlayerString}
             />
           </Box>
         )}
