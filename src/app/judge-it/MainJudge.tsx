@@ -7,28 +7,16 @@ import PlayerSelect from "../components/PlayerSelect";
 import AlertComponent from "../components/AlertComponent";
 import JudgeButton from "../components/JudgeButton";
 
-interface MainJudgeProps {
-  parentTeam: string | null;
-  parentPlayer: string | null;
-}
-
-const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
+const MainJudge: React.FC = () => {
   const { alert } = useFetchDataConvex();
 
-  const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(
-    null,
-  );
-  const [selectedPlayer, setSelectedPlayer] = useState<Id<"players"> | null>(
-    null,
-  );
+  const [teamA, setTeamA] = useState<Id<"teams"> | null>(null);
+  const [teamB, setTeamB] = useState<Id<"teams"> | null>(null);
+  const [playerA, setPlayerA] = useState<Id<"players"> | null>(null);
+  const [playerB, setPlayerB] = useState<Id<"players"> | null>(null);
 
   const { handleGlobalStart, nextHeatNumber } = useHeatControls(
-    {
-      teamA: parentTeam as Id<"teams">,
-      teamB: selectedTeamId as Id<"teams">,
-      playerA: parentPlayer as Id<"players">,
-      playerB: selectedPlayer as Id<"players">,
-    },
+    { teamA, teamB, playerA, playerB },
     alert,
   );
 
@@ -44,19 +32,26 @@ const MainJudge: React.FC<MainJudgeProps> = ({ parentTeam, parentPlayer }) => {
       {/**
        * Show team selection as a dropdown
        * Will only show active teams
-       */}{" "}
-      <TeamSelect
-        selectedTeamId={selectedTeamId}
-        setSelectedTeam={setSelectedTeamId}
-      />
+       */}
+      <TeamSelect selectedTeamId={teamA} setSelectedTeam={setTeamA} />
       {/**
        * Show player selection as a group of radio buttons
        * Disable the radio group if there are no players
        */}
       <PlayerSelect
-        selectedTeamId={selectedTeamId}
-        selectedPlayer={selectedPlayer}
-        setSelectedPlayer={setSelectedPlayer}
+        selectedTeamId={teamA}
+        selectedPlayer={playerA}
+        setSelectedPlayer={setPlayerA}
+      />
+      <TeamSelect selectedTeamId={teamB} setSelectedTeam={setTeamB} />
+      {/**
+       * Show player selection as a group of radio buttons
+       * Disable the radio group if there are no players
+       */}
+      <PlayerSelect
+        selectedTeamId={teamB}
+        selectedPlayer={playerB}
+        setSelectedPlayer={setPlayerB}
       />
       <Stack spacing={2} sx={{ width: "100%" }}>
         <JudgeButton onClick={() => handleGlobalStart()}>

@@ -15,8 +15,6 @@ import {
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useAuth } from "@/AuthContext";
-import TeamSelect from "../components/TeamSelect";
-import PlayerSelect from "../components/PlayerSelect";
 import MainJudge from "./MainJudge";
 import Header from "../components/Header";
 import ParticipantsJudge from "./ParticipantsJudge";
@@ -26,18 +24,13 @@ import AlertComponent from "../components/AlertComponent";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 import { RequireApproval } from "../components/RequireApproval";
-import { Id } from "convex/_generated/dataModel";
 
 export const dynamic = "force-dynamic";
 
 function Judge(): React.ReactElement {
   const { user } = useAuth();
-  const [selectedTeamId, setSelectedTeam] = useState<Id<"teams"> | null>(null);
-  const [selectedPlayer, setSelectedPlayer] = useState<Id<"players"> | null>(
-    null,
-  );
   const [judgeType, setJudgeType] = useState<string>("");
-  const { players, teams, alert, reload, lastReloaded } = useFetchDataConvex();
+  const { alert, reload, lastReloaded } = useFetchDataConvex();
 
   const reloadTooltip = useMemo(
     () => `Reload data (Last: ${new Date(lastReloaded).toLocaleTimeString()})`,
@@ -114,30 +107,6 @@ function Judge(): React.ReactElement {
           </RadioGroup>
         </FormControl>
 
-        <Box>
-          {/**
-           * Show team selection as a dropdown
-           * Will only show active teams
-           */}
-          <TeamSelect
-            selectedTeamId={selectedTeamId}
-            setSelectedTeam={setSelectedTeam}
-          />
-        </Box>
-
-        {judgeType !== BEER_JUDGE && (
-          <Box>
-            {/**
-             * Show player selection as a group of radio buttons
-             * Disable the radio group if there are no players
-             */}
-            <PlayerSelect
-              selectedTeamId={selectedTeamId}
-              selectedPlayer={selectedPlayer}
-              setSelectedPlayer={setSelectedPlayer}
-            />
-          </Box>
-        )}
         {/**
          * Display the specific judge extra functionality
          *
@@ -145,25 +114,9 @@ function Judge(): React.ReactElement {
          * Loads participants.jsx if judgeType is participants side
          * Loads beer.jsx if judgeType is beer side
          */}
-        {judgeType === MAIN_JUDGE && (
-          <MainJudge
-            parentTeam={selectedTeamId ? selectedTeamId : null}
-            parentPlayer={selectedPlayer ? selectedPlayer : null}
-          />
-        )}
-        {judgeType === PARTICIPANTS_JUDGE && (
-          <ParticipantsJudge
-            selectedTeam={teams.find((t) => t.id === selectedTeamId) || null}
-            selectedPlayer={
-              players.find((p) => p.id === selectedPlayer) || null
-            }
-          />
-        )}
-        {judgeType === BEER_JUDGE && (
-          <BeerJudge
-            selectedTeam={teams.find((t) => t.id === selectedTeamId) || null}
-          />
-        )}
+        {judgeType === MAIN_JUDGE && <MainJudge />}
+        {judgeType === PARTICIPANTS_JUDGE && <ParticipantsJudge />}
+        {judgeType === BEER_JUDGE && <BeerJudge />}
       </Stack>
       <AlertComponent
         severity={alert.severity}

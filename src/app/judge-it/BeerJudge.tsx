@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   getPlayerIdGivenTeamAndTimeLogs,
   getPlayerName,
@@ -8,14 +8,12 @@ import {
   TIME_TYPE_BEER,
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
-import type { Team, TimeTypeKey } from "@/types";
+import type { TimeTypeKey } from "@/types";
 import { useFetchDataConvex, useHeatControls, useCurrentHeat } from "../hooks";
 import JudgeButton from "../components/JudgeButton";
 import AlertComponent from "../components/AlertComponent";
-
-interface BeerJudgeProps {
-  selectedTeam: Team | null;
-}
+import TeamSelect from "../components/TeamSelect";
+import { Id } from "convex/_generated/dataModel";
 
 enum BeerSidePhase {
   SAILING_IN = 1,
@@ -27,13 +25,14 @@ enum BeerSidePhase {
   SAILING_OUT = 7,
 }
 
-const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
+const BeerJudge: React.FC = () => {
   const { alert, timeTypes, players, reload } = useFetchDataConvex();
   const { timeLogs } = useCurrentHeat();
   const { insertTimeLog } = useHeatControls({}, alert);
+  const [teamId, setTeamId] = useState<Id<"teams"> | null>(null);
 
-  const latestPlayer = selectedTeam
-    ? getPlayerIdGivenTeamAndTimeLogs(selectedTeam.id, timeLogs)
+  const latestPlayer = teamId
+    ? getPlayerIdGivenTeamAndTimeLogs(teamId, timeLogs)
     : null;
   const playerName = getPlayerName(latestPlayer, players);
 
@@ -73,7 +72,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
 
   const handleTimeTypeClick = async (timeTypeKey: TimeTypeKey) => {
     const timeTypeId = timeTypes.find((tt) => tt.time_eng === timeTypeKey)!.id;
-    await insertTimeLog(timeTypeId, latestPlayer, selectedTeam?.id);
+    await insertTimeLog(timeTypeId, latestPlayer, teamId ?? undefined);
     reload();
   };
 
@@ -85,6 +84,7 @@ const BeerJudge: React.FC<BeerJudgeProps> = ({ selectedTeam }) => {
         open={alert.open}
         setOpen={alert.setOpen}
       />
+      <TeamSelect selectedTeamId={teamId} setSelectedTeam={setTeamId} />
       {playerName !== "" && (
         <JudgeButton
           disabled={currentPhase >= BeerSidePhase.SAILING_OUT}
