@@ -5,10 +5,6 @@ import {
   Container,
   Box,
   Typography,
-  FormControl,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   Stack,
   IconButton,
   Tooltip,
@@ -22,14 +18,14 @@ import BeerJudge from "./BeerJudge";
 import NotLoggedIn from "../components/NotLoggedIn";
 import AlertComponent from "../components/AlertComponent";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
-import { BEER_JUDGE, MAIN_JUDGE, PARTICIPANTS_JUDGE } from "@/utils/constants";
 import { RequireApproval } from "../components/RequireApproval";
+import JudgeTypeRadio, { judge } from "../components/JudgeTypeRadio";
 
 export const dynamic = "force-dynamic";
 
 function Judge(): React.ReactElement {
   const { user } = useAuth();
-  const [judgeType, setJudgeType] = useState<string>("");
+  const [judgeType, setJudgeType] = useState<judge>(judge.NONE);
   const { alert, reload, lastReloaded } = useFetchDataConvex();
 
   const reloadTooltip = useMemo(
@@ -47,14 +43,8 @@ function Judge(): React.ReactElement {
       <Stack
         spacing={2}
         sx={{
-          minHeight:
-            judgeType === MAIN_JUDGE
-              ? "calc(110vh - 80px)"
-              : "calc(100vh - 80px)",
-          maxHeight:
-            judgeType === MAIN_JUDGE
-              ? "calc(110vh - 80px)"
-              : "calc(100vh - 80px)",
+          minHeight: "calc(100vh - 80px)",
+          maxHeight: "calc(100vh - 80px)",
           overflowY: "auto",
           py: 2,
         }}
@@ -84,28 +74,10 @@ function Judge(): React.ReactElement {
             </IconButton>
           </Tooltip>
         </Box>
-        <FormControl fullWidth variant="filled">
-          <Typography variant="h6" gutterBottom>
-            Judge type
-          </Typography>
-          <RadioGroup row onChange={(e) => setJudgeType(e.target.value)}>
-            <FormControlLabel
-              value={MAIN_JUDGE}
-              control={<Radio />}
-              label="Participants main"
-            />
-            <FormControlLabel
-              value={PARTICIPANTS_JUDGE}
-              control={<Radio />}
-              label="Participants side"
-            />
-            <FormControlLabel
-              value={BEER_JUDGE}
-              control={<Radio />}
-              label="Beer side"
-            />
-          </RadioGroup>
-        </FormControl>
+        <JudgeTypeRadio
+          selectedType={judgeType}
+          setSelectedType={setJudgeType}
+        />
 
         {/**
          * Display the specific judge extra functionality
@@ -114,9 +86,9 @@ function Judge(): React.ReactElement {
          * Loads participants.jsx if judgeType is participants side
          * Loads beer.jsx if judgeType is beer side
          */}
-        {judgeType === MAIN_JUDGE && <MainJudge />}
-        {judgeType === PARTICIPANTS_JUDGE && <ParticipantsJudge />}
-        {judgeType === BEER_JUDGE && <BeerJudge />}
+        {judgeType === judge.MAIN && <MainJudge />}
+        {judgeType === judge.PARTICIPANTS && <ParticipantsJudge />}
+        {judgeType === judge.BEER && <BeerJudge />}
       </Stack>
       <AlertComponent
         severity={alert.severity}
