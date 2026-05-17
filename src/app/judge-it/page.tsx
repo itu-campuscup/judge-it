@@ -15,8 +15,8 @@ import {
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useAuth } from "@/AuthContext";
-import TeamSelect from "./TeamSelect";
-import PlayerSelect from "./PlayerSelect";
+import TeamSelect from "../components/TeamSelect";
+import PlayerSelect from "../components/PlayerSelect";
 import MainJudge from "./MainJudge";
 import Header from "../components/Header";
 import ParticipantsJudge from "./ParticipantsJudge";
