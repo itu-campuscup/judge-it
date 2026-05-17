@@ -6,6 +6,7 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
+  Legend,
 } from "recharts";
 
 interface EntityInfo {
