@@ -251,6 +251,54 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
               color="#4fc3f7"
             />
           </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            <RadarChart
+              cx={300}
+              cy={200}
+              outerRadius={160}
+              width={600}
+              height={400}
+              data={data1}
+            >
+              <PolarGrid gridType="circle" />
+              <PolarAngleAxis
+                dataKey="subject"
+                style={{ fontSize: "14px", fontWeight: "bold" }}
+              />
+              <PolarRadiusAxis
+                angle={30}
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+                style={{ fontSize: "12px" }}
+              />
+              <Radar
+                name={entity1.name}
+                dataKey="Performance"
+                stroke="#8884d8"
+                fill="#8884d8"
+                fillOpacity={0.4}
+                strokeWidth={2}
+              />
+              <Radar
+                name={entity2!.name}
+                dataKey="Performance"
+                data={data2}
+                stroke="#4fc3f7"
+                fill="#4fc3f7"
+                fillOpacity={0.4}
+                strokeWidth={2}
+              />
+              <Legend />
+            </RadarChart>
+          </Box>
         </>
       )}
     </Box>
