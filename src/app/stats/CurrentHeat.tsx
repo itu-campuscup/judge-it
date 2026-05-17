@@ -207,6 +207,46 @@ const CurrentHeat: React.FC = () => {
     raceFinished,
   ]);
 
+  const team1 = teamsData[0];
+  const team2 = teamsData[1];
+
+  const winningTeam: TeamData | null = useMemo(() => {
+    if (!team1 || !team2) return null;
+
+    const team1SailLogs = allSailLogs.filter(
+      (log) => log.team_id === team1.teamId,
+    );
+    const team2SailLogs = allSailLogs.filter(
+      (log) => log.team_id === team2.teamId,
+    );
+
+    if (team1SailLogs.length >= 16 || team2SailLogs.length >= 16) {
+      let team1SixteenthTime: string | null = null;
+      let team2SixteenthTime: string | null = null;
+
+      if (team1SailLogs.length >= 16) {
+        const sortedTeam1Logs = sortTimeLogsByTime(team1SailLogs);
+        team1SixteenthTime = sortedTeam1Logs[15]?.time || null;
+      }
+
+      if (team2SailLogs.length >= 16) {
+        const sortedTeam2Logs = sortTimeLogsByTime(team2SailLogs);
+        team2SixteenthTime = sortedTeam2Logs[15]?.time || null;
+      }
+
+      if (team1SixteenthTime && team2SixteenthTime) {
+        const team1Time = timeToMilli(team1SixteenthTime);
+        const team2Time = timeToMilli(team2SixteenthTime);
+        return team1Time <= team2Time ? team1 : team2;
+      } else if (team1SixteenthTime) {
+        return team1;
+      } else if (team2SixteenthTime) {
+        return team2;
+      }
+    }
+    return null;
+  }, [team1, team2, allSailLogs]);
+
   if (!currentHeat) {
     return (
       <Box
@@ -221,54 +261,6 @@ const CurrentHeat: React.FC = () => {
       </Box>
     );
   }
-
-  const team1 = teamsData[0];
-  const team2 = teamsData[1];
-
-  const winningTeam: TeamData | null = useMemo(() => {
-    if (!team1 || !team2) return null;
-
-    // Check if either team has 16+ sail logs
-    const team1SailLogs = allSailLogs.filter(
-      (log) => log.team_id === team1.teamId,
-    );
-    const team2SailLogs = allSailLogs.filter(
-      (log) => log.team_id === team2.teamId,
-    );
-
-    // If either team has 16+ logs, determine who got their 16th log first
-    if (team1SailLogs.length >= 16 || team2SailLogs.length >= 16) {
-      let team1SixteenthTime: string | null = null;
-      let team2SixteenthTime: string | null = null;
-
-      // Get 16th log time for team1 if they have 16+ logs
-      if (team1SailLogs.length >= 16) {
-        const sortedTeam1Logs = sortTimeLogsByTime(team1SailLogs);
-        team1SixteenthTime = sortedTeam1Logs[15]?.time || null; // 16th log (0-indexed)
-      }
-
-      // Get 16th log time for team2 if they have 16+ logs
-      if (team2SailLogs.length >= 16) {
-        const sortedTeam2Logs = sortTimeLogsByTime(team2SailLogs);
-        team2SixteenthTime = sortedTeam2Logs[15]?.time || null; // 16th log (0-indexed)
-      }
-
-      // Determine winner based on who got 16th log first
-      if (team1SixteenthTime && team2SixteenthTime) {
-        // Both teams finished - compare times
-        const team1Time = timeToMilli(team1SixteenthTime);
-        const team2Time = timeToMilli(team2SixteenthTime);
-        return team1Time <= team2Time ? team1 : team2;
-      } else if (team1SixteenthTime) {
-        // Only team1 finished
-        return team1;
-      } else if (team2SixteenthTime) {
-        // Only team2 finished
-        return team2;
-      }
-    }
-    return null;
-  }, [team1, team2, allSailLogs]);
 
   return (
     <Box
