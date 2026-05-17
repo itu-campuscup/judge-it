@@ -231,7 +231,26 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
         </>
       ) : (
         <>
-          {/* Overlay mode will be added in next tasks */}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 4,
+              mb: 3,
+              minHeight: "200px",
+              flexShrink: 0,
+            }}
+          >
+            <EntityInfoCard
+              entity={entity1}
+              align="left"
+              color="#8884d8"
+            />
+            <EntityInfoCard
+              entity={entity2!}
+              align="right"
+              color="#4fc3f7"
+            />
+          </Box>
         </>
       )}
     </Box>
