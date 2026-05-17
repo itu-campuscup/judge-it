@@ -173,6 +173,13 @@ If not, you can create one for free at [convex.dev](https://convex.dev/).
 
    Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
 
+   > You might run into an issue that says something like:
+   > ```bash
+   > convex/auth.ts:8:6 - error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try npm i --save-dev @types/node and then add 'node' to the types field in your tsconfig.
+   > ```
+   > If this happens you probably have to delete the `convex/tsconfig.json` file and rerun `bun dev`.
+
+
 3. **Import data**
 
    If you want initial data then see [scripts/README.md](scripts/README.md) for instructions on importing data.
