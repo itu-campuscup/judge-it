@@ -29,6 +29,104 @@ interface RadarChartComponentProps {
   data2?: RadarChartData[];
 }
 
+interface EntityInfoCardProps {
+  entity: EntityInfo;
+  align: "left" | "right";
+  color: string;
+}
+
+const EntityInfoCard: React.FC<EntityInfoCardProps> = ({
+  entity,
+  align,
+  color,
+}) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: align === "left" ? "flex-start" : "flex-end",
+        mb: 3,
+        minHeight: "200px",
+        flex: 1,
+        textAlign: align,
+      }}
+    >
+      {align === "right" && (
+        <Box sx={{ textAlign: "right", flex: 1 }}>
+          <Typography
+            variant="h2"
+            component="div"
+            sx={{
+              fontSize: "2rem",
+              fontWeight: "bold",
+              mb: 1,
+              color: color,
+            }}
+          >
+            {entity.name}
+          </Typography>
+          {entity.altText != null && entity.altText != "" && (
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              sx={{
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                fontSize: "1.2rem",
+              }}
+            >
+              {entity.altTextType}: {entity.altText}
+            </Typography>
+          )}
+        </Box>
+      )}
+      {entity.imageUrl && (
+        <Avatar
+          src={entity.imageUrl}
+          alt={entity.name}
+          sx={{
+            width: 140,
+            height: 140,
+            mx: align === "left" ? 0 : 2,
+            mr: align === "left" ? 2 : 0,
+            border: `3px solid ${color}`,
+          }}
+        />
+      )}
+      {align === "left" && (
+        <Box sx={{ textAlign: "left", flex: 1 }}>
+          <Typography
+            variant="h2"
+            component="div"
+            sx={{
+              fontSize: "2rem",
+              fontWeight: "bold",
+              mb: 1,
+              color: color,
+            }}
+          >
+            {entity.name}
+          </Typography>
+          {entity.altText != null && entity.altText != "" && (
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              sx={{
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                fontSize: "1.2rem",
+              }}
+            >
+              {entity.altTextType}: {entity.altText}
+            </Typography>
+          )}
+        </Box>
+      )}
+    </Box>
+  );
+};
+
 const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
   entity1,
   data1,
