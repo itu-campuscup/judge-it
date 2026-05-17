@@ -8,6 +8,13 @@ import {
   Radar,
 } from "recharts";
 
+interface EntityInfo {
+  imageUrl?: string;
+  name: string;
+  altTextType: string;
+  altText: string;
+}
+
 interface RadarChartData {
   subject: string;
   Performance: number;
@@ -15,11 +22,10 @@ interface RadarChartData {
 }
 
 interface RadarChartComponentProps {
-  imageUrl?: string;
-  name: string;
-  altTextType: string;
-  altText: string;
-  data: RadarChartData[];
+  entity1: EntityInfo;
+  data1: RadarChartData[];
+  entity2?: EntityInfo;
+  data2?: RadarChartData[];
 }
 
 const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
