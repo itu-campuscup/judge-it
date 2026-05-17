@@ -313,14 +313,14 @@ const Teams: React.FC = () => {
             imageUrl: team1ChartData.imageUrl,
             name: team1ChartData.name,
             altTextType: "",
-            altText: ""
+            altText: "",
           }}
           data1={team1ChartData.data}
           entity2={{
             imageUrl: team2ChartData.imageUrl,
             name: team2ChartData.name,
             altTextType: "",
-            altText: ""
+            altText: "",
           }}
           data2={team2ChartData.data}
         />

@@ -240,16 +240,8 @@ const RadarChartComponent: React.FC<RadarChartComponentProps> = ({
               flexShrink: 0,
             }}
           >
-            <EntityInfoCard
-              entity={entity1}
-              align="left"
-              color="#8884d8"
-            />
-            <EntityInfoCard
-              entity={entity2!}
-              align="right"
-              color="#4fc3f7"
-            />
+            <EntityInfoCard entity={entity1} align="left" color="#8884d8" />
+            <EntityInfoCard entity={entity2!} align="right" color="#4fc3f7" />
           </Box>
 
           <Box

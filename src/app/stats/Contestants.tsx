@@ -290,14 +290,14 @@ const Contestants: React.FC = () => {
             imageUrl: player1ChartData.imageUrl,
             name: player1ChartData.name,
             altTextType: "Fun Fact",
-            altText: player1ChartData.funFact || ""
+            altText: player1ChartData.funFact || "",
           }}
           data1={player1ChartData.data}
           entity2={{
             imageUrl: player2ChartData.imageUrl,
             name: player2ChartData.name,
             altTextType: "Fun Fact",
-            altText: player2ChartData.funFact || ""
+            altText: player2ChartData.funFact || "",
           }}
           data2={player2ChartData.data}
         />
