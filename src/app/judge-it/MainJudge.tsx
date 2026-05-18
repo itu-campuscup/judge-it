@@ -29,25 +29,13 @@ const MainJudge: React.FC = () => {
         setOpen={alert.setOpen}
         context={alert.context}
       />
-      {/**
-       * Show team selection as a dropdown
-       * Will only show active teams
-       */}
       <TeamSelect selectedTeamId={teamA} setSelectedTeam={setTeamA} />
-      {/**
-       * Show player selection as a group of radio buttons
-       * Disable the radio group if there are no players
-       */}
       <PlayerSelect
         selectedTeamId={teamA}
         selectedPlayer={playerA}
         setSelectedPlayer={setPlayerA}
       />
       <TeamSelect selectedTeamId={teamB} setSelectedTeam={setTeamB} />
-      {/**
-       * Show player selection as a group of radio buttons
-       * Disable the radio group if there are no players
-       */}
       <PlayerSelect
         selectedTeamId={teamB}
         selectedPlayer={playerB}
