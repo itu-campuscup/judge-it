@@ -62,7 +62,7 @@
     "@typescript-eslint/parser": "^8.55.0",
     "baseline-browser-mapping": "^2.9.19",
     "eslint": "^10.0.0",
-    "eslint-config-next": "16.2.1",
+    "eslint-config-next": "16.2.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "pixelmatch": "^7.1.0",
