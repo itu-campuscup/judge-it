@@ -45,35 +45,38 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 
 /**
  * Sorts time logs by time in ascending order.
- * Note: Returns a new array to avoid in-place mutation.
+ * Performance Optimization: Implements Schwartzian Transform (map-sort-map) to reduce
+ * O(N log N) time parsing operations to O(N).
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort(
-    (a: TimeLog, b: TimeLog) =>
-      timeToMilli(a.time || "") - timeToMilli(b.time || ""),
-  );
+  return timeLogs
+    .map((log) => ({ log, timeMs: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.timeMs - b.timeMs)
+    .map(({ log }) => log);
 };
 
 /**
  * Performance Optimization: Sorts time logs by heat ID then by time in a single pass.
- * This replaces redundant double-sorts in statistics components.
- * Note: Returns a new array to avoid in-place mutation.
+ * Implements Schwartzian Transform to maintain O(N) complexity for time parsing.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs.
  */
 export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
-    const aHeat = String(a.heat_id ?? "");
-    const bHeat = String(b.heat_id ?? "");
-
-    // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
-    if (aHeat < bHeat) return -1;
-    if (aHeat > bHeat) return 1;
-
-    return timeToMilli(a.time || "") - timeToMilli(b.time || "");
-  });
+  return timeLogs
+    .map((log) => ({
+      log,
+      heat: String(log.heat_id ?? ""),
+      timeMs: timeToMilli(log.time || ""),
+    }))
+    .sort((a, b) => {
+      // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
+      if (a.heat < b.heat) return -1;
+      if (a.heat > b.heat) return 1;
+      return a.timeMs - b.timeMs;
+    })
+    .map(({ log }) => log);
 };
 
 /**

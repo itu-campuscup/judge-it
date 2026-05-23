@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Typography, Box, Avatar } from "@mui/material";
-import { Heat, Player } from "@/types";
+import { Player } from "@/types";
 import {
   getCurrentHeat,
   getCurrentPlayer,
@@ -28,37 +28,147 @@ interface TeamData {
 }
 
 const CurrentHeat: React.FC = () => {
-  const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
-  const [teamsData, setTeamsData] = useState<TeamData[]>([]);
-  const [raceTimer, setRaceTimer] = useState<string>("00:00");
-  const [raceStartTime, setRaceStartTime] = useState<string | null>(null);
-  const [raceFinished, setRaceFinished] = useState<boolean>(false);
-
   const { alert, heats, players, teams, timeLogs, timeTypes } =
     useFetchDataConvex();
 
-  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
+  const sailTypeId = useMemo(
+    () => getTimeTypeSail(timeTypes)?.id || "",
+    [timeTypes],
+  );
 
-  useEffect(() => {
-    const heat = getCurrentHeat(heats, alert || undefined);
-    if (heat) {
-      setCurrentHeat(heat);
+  // Performance Optimization: Convert currentHeat from useState to useMemo
+  // to avoid extra render cycles when heats update.
+  const currentHeat = useMemo(
+    () => getCurrentHeat(heats, alert || undefined),
+    [heats, alert],
+  );
+
+  // Performance Optimization: Consolidate all derived heat data into a single useMemo.
+  // This avoids redundant O(N) operations and prevents multiple state updates
+  // that cause extra re-renders.
+  const processedData = useMemo(() => {
+    if (!currentHeat?.id) return null;
+
+    const currentHeatTimeLogs = filterTimeLogsByHeatId(
+      timeLogs,
+      currentHeat.id,
+    );
+    const allSailLogs = filterTimeLogsByTimeType(
+      currentHeatTimeLogs,
+      sailTypeId as Id<"time_types">,
+    );
+
+    // Performance Optimization: Group sail logs by team_id in a single pass O(N)
+    const logsByTeam = new Map<Id<"teams">, typeof allSailLogs>();
+    allSailLogs.forEach((log) => {
+      if (!log.team_id) return;
+      const teamLogs = logsByTeam.get(log.team_id) || [];
+      teamLogs.push(log);
+      logsByTeam.set(log.team_id, teamLogs);
+    });
+
+    const teamIds = Array.from(logsByTeam.keys());
+    let raceFinished = false;
+    let winningTeamId: Id<"teams"> | null = null;
+
+    for (const teamId of teamIds) {
+      const teamSailLogs = logsByTeam.get(teamId) || [];
+      if (teamSailLogs.length >= 16) {
+        raceFinished = true;
+        winningTeamId = teamId;
+        break;
+      }
     }
-  }, [heats, alert]);
 
-  // Reset timer state when heat changes
+    const sortedAllSailLogs =
+      allSailLogs.length > 0 ? sortTimeLogsByTime(allSailLogs) : [];
+    const raceStartTime = sortedAllSailLogs[0]?.time || null;
+
+    // Calculate final time from when winning team got their 16th sail log
+    let finalTimeStr = "00:00";
+    if (raceFinished && winningTeamId) {
+      const winningSailLogs = logsByTeam.get(winningTeamId) || [];
+      if (winningSailLogs.length >= 16) {
+        const sortedWinningSailLogs = sortTimeLogsByTime(winningSailLogs);
+        const sixteenthSailLog = sortedWinningSailLogs[15];
+        const firstSailLog = sortedAllSailLogs[0];
+
+        if (firstSailLog?.time && sixteenthSailLog?.time) {
+          const elapsedMs = calcTimeDifference(
+            firstSailLog.time,
+            sixteenthSailLog.time,
+          );
+          const formatted = formatTime(elapsedMs);
+          const parts = formatted.split(":");
+          if (parts.length >= 2) {
+            const minutes = parseInt(parts[0], 10) % 60;
+            finalTimeStr = `${minutes.toString().padStart(2, "0")}:${parts[1]}`;
+          }
+        }
+      }
+    }
+
+    // Pre-calculate lookup Map for teams for O(1) access
+    const teamsMap = new Map<Id<"teams">, (typeof teams)[0]>();
+    teams.forEach((t) => teamsMap.set(t.id, t));
+
+    const teamsData: TeamData[] = teamIds.map((teamId) => {
+      const team = teamsMap.get(teamId);
+      const teamPlayers = getTeamPlayer(teamId, teams, players);
+      const teamSailLogs = logsByTeam.get(teamId) || [];
+
+      return {
+        teamId,
+        teamName: team?.name || `Team ${teamId}`,
+        teamImage: team?.image_url,
+        currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
+        sailCount: teamSailLogs.length,
+        isFinished: raceFinished,
+      };
+    });
+
+    // Determine winning team based on who reached 16 logs first
+    let winningTeam: TeamData | null = null;
+    if (raceFinished && teamsData.length >= 2) {
+      const t1 = teamsData[0];
+      const t2 = teamsData[1];
+      const t1Logs = logsByTeam.get(t1.teamId) || [];
+      const t2Logs = logsByTeam.get(t2.teamId) || [];
+
+      if (t1Logs.length >= 16 && t2Logs.length >= 16) {
+        const t1Time = timeToMilli(sortTimeLogsByTime(t1Logs)[15]?.time || "");
+        const t2Time = timeToMilli(sortTimeLogsByTime(t2Logs)[15]?.time || "");
+        winningTeam = t1Time <= t2Time ? t1 : t2;
+      } else if (t1Logs.length >= 16) {
+        winningTeam = t1;
+      } else if (t2Logs.length >= 16) {
+        winningTeam = t2;
+      }
+    }
+
+    return {
+      teamsData,
+      raceStartTime,
+      raceFinished,
+      finalTimeStr,
+      winningTeam,
+    };
+  }, [currentHeat?.id, timeLogs, teams, players, sailTypeId]);
+
+  const [raceTimer, setRaceTimer] = useState<string>("00:00");
+
+  // Update timer display when race finishes or state resets
   useEffect(() => {
-    if (currentHeat) {
+    if (!processedData || !processedData.raceStartTime) {
       setRaceTimer("00:00");
-      setRaceStartTime(null);
-      setRaceFinished(false);
-      setTeamsData([]);
+    } else if (processedData.raceFinished) {
+      setRaceTimer(processedData.finalTimeStr);
     }
-  }, [currentHeat?.id]);
+  }, [processedData]);
 
   // Race timer effect
   useEffect(() => {
-    if (!raceStartTime || raceFinished) return;
+    if (!processedData?.raceStartTime || processedData.raceFinished) return;
 
     const timer = setInterval(() => {
       const now = new Date();
@@ -70,7 +180,10 @@ const CurrentHeat: React.FC = () => {
         .toString()
         .padStart(3, "0")}`;
 
-      const elapsedMs = calcTimeDifference(raceStartTime, currentTime);
+      const elapsedMs = calcTimeDifference(
+        processedData.raceStartTime!,
+        currentTime,
+      );
       const formatted = formatTime(elapsedMs);
       const parts = formatted.split(":");
       if (parts.length >= 2) {
@@ -80,172 +193,11 @@ const CurrentHeat: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [raceStartTime, raceFinished]);
+  }, [processedData?.raceStartTime, processedData?.raceFinished]);
 
-  // Memoize expensive filtering operations
-  const currentHeatTimeLogs = useMemo(
-    () =>
-      currentHeat?.id ? filterTimeLogsByHeatId(timeLogs, currentHeat.id) : [],
-    [timeLogs, currentHeat?.id],
-  );
-
-  const allSailLogs = useMemo(
-    () =>
-      filterTimeLogsByTimeType(
-        currentHeatTimeLogs,
-        sailTypeId as Id<"time_types">,
-      ),
-    [currentHeatTimeLogs, sailTypeId],
-  );
-
-  useEffect(() => {
-    if (!currentHeat?.id) return;
-
-    const processHeatData = () => {
-      // Performance Optimization: Group sail logs by team_id in a single pass O(N)
-      // instead of multiple filter calls O(T*N)
-      const logsByTeam = new Map<Id<"teams">, typeof allSailLogs>();
-      allSailLogs.forEach((log) => {
-        if (!log.team_id) return;
-        const teamLogs = logsByTeam.get(log.team_id) || [];
-        teamLogs.push(log);
-        logsByTeam.set(log.team_id, teamLogs);
-      });
-
-      const teamIds = Array.from(logsByTeam.keys());
-      let raceComplete = false;
-      let winningTeamId: Id<"teams"> | null = null;
-
-      for (const teamId of teamIds) {
-        const teamSailLogs = logsByTeam.get(teamId) || [];
-        if (teamSailLogs.length >= 16) {
-          raceComplete = true;
-          winningTeamId = teamId;
-          break;
-        }
-      }
-
-      // Set race finished if any team reaches 16 sail logs
-      if (raceComplete && !raceFinished) {
-        setRaceFinished(true);
-      }
-
-      // Performance Optimization: Sort sail logs once and reuse
-      const sortedAllSailLogs =
-        allSailLogs.length > 0 ? sortTimeLogsByTime(allSailLogs) : [];
-
-      // Calculate final time from when winning team got their 16th sail log
-      let finalTime: string | null = null;
-      if (raceComplete && winningTeamId) {
-        const winningSailLogs = logsByTeam.get(winningTeamId) || [];
-        if (winningSailLogs.length >= 16) {
-          const sortedWinningSailLogs = sortTimeLogsByTime(winningSailLogs);
-          const sixteenthSailLog = sortedWinningSailLogs[15]; // 16th log (0-indexed)
-          const firstSailLog = sortedAllSailLogs[0]; // First sail log of the race
-
-          if (firstSailLog?.time && sixteenthSailLog?.time) {
-            const elapsedMs = calcTimeDifference(
-              firstSailLog.time,
-              sixteenthSailLog.time,
-            );
-            const formatted = formatTime(elapsedMs);
-            const parts = formatted.split(":");
-            if (parts.length >= 2) {
-              const minutes = parseInt(parts[0], 10) % 60;
-              finalTime = `${minutes.toString().padStart(2, "0")}:${parts[1]}`;
-            }
-          }
-        }
-      }
-
-      // Set race start time from first sail log
-      if (sortedAllSailLogs.length > 0 && !raceStartTime) {
-        const firstSailLog = sortedAllSailLogs[0];
-        if (firstSailLog?.time) {
-          setRaceStartTime(firstSailLog.time);
-        }
-      }
-
-      // Performance Optimization: Pre-calculate lookup Map for teams for O(1) access
-      const teamsMap = new Map<Id<"teams">, (typeof teams)[0]>();
-      teams.forEach((t) => teamsMap.set(t.id, t));
-
-      const processedTeams: TeamData[] = teamIds.map((teamId) => {
-        const team = teamsMap.get(teamId);
-        const teamPlayers = getTeamPlayer(teamId, teams, players);
-
-        // Get only sail logs for this team from our pre-computed Map
-        const teamSailLogs = logsByTeam.get(teamId) || [];
-        const sailCount = teamSailLogs.length;
-
-        return {
-          teamId,
-          teamName: team?.name || `Team ${teamId}`,
-          teamImage: team?.image_url,
-          currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
-          sailCount,
-          isFinished: raceComplete,
-        };
-      });
-
-      setTeamsData(processedTeams);
-
-      // Update timer display with final time if race is finished
-      if (raceComplete && finalTime) {
-        setRaceTimer(finalTime);
-      }
-    };
-
-    processHeatData();
-  }, [
-    timeLogs,
-    currentHeat,
-    teams,
-    players,
-    timeTypes,
-    raceStartTime,
-    raceFinished,
-  ]);
-
-  const team1 = teamsData[0];
-  const team2 = teamsData[1];
-
-  const winningTeam: TeamData | null = useMemo(() => {
-    if (!team1 || !team2) return null;
-
-    const team1SailLogs = allSailLogs.filter(
-      (log) => log.team_id === team1.teamId,
-    );
-    const team2SailLogs = allSailLogs.filter(
-      (log) => log.team_id === team2.teamId,
-    );
-
-    if (team1SailLogs.length >= 16 || team2SailLogs.length >= 16) {
-      let team1SixteenthTime: string | null = null;
-      let team2SixteenthTime: string | null = null;
-
-      if (team1SailLogs.length >= 16) {
-        const sortedTeam1Logs = sortTimeLogsByTime(team1SailLogs);
-        team1SixteenthTime = sortedTeam1Logs[15]?.time || null;
-      }
-
-      if (team2SailLogs.length >= 16) {
-        const sortedTeam2Logs = sortTimeLogsByTime(team2SailLogs);
-        team2SixteenthTime = sortedTeam2Logs[15]?.time || null;
-      }
-
-      if (team1SixteenthTime && team2SixteenthTime) {
-        const team1Time = timeToMilli(team1SixteenthTime);
-        const team2Time = timeToMilli(team2SixteenthTime);
-        return team1Time <= team2Time ? team1 : team2;
-      } else if (team1SixteenthTime) {
-        return team1;
-      } else if (team2SixteenthTime) {
-        return team2;
-      }
-    }
-    return null;
-  }, [team1, team2, allSailLogs]);
+  const team1 = processedData?.teamsData[0];
+  const team2 = processedData?.teamsData[1];
+  const winningTeam = processedData?.winningTeam;
 
   if (!currentHeat) {
     return (
@@ -355,7 +307,7 @@ const CurrentHeat: React.FC = () => {
           >
             {raceTimer}
           </Typography>
-          {raceFinished && (
+          {processedData?.raceFinished && (
             <Typography variant="h4" color="success.main">
               Final Time!
             </Typography>

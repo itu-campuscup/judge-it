@@ -22,3 +22,11 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2025-05-26 - [Schwartzian Transform for Time Sorting]
+**Learning:** Sorting time logs by parsing "HH:MM:SS.mmm" strings in the comparator leads to redundant O(N log N) parsing operations.
+**Action:** Use the Schwartzian Transform (map-sort-map) to parse time strings once into milliseconds, significantly improving performance for ranking and comparison views.
+
+## 2025-05-26 - [Consolidating Derived State in Timer Components]
+**Learning:** Components with active timers (like `CurrentHeat.tsx`) re-render frequently (every 1s). Distributing O(N) operations across multiple `useMemo` hooks or `useEffect` calls can lead to inefficient render cycles and stale state if not synchronized.
+**Action:** Consolidate all heavy derived data (filtering, grouping, status calculation) into a single, comprehensive `useMemo` to ensure O(N) work is minimized and the 1s render loop remains extremely lightweight.
