@@ -45,35 +45,39 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 
 /**
  * Sorts time logs by time in ascending order.
+ * Performance Optimization: Uses Schwartzian Transform to reduce expensive time parsing calls from O(N log N) to O(N).
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort(
-    (a: TimeLog, b: TimeLog) =>
-      timeToMilli(a.time || "") - timeToMilli(b.time || ""),
-  );
+  return timeLogs
+    .map((log) => ({ log, time: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.time - b.time)
+    .map(({ log }) => log);
 };
 
 /**
  * Performance Optimization: Sorts time logs by heat ID then by time in a single pass.
- * This replaces redundant double-sorts in statistics components.
+ * Performance Optimization: Uses Schwartzian Transform to reduce expensive time parsing calls from O(N log N) to O(N).
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs.
  */
 export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
-    const aHeat = String(a.heat_id ?? "");
-    const bHeat = String(b.heat_id ?? "");
-
-    // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
-    if (aHeat < bHeat) return -1;
-    if (aHeat > bHeat) return 1;
-
-    return timeToMilli(a.time || "") - timeToMilli(b.time || "");
-  });
+  return timeLogs
+    .map((log) => ({
+      log,
+      heatId: String(log.heat_id ?? ""),
+      time: timeToMilli(log.time || ""),
+    }))
+    .sort((a, b) => {
+      // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
+      if (a.heatId < b.heatId) return -1;
+      if (a.heatId > b.heatId) return 1;
+      return a.time - b.time;
+    })
+    .map(({ log }) => log);
 };
 
 /**
