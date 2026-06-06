@@ -22,3 +22,7 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2025-05-26 - [Sorting Optimization with Schwartzian Transform]
+**Learning:** Sorting logic that involves expensive key derivation (like parsing "HH:MM:SS.mmm" to milliseconds) can be optimized from $O(N \log N)$ derivation calls to $O(N)$ calls using the Schwartzian Transform (map-sort-map). This is particularly effective in React where such sorting might happen on every data update.
+**Action:** Use the map-sort-map pattern for sorting logic where key calculation is non-trivial.

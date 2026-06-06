@@ -45,35 +45,40 @@ export const sortTimeLogsByHeat = (timeLogs: TimeLog[]): TimeLog[] => {
 
 /**
  * Sorts time logs by time in ascending order.
+ * Performance Optimization: Uses Schwartzian Transform (map-sort-map) to call timeToMilli only once per log.
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs by time in ascending order.
  */
 export const sortTimeLogsByTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort(
-    (a: TimeLog, b: TimeLog) =>
-      timeToMilli(a.time || "") - timeToMilli(b.time || ""),
-  );
+  return timeLogs
+    .map((log) => ({ log, t: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.t - b.t)
+    .map(({ log }) => log);
 };
 
 /**
  * Performance Optimization: Sorts time logs by heat ID then by time in a single pass.
+ * Uses Schwartzian Transform (map-sort-map) to call timeToMilli only once per log.
  * This replaces redundant double-sorts in statistics components.
  * Note: Returns a new array to avoid in-place mutation.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} The sorted time logs.
  */
 export const sortTimeLogsByHeatAndTime = (timeLogs: TimeLog[]): TimeLog[] => {
-  return [...timeLogs].sort((a: TimeLog, b: TimeLog) => {
-    const aHeat = String(a.heat_id ?? "");
-    const bHeat = String(b.heat_id ?? "");
-
-    // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
-    if (aHeat < bHeat) return -1;
-    if (aHeat > bHeat) return 1;
-
-    return timeToMilli(a.time || "") - timeToMilli(b.time || "");
-  });
+  return timeLogs
+    .map((log) => ({
+      log,
+      h: String(log.heat_id ?? ""),
+      t: timeToMilli(log.time || ""),
+    }))
+    .sort((a, b) => {
+      // Performance Optimization: Use direct comparison for non-locale-sensitive IDs
+      if (a.h < b.h) return -1;
+      if (a.h > b.h) return 1;
+      return a.t - b.t;
+    })
+    .map(({ log }) => log);
 };
 
 /**
