@@ -1,4 +1,4 @@
-## 2025-05-22 - Missing Admin Authorization on Sensitive Endpoints
-**Vulnerability:** The administrative endpoints (`listUsers`, `approveUser`, `disapproveUser`) in `convex/admin.ts` were accessible to any authenticated user. This allowed any registered user to view other users' emails and approve their own or others' accounts.
-**Learning:** Initial implementation relied on UI-level checks and comments (`// In production, verify the current user is an admin`) without enforcing backend authorization. This is a classic "Broken Access Control" pattern.
-**Prevention:** Always enforce authorization at the database/API layer using dedicated helpers (`requireAdminUser`). Never rely solely on UI-level hiding of features.
+## 2025-05-23 - Missing Authorization on Data Queries
+**Vulnerability:** All 16 query handlers in `convex/queries.ts` (e.g., `getPlayers`, `getTimeLogs`) lacked authorization checks. While mutations were correctly protected by `requireApprovedUser`, these read-only queries were accessible to any authenticated user, including those pending admin approval.
+**Learning:** Security was partially enforced at the UI level (route protection) and for data modifications (mutations), but the data access layer (queries) was overlooked. This allowed unapproved users to potentially bypass the "Pending Approval" screen and fetch all competition data directly.
+**Prevention:** Always implement defense-in-depth by enforcing authorization at the lowest possible level—the API handlers themselves. Every query and mutation that returns non-public data must explicitly verify the user's status using `requireApprovedUser` or `requireAdminUser`.
