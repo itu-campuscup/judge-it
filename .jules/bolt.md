@@ -22,3 +22,11 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2025-05-26 - [Fragility of Manual String Parsing]
+**Learning:** Attempting to optimize `timeToMilli` by replacing `.split()` with `indexOf`/`substring` was found to be fragile. If the input format varies (e.g., missing decimals), manual index calculation becomes error-prone and can lead to incorrect parsing.
+**Action:** Prioritize robustness for core utility functions. If performance is a concern, ensure the input format is strictly guaranteed or use proven parsing methods like `.split()`.
+
+## 2025-05-26 - [Schwartzian Transform for Sorting]
+**Learning:** Using the Schwartzian Transform (`map-sort-map`) is effective for reducing the number of expensive key transformations (like `timeToMilli`) during sorting from O(N log N) to O(N).
+**Action:** Apply this pattern when the sorting key computation is expensive, but be mindful of the additional memory overhead for intermediate objects.

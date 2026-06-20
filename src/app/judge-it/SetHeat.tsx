@@ -127,7 +127,7 @@ const SetHeat: React.FC = () => {
   };
 
   const handleSetHeat = async (heatNumberString: string): Promise<void> => {
-    const heatNumber = parseInt(heatNumberString);
+    const heatNumber = parseInt(heatNumberString, 10);
     if (hasHeatBeenUsed(heatNumber)) {
       const nextNaturalHeat = getNextNaturalHeat();
       const confirmReuse = window.confirm(

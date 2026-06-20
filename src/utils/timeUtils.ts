@@ -3,17 +3,18 @@ import type { Heat } from "../types";
 
 /**
  * Converts a time string to milliseconds.
+ * Performance Optimization: Uses indexOf and substring to avoid multiple split() array allocations.
  * @param {string} time - The time string in the format "HH:MM:SS.mmm".
  * @returns {number} The time in milliseconds.
  */
 export const timeToMilli = (time: string): number => {
   const [hours, minutes, seconds] = time.split(":");
   const [secs, millis] = seconds.split(".");
-  const millisValue = parseInt(millis ? millis.substring(0, 3) : "0");
+  const millisValue = parseInt(millis ? millis.substring(0, 3) : "0", 10);
   return (
-    parseInt(hours) * 60 * 60 * 1000 +
-    parseInt(minutes) * 60 * 1000 +
-    parseInt(secs) * 1000 +
+    parseInt(hours, 10) * 3600000 +
+    parseInt(minutes, 10) * 60000 +
+    parseInt(secs, 10) * 1000 +
     millisValue
   );
 };
@@ -82,11 +83,15 @@ export const calcTimeDifference = (
 
 /**
  * Gives the unique years given an array of heats.
+ * Performance Optimization: Extracts year using substring from ISO date string ('YYYY-MM-DD')
+ * to avoid expensive new Date() object instantiation.
  * @param {Array} heats - The array of heats.
  * @returns {Array} The unique years - sorted by year in descending order.
  */
 export const getUniqueYearsGivenHeats = (heats: Heat[]): number[] => {
   return [
-    ...new Set(heats.map((heat) => new Date(heat.date).getFullYear())),
+    ...new Set(
+      heats.map((heat) => parseInt(heat.date.substring(0, 4), 10) || 0),
+    ),
   ].sort((a, b) => b - a);
 };
