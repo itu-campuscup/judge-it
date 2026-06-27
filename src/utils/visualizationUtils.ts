@@ -31,7 +31,11 @@ export const filterAndSortTimeLogs = (
 ): TimeLog[] => {
   const heatIdsInYear = new Set(
     heats
-      .filter((heat) => new Date(heat.date).getFullYear() === selectedYear)
+      .filter((heat) => {
+        // Performance Optimization: Use substring and parseInt instead of new Date().getFullYear()
+        // to avoid the overhead of full date parsing and object instantiation during filtering.
+        return parseInt(heat.date.substring(0, 4), 10) === selectedYear;
+      })
       .map((heat) => heat.id),
   );
 

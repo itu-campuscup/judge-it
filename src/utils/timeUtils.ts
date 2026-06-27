@@ -87,6 +87,12 @@ export const calcTimeDifference = (
  */
 export const getUniqueYearsGivenHeats = (heats: Heat[]): number[] => {
   return [
-    ...new Set(heats.map((heat) => new Date(heat.date).getFullYear())),
+    ...new Set(
+      heats.map((heat) => {
+        // Performance Optimization: Use substring and parseInt instead of new Date().getFullYear()
+        // to avoid the overhead of full date parsing and object instantiation.
+        return parseInt(heat.date.substring(0, 4), 10);
+      }),
+    ),
   ].sort((a, b) => b - a);
 };
