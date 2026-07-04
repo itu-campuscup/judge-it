@@ -31,7 +31,9 @@ export const filterAndSortTimeLogs = (
 ): TimeLog[] => {
   const heatIdsInYear = new Set(
     heats
-      .filter((heat) => new Date(heat.date).getFullYear() === selectedYear)
+      .filter(
+        (heat) => parseInt(heat.date.substring(0, 4), 10) === selectedYear,
+      )
       .map((heat) => heat.id),
   );
 
@@ -39,7 +41,9 @@ export const filterAndSortTimeLogs = (
     .filter(
       (tl) => tl.time_type_id === timeTypeId && heatIdsInYear.has(tl.heat_id),
     )
-    .sort((a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || ""));
+    .map((log) => ({ log, timeMs: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.timeMs - b.timeMs)
+    .map(({ log }) => log);
 };
 
 interface TimeEntry {
