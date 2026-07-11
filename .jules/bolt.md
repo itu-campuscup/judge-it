@@ -22,3 +22,13 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2025-05-26 - [Schwartzian Transform for Sorting]
+**Learning:** Sorting time logs involved expensive `timeToMilli` calls (string splitting and parsing) in the comparator. Implementing the Schwartzian Transform (map-sort-map) reduced these calls from O(N log N) to O(N), which is particularly effective in React render cycles where sorting happens frequently.
+
+**Action:** Use the Schwartzian Transform when sorting by derived or parsed keys in utility functions.
+
+## 2025-05-26 - [Fast ISO Year Extraction]
+**Learning:** `new Date(isoString).getFullYear()` is significantly slower than `parseInt(isoString.substring(0, 4), 10)` when processing large arrays of ISO-8601 dates.
+
+**Action:** Prefer `substring(0, 4)` for extracting years from ISO date strings in performance-critical loops.

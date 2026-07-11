@@ -21,7 +21,10 @@ import { Id } from "convex/_generated/dataModel";
 
 /**
  * Filters and sorts time logs for a given year and time type.
- * Performance: Optimized from O(H*L) to O(H+L) using a Set for heat ID lookups.
+ * Performance Optimization:
+ * 1. O(H+L) filtering using Set.
+ * 2. substring extraction for year to avoid Date instantiation.
+ * 3. Schwartzian Transform to minimize timeToMilli calls during sort.
  */
 export const filterAndSortTimeLogs = (
   timeLogs: TimeLog[],
@@ -31,7 +34,9 @@ export const filterAndSortTimeLogs = (
 ): TimeLog[] => {
   const heatIdsInYear = new Set(
     heats
-      .filter((heat) => new Date(heat.date).getFullYear() === selectedYear)
+      .filter(
+        (heat) => parseInt(heat.date.substring(0, 4), 10) === selectedYear,
+      )
       .map((heat) => heat.id),
   );
 
@@ -39,7 +44,9 @@ export const filterAndSortTimeLogs = (
     .filter(
       (tl) => tl.time_type_id === timeTypeId && heatIdsInYear.has(tl.heat_id),
     )
-    .sort((a, b) => timeToMilli(a.time || "") - timeToMilli(b.time || ""));
+    .map((log) => ({ log, time: timeToMilli(log.time || "") }))
+    .sort((a, b) => a.time - b.time)
+    .map(({ log }) => log);
 };
 
 interface TimeEntry {

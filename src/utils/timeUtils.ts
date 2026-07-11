@@ -9,11 +9,11 @@ import type { Heat } from "../types";
 export const timeToMilli = (time: string): number => {
   const [hours, minutes, seconds] = time.split(":");
   const [secs, millis] = seconds.split(".");
-  const millisValue = parseInt(millis ? millis.substring(0, 3) : "0");
+  const millisValue = parseInt(millis ? millis.substring(0, 3) : "0", 10);
   return (
-    parseInt(hours) * 60 * 60 * 1000 +
-    parseInt(minutes) * 60 * 1000 +
-    parseInt(secs) * 1000 +
+    parseInt(hours, 10) * 60 * 60 * 1000 +
+    parseInt(minutes, 10) * 60 * 1000 +
+    parseInt(secs, 10) * 1000 +
     millisValue
   );
 };
@@ -81,12 +81,13 @@ export const calcTimeDifference = (
 };
 
 /**
+ * Performance Optimization: Extracts years using substring to avoid expensive Date instantiation.
  * Gives the unique years given an array of heats.
  * @param {Array} heats - The array of heats.
  * @returns {Array} The unique years - sorted by year in descending order.
  */
 export const getUniqueYearsGivenHeats = (heats: Heat[]): number[] => {
   return [
-    ...new Set(heats.map((heat) => new Date(heat.date).getFullYear())),
+    ...new Set(heats.map((heat) => parseInt(heat.date.substring(0, 4), 10))),
   ].sort((a, b) => b - a);
 };
