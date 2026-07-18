@@ -103,6 +103,13 @@ async function viewSecrets() {
   const envLabel = env ? ` [${env}]` : "";
   console.log(`[INFO]\t Stored credentials${envLabel}:`);
 
+  if (typeof secrets === "undefined" || !secrets) {
+    console.error(
+      "[ERROR]\t Bun secrets are not available in this environment.",
+    );
+    return;
+  }
+
   for (const key of KEYS) {
     const storageKey = key + envSuffix;
     try {

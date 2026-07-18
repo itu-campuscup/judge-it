@@ -37,28 +37,35 @@ const getOrPrompt = async (
 ): Promise<string | null> => {
   const storageKey = envKey + envSuffix;
 
+  // Priority: check environment variable first to avoid keychain prompts/failures
+  const fromEnv = Bun.env[envKey];
+  if (fromEnv) {
+    console.log(`[INFO]\t Loaded ${envKey} from environment`);
+    return fromEnv;
+  }
+
   // In CI we must not access the OS keychain — read only from environment
   if (isCI()) {
-    const fromEnv = Bun.env[envKey];
-    if (fromEnv) {
-      console.log(`[INFO]\t Loaded ${envKey} from environment (CI)`);
-      return fromEnv;
-    }
     return null;
   }
 
-  // Local/dev flow: try Bun.secrets for keychain storage first
-  try {
-    const stored = await secrets.get({
-      service: SECRET_SERVICE,
-      name: storageKey,
-    });
-    if (stored) {
-      console.log(`[INFO]\t Loaded ${storageKey} from keychain`);
-      return stored;
+  // Local/dev flow: try Bun.secrets for keychain storage first if available
+  if (typeof secrets !== "undefined" && secrets) {
+    try {
+      const stored = await secrets.get({
+        service: SECRET_SERVICE,
+        name: storageKey,
+      });
+      if (stored) {
+        console.log(`[INFO]\t Loaded ${storageKey} from keychain`);
+        return stored;
+      }
+    } catch (err) {
+      console.error(
+        `[ERROR]\t Error accessing secrets for ${storageKey}:`,
+        err,
+      );
     }
-  } catch (err) {
-    console.error(`[ERROR]\t Error accessing secrets for ${storageKey}:`, err);
   }
 
   // Interactive prompt (only on TTY)
@@ -68,13 +75,15 @@ const getOrPrompt = async (
       const entered = prompt(`Enter ${displayName}:`);
       if (entered) {
         try {
-          // Save to Bun.secrets for future local runs
-          await secrets.set({
-            service: SECRET_SERVICE,
-            name: storageKey,
-            value: entered,
-          });
-          console.log(`[INFO]\t Saved ${storageKey} to keychain`);
+          // Save to Bun.secrets for future local runs if available
+          if (typeof secrets !== "undefined" && secrets) {
+            await secrets.set({
+              service: SECRET_SERVICE,
+              name: storageKey,
+              value: entered,
+            });
+            console.log(`[INFO]\t Saved ${storageKey} to keychain`);
+          }
           return entered;
         } catch (saveErr) {
           console.error(
@@ -130,6 +139,10 @@ export const readAppConfig = async (env?: string) => {
 export const clearStoredSecrets = async (env?: string): Promise<void> => {
   const envSuffix = env ? `_${env.toUpperCase()}` : "";
   const keysToDelete = ["NEXT_PUBLIC_CONVEX_URL"];
+  if (typeof secrets === "undefined" || !secrets) {
+    console.warn("[WARN]\t Bun secrets are not available in this environment.");
+    return;
+  }
   try {
     for (const key of keysToDelete) {
       await secrets.delete({
