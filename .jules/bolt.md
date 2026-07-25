@@ -22,3 +22,7 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2025-05-26 - [Avoid Expensive Date Parsing and Timezone Shift Bugs]
+**Learning:** Parsing string dates with `new Date(heat.date)` can lead to timezone-shifting bugs depending on the browser environment and local system time (where a date-only string might be parsed in UTC but local timezone offset shifts the year backward). Using `substring(0, 4)` is 100% immune to these timezone shifts, making it both faster and safer.
+**Action:** For simple year or date substring checks, always use direct string operations (like `substring(0, 4)` or `parseInt(..., 10)`) rather than instantiating expensive and fragile JS `Date` objects inside loops.

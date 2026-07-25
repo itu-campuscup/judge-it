@@ -21,7 +21,10 @@ const SetHeat: React.FC = () => {
   const thisYearsHeats = useMemo(
     () =>
       heats.filter(
-        (heat: Heat) => new Date(heat.date).getFullYear() === getCurYear(),
+        // Performance Optimization: Use substring(0, 4) and parseInt to extract the year of each heat,
+        // avoiding expensive new Date() parser instantiations.
+        (heat: Heat) =>
+          parseInt(heat.date.substring(0, 4), 10) === getCurYear(),
       ),
     [heats],
   );

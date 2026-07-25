@@ -86,7 +86,10 @@ export const calcTimeDifference = (
  * @returns {Array} The unique years - sorted by year in descending order.
  */
 export const getUniqueYearsGivenHeats = (heats: Heat[]): number[] => {
+  // Performance Optimization: Use substring(0, 4) and parseInt to extract the year from
+  // "YYYY-MM-DD" format. This is significantly faster than parsing the entire date string
+  // with new Date() and is immune to browser-specific timezone shift bugs.
   return [
-    ...new Set(heats.map((heat) => new Date(heat.date).getFullYear())),
+    ...new Set(heats.map((heat) => parseInt(heat.date.substring(0, 4), 10))),
   ].sort((a, b) => b - a);
 };
