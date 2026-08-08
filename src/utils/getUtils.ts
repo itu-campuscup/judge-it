@@ -63,13 +63,15 @@ export const getHeatNumber = (heatId: Id<"heats">, heats: Heat[]): string => {
 
 /**
  * Get the heat year given the heat ID.
+ * Performance Optimization: Extract the year from the date string 'YYYY-MM-DD'
+ * using substring(0, 4) instead of split('-')[0] to avoid creating temporary arrays.
  * @param {Id<"heats">} heatId - The heat ID.
  * @param {Array} heats - The list of heats.
  * @returns {string} The heat year.
  */
 export const getHeatYear = (heatId: Id<"heats">, heats: Heat[]): string => {
   const heat = heats.find((h: Heat) => h.id === heatId);
-  return heat ? heat.date.split("-")[0] : "";
+  return heat ? heat.date.substring(0, 4) : "";
 };
 
 /**

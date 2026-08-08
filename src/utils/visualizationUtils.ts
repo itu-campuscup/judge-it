@@ -31,7 +31,9 @@ export const filterAndSortTimeLogs = (
 ): TimeLog[] => {
   const heatIdsInYear = new Set(
     heats
-      .filter((heat) => new Date(heat.date).getFullYear() === selectedYear)
+      .filter(
+        (heat) => parseInt(heat.date.substring(0, 4), 10) === selectedYear,
+      )
       .map((heat) => heat.id),
   );
 
