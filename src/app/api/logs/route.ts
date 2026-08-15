@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
                 typeof rawData.user.email === "string"
                   ? rawData.user.email
                       .slice(0, 255)
-                      .replace(/(..)(.*)(@.*)/, "$1***$3") // Security: Mask PII in logs
+                      .replace(/(.)(.*)(@.*)/, "$1***$3") // Security: Mask PII in logs
                   : undefined,
             }
           : undefined,
