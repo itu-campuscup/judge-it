@@ -69,7 +69,8 @@ export const getHeatNumber = (heatId: Id<"heats">, heats: Heat[]): string => {
  */
 export const getHeatYear = (heatId: Id<"heats">, heats: Heat[]): string => {
   const heat = heats.find((h: Heat) => h.id === heatId);
-  return heat ? heat.date.split("-")[0] : "";
+  // Performance Optimization: Use direct substring slice instead of split array allocation
+  return heat ? heat.date.substring(0, 4) : "";
 };
 
 /**
