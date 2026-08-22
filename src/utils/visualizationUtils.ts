@@ -7,8 +7,6 @@ import {
   milliToSecs,
 } from "./timeUtils";
 import {
-  getPlayerName,
-  getHeatNumber,
   getTeamName,
   getPlayerFunFact,
   getTeamImageUrl,
@@ -146,6 +144,8 @@ export const removeDuplicateTimeEntries = (
 
 /**
  * Generates the chart data for the top times.
+ * Performance Optimization: Pre-calculates Map lookups for players, teams, heats, and player-to-team
+ * relationships to achieve O(1) lookups per entry instead of O(P + T + H) nested array scans.
  * @param {Array} topTimes - The top times.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
@@ -164,13 +164,41 @@ export const generateRankableData = (
   teamName: string;
   heatNumber: string;
 }> => {
-  return topTimes.map((time) => ({
-    time: time.duration ?? 0,
-    imageUrl: getPlayerImageWithFallback(time.playerId, players, teams),
-    playerName: getPlayerName(time.playerId, players),
-    teamName: time.teamId ? getTeamName(time.teamId, teams) : "",
-    heatNumber: getHeatNumber(time.heatId, heats),
-  }));
+  const playerMap = new Map(players.map((p) => [p.id, p]));
+  const teamMap = new Map(teams.map((t) => [t.id, t]));
+  const heatMap = new Map(heats.map((h) => [h.id, h]));
+
+  const playerTeamMap = new Map<Id<"players">, Team>();
+  for (const team of teams) {
+    if (team.player_1_id) playerTeamMap.set(team.player_1_id, team);
+    if (team.player_2_id) playerTeamMap.set(team.player_2_id, team);
+    if (team.player_3_id) playerTeamMap.set(team.player_3_id, team);
+    if (team.player_4_id) playerTeamMap.set(team.player_4_id, team);
+  }
+
+  return topTimes.map((time) => {
+    const player = playerMap.get(time.playerId);
+    const team = time.teamId ? teamMap.get(time.teamId) : undefined;
+    const heat = heatMap.get(time.heatId);
+
+    const playerName = player ? player.name : "";
+    const teamName = team ? team.name : "";
+    const heatNumber = heat ? heat.heat.toString() : "";
+
+    let imageUrl = player?.image_url || "";
+    if (!imageUrl) {
+      const playerTeam = playerTeamMap.get(time.playerId);
+      imageUrl = playerTeam?.image_url || "";
+    }
+
+    return {
+      time: time.duration ?? 0,
+      imageUrl,
+      playerName,
+      teamName,
+      heatNumber,
+    };
+  });
 };
 
 /**
