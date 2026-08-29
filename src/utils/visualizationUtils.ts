@@ -7,8 +7,6 @@ import {
   milliToSecs,
 } from "./timeUtils";
 import {
-  getPlayerName,
-  getHeatNumber,
   getTeamName,
   getPlayerFunFact,
   getTeamImageUrl,
@@ -146,6 +144,11 @@ export const removeDuplicateTimeEntries = (
 
 /**
  * Generates the chart data for the top times.
+ * Performance Optimization: Pre-computes lookup Maps for players, teams, heats,
+ * and player-to-team associations to achieve O(1) entity resolution per entry
+ * instead of nested array .find() scans, reducing total time complexity from
+ * O(N * (P + T + H)) to O(N + P + T + H).
+ *
  * @param {Array} topTimes - The top times.
  * @param {Array} players - The list of players.
  * @param {Array} teams - The list of teams.
@@ -164,13 +167,36 @@ export const generateRankableData = (
   teamName: string;
   heatNumber: string;
 }> => {
-  return topTimes.map((time) => ({
-    time: time.duration ?? 0,
-    imageUrl: getPlayerImageWithFallback(time.playerId, players, teams),
-    playerName: getPlayerName(time.playerId, players),
-    teamName: time.teamId ? getTeamName(time.teamId, teams) : "",
-    heatNumber: getHeatNumber(time.heatId, heats),
-  }));
+  const playerMap = new Map<string, Player>(players.map((p) => [p.id, p]));
+  const teamMap = new Map<string, Team>(teams.map((t) => [t.id, t]));
+  const heatMap = new Map<string, Heat>(heats.map((h) => [h.id, h]));
+
+  const playerTeamMap = new Map<string, Team>();
+  teams.forEach((t) => {
+    if (t.player_1_id) playerTeamMap.set(t.player_1_id, t);
+    if (t.player_2_id) playerTeamMap.set(t.player_2_id, t);
+    if (t.player_3_id) playerTeamMap.set(t.player_3_id, t);
+    if (t.player_4_id) playerTeamMap.set(t.player_4_id, t);
+  });
+
+  return topTimes.map((time) => {
+    const player = playerMap.get(time.playerId);
+    const playerTeam = playerTeamMap.get(time.playerId);
+    const imageUrl = player?.image_url || playerTeam?.image_url || "";
+    const playerName = player ? player.name : "";
+    const team = time.teamId ? teamMap.get(time.teamId) : undefined;
+    const teamName = team ? team.name : "";
+    const heat = heatMap.get(time.heatId);
+    const heatNumber = heat ? heat.heat.toString() : "";
+
+    return {
+      time: time.duration ?? 0,
+      imageUrl,
+      playerName,
+      teamName,
+      heatNumber,
+    };
+  });
 };
 
 /**
