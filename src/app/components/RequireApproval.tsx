@@ -13,25 +13,31 @@ import {
 } from "@mui/material";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import { useAuth } from "@/AuthContext";
+export function shouldRedirectToSignIn(
+  loading: boolean,
+  isAuthenticated: boolean,
+): boolean {
+  return !loading && !isAuthenticated;
+}
 
 /**
  * Component to check if user is approved before allowing access
  * Shows pending approval message if user is authenticated but not approved
  */
 export function RequireApproval({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const userStatus = useQuery(api.admin.getCurrentUserStatus);
   const router = useRouter();
 
-  // If not authenticated, redirect to home
+  // Convex Auth reports unauthenticated until its persisted session hydrates.
+  // Redirect only after that loading state settles.
   useEffect(() => {
-    if (isAuthenticated === false) {
+    if (shouldRedirectToSignIn(loading, isAuthenticated)) {
       router.push("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, loading, router]);
 
-  // Loading state
-  if (userStatus === undefined) {
+  if (loading || userStatus === undefined) {
     return (
       <Container>
         <Box
