@@ -73,6 +73,17 @@ const Header: React.FC = () => {
                     Judge Page
                   </Link>
                 </MenuItem>
+                <MenuItem
+                  onClick={() => handleMenuToggle()}
+                  sx={{ fontSize: "0.875rem", py: 0.5 }}
+                >
+                  <Link
+                    href="/manage"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    Manage Teams
+                  </Link>
+                </MenuItem>
                 <Divider sx={{ my: 0.5 }} />
               </Menu>
               <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
