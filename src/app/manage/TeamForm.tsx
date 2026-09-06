@@ -3,22 +3,18 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import {
+  Autocomplete,
   Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import type { AlertObject, Player } from "@/types";
-import { buildTeamPayload } from "./formValues";
+import { availableContestantsForSlot, buildTeamPayload } from "./formValues";
 
 interface TeamFormProps {
   alert: AlertObject;
@@ -34,9 +30,9 @@ export default function TeamForm({ alert, players }: TeamFormProps) {
   const [playerIds, setPlayerIds] = useState(EMPTY_PLAYER_IDS);
   const [submitting, setSubmitting] = useState(false);
 
-  const selectPlayer = (slot: number, event: SelectChangeEvent) => {
+  const selectPlayer = (slot: number, player: Player | null) => {
     const nextPlayerIds = [...playerIds];
-    nextPlayerIds[slot] = event.target.value as Id<"players"> | "";
+    nextPlayerIds[slot] = player?.id ?? "";
     setPlayerIds(nextPlayerIds);
   };
 
@@ -92,34 +88,20 @@ export default function TeamForm({ alert, players }: TeamFormProps) {
         />
         {playerIds.map((selectedPlayerId, slot) => {
           const label = `Contestant ${slot + 1}`;
+          const selectedPlayer =
+            players.find((player) => player.id === selectedPlayerId) ?? null;
+
           return (
-            <FormControl key={label} fullWidth>
-              <InputLabel id={`contestant-${slot + 1}-label`}>
-                {label}
-              </InputLabel>
-              <Select
-                labelId={`contestant-${slot + 1}-label`}
-                label={label}
-                value={selectedPlayerId}
-                onChange={(event) => selectPlayer(slot, event)}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {players.map((player) => (
-                  <MenuItem
-                    key={player.id}
-                    value={player.id}
-                    disabled={playerIds.some(
-                      (playerId, index) =>
-                        index !== slot && playerId === player.id,
-                    )}
-                  >
-                    {player.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              key={label}
+              options={availableContestantsForSlot(players, playerIds, slot)}
+              value={selectedPlayer}
+              getOptionKey={(player) => player.id}
+              getOptionLabel={(player) => player.name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              onChange={(_, player) => selectPlayer(slot, player)}
+              renderInput={(params) => <TextField {...params} label={label} />}
+            />
           );
         })}
         <Button type="submit" variant="contained" disabled={submitting}>

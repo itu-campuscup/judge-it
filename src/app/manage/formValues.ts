@@ -1,4 +1,5 @@
 import type { Id } from "convex/_generated/dataModel";
+import type { Player } from "@/types";
 
 export interface ContestantFormValues {
   name: string;
@@ -26,6 +27,19 @@ export function buildContestantPayload(values: ContestantFormValues) {
     ...(imageUrl ? { image_url: imageUrl } : {}),
     ...(funFact ? { fun_fact: funFact } : {}),
   };
+}
+
+export function availableContestantsForSlot(
+  players: Player[],
+  playerIds: Array<Id<"players"> | "">,
+  slot: number,
+) {
+  const selectedByOtherSlots = new Set(
+    playerIds.filter(
+      (playerId, selectedSlot) => selectedSlot !== slot && playerId,
+    ),
+  );
+  return players.filter((player) => !selectedByOtherSlots.has(player.id));
 }
 
 export function buildTeamPayload(values: TeamFormValues) {
