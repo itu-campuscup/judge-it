@@ -3,6 +3,7 @@ import type { Id } from "convex/_generated/dataModel";
 
 const playerA = "players_a" as Id<"players">;
 const playerB = "players_b" as Id<"players">;
+const playerC = "players_c" as Id<"players">;
 
 async function loadFormValues() {
   return import("./formValues");
@@ -52,6 +53,19 @@ describe("management form values", () => {
         playerIds: [playerA, playerA, "", ""],
       }),
     ).toThrow("A contestant can only appear once per team");
+  });
+
+  test("excludes contestants selected in another slot", async () => {
+    const { availableContestantsForSlot } = await loadFormValues();
+    const contestants = [
+      { id: playerA, name: "Alice" },
+      { id: playerB, name: "Bob" },
+      { id: playerC, name: "Charlie" },
+    ];
+
+    expect(
+      availableContestantsForSlot(contestants, [playerA, playerB, "", ""], 0),
+    ).toEqual([contestants[0], contestants[2]]);
   });
 
   test("requires names after trimming whitespace", async () => {
