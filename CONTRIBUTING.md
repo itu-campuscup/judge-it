@@ -126,7 +126,8 @@ Continue with [Getting Started](#getting-started) to set up your own Convex proj
 
 - [Bun](https://bun.sh/) 1.3 or higher (required due to secret management)
   Installation instructions can be found on [bun.com](https://bun.com/).
-- Access to CampusCup Supabase organization
+- You can use your own Convex project for development; production access is not required.
+  Set `NEXT_PUBLIC_CONVEX_URL` to your own deployment.
 
 **Installation:**
 
@@ -254,13 +255,13 @@ Notes & gotchas:
 5. Commit your changes with a clear and descriptive commit message
     - Use the [commit message styleguide](#commit-messages) to write your commit message
 6. Push your changes
-7. Create a PR to the develop branch of the repository
+7. Create a PR to the main branch of the repository
     - Add a description of your changes and why they are needed
     - Ensure checks are passing (lint, tests, etc)
     - Check if test deployment looks correct
     - Get a review from GitHub Copilot if you have access first
     - Request a review from the CampusCup team
-8. Wait for the CampusCup team to review your changes and merge them into the develop branch
+8. Wait for the CampusCup team to review your changes and merge them into the main branch
 
 > **ℹ️ Note:** This project uses [all-contributors](https://github.com/all-contributors/app) to keep track of all contributors.
 > Please add yourself to the list by writing `@all-contributors please add @<username> for code` in a comment on your first PR.
@@ -283,13 +284,16 @@ When creating a new branch, please use the following naming convention:
 
 Type can be one of the following:
 
-- `Feat` - for a new feature
-- `Fix` - for a bug fix
-- `Docs` - for documentation only changes
-- `Style` - for changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-- `Refactor` - for a code change that neither fixes a bug nor adds a feature
-- `Perf` - for a code change that improves performance
-- `Test` - for adding missing tests or correcting existing tests
+- `feat` - for a new feature
+- `fix` - for a bug fix
+- `docs` - for documentation-only changes
+- `style` - for formatting or non-semantic cleanups
+- `refactor` - for code changes that neither fix a bug nor add a feature
+- `perf` - for performance improvements
+- `test` - for adding or correcting tests
+- `chore` - for dependency updates, maintenance, and housekeeping
+- `ci` - for continuous integration, workflow, and automation changes
+- `build` - for build tooling or release pipeline changes
 
 **Task id** is the id of the task/issue you are working on.
 If not applicable, you can leave it out together with the suffixed dash (`-`).
@@ -299,23 +303,34 @@ Please use dashes (`-`) to separate words and keep it short.
 
 ### Commit Messages
 
-When creating a commit, please use imperative to describe what the commit does.
-Example:
+Use Conventional Commits for all judge-it commits:
+
+`type(scope): imperative description`
+
+`type` can be one of:
+
+- `feat`
+- `fix`
+- `docs`
+- `test`
+- `refactor`
+- `perf`
+- `style`
+- `chore`
+- `ci`
+- `build`
+
+Optional `scope` is helpful for narrowing a change (for example `feat(auth)`, `fix(convex)`).
+When a commit introduces a breaking change, add `!` after `type` or `scope` and include a
+`BREAKING CHANGE:` footer.
+
+Examples:
 
 ```txt
-Fix bug on the login page
-```
-
-Keep the commit message short and descriptive.
-If the commit is large use new lines to separate the different parts of the commit message.
-
-Example:
-
-```txt
-Fix bug on the login page
-
-Fix redirect after login
-Add a test for the bug
+feat(teams): add year selector to the teams page
+fix(convex): use local Convex environment by default for contributors
+docs(contributing): clarify PR base branch and branch naming rules
+ci(build): pin Bun version in the judge-it CI workflow
 ```
 
 ### Coding Style
