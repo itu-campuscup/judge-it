@@ -1,0 +1,448 @@
+import { TIME_TYPE_BEER, TIME_TYPE_SAIL, TIME_TYPE_SPIN } from "./constants";
+import {
+  calculateTimes,
+  removeDuplicateTimeEntries,
+} from "./visualizationUtils";
+import {
+  filterTimeLogsByTeamId,
+  sortTimeLogsByTime,
+  splitTimeLogsPerHeat,
+} from "./sortFilterUtils";
+import type {
+  Player,
+  Heat,
+  Team,
+  TimeType,
+  TimeLog,
+  AlertObject,
+  TimeEntry,
+} from "@/types";
+import { Id } from "convex/_generated/dataModel";
+
+/**
+ * Gets the player name given the player ID.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @returns {string} The player name.
+ */
+export const getPlayerName = (
+  playerId: Id<"players"> | null,
+  players: Player[],
+): string => {
+  const player = players.find((p) => p.id === playerId);
+  return player ? player.name : "";
+};
+
+/**
+ * Gets the player name with team name given the player ID.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The player name - team name.
+ */
+export const getPlayerNameWithTeam = (
+  playerId: Id<"players"> | null,
+  players: Player[],
+  teams: Team[],
+): string => {
+  const player = players.find((p) => p.id === playerId);
+  const team = getPlayerTeam(playerId as Player["id"], teams);
+  return player && team ? `${player.name} - ${team.name}` : "";
+};
+
+/**
+ * Gets the heat number given the heat ID.
+ * @param {Id<"heats">} heatId - The heat ID.
+ * @param {Array} heats - The list of heats.
+ * @returns {string} The heat number.
+ */
+export const getHeatNumber = (heatId: Id<"heats">, heats: Heat[]): string => {
+  const heat = heats.find((h: Heat) => h.id === heatId);
+  return heat ? heat.heat.toString() : "";
+};
+
+/**
+ * Get the heat year given the heat ID.
+ * @param {Id<"heats">} heatId - The heat ID.
+ * @param {Array} heats - The list of heats.
+ * @returns {string} The heat year.
+ */
+export const getHeatYear = (heatId: Id<"heats">, heats: Heat[]): string => {
+  const heat = heats.find((h: Heat) => h.id === heatId);
+  return heat ? heat.date.split("-")[0] : "";
+};
+
+/**
+ * Gets the team name given the team ID.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The team name.
+ */
+export const getTeamName = (teamId: Id<"teams">, teams: Team[]): string => {
+  const team = teams.find((t: Team) => t.id === teamId);
+  return team ? team.name : "";
+};
+
+/**
+ * Gets the player image URL given the player ID.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @returns {string} The player image URL.
+ */
+export const getPlayerImageUrl = (
+  playerId: Id<"players">,
+  players: Player[],
+): string => {
+  const player = players.find((p: Player) => p.id === playerId);
+  return player?.image_url || "";
+};
+
+/**
+ * Gets the team image URL given the team ID.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The team image URL.
+ */
+export const getTeamImageUrl = (teamId: Id<"teams">, teams: Team[]): string => {
+  const team = teams.find((t: Team) => t.id === teamId);
+  return team?.image_url || "";
+};
+
+/**
+ * Gets the current still active teams.
+ * @param {Array} teams - The list of teams.
+ * @returns {Array} The list of active teams.
+ */
+export const getActiveTeams = (teams: Team[]): Team[] => {
+  return teams.filter((t: Team) => t.is_out === false);
+};
+
+/**
+ * Get player given the player ID.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @returns {Object} The player.
+ */
+export const getPlayer = (
+  playerId: Id<"players">,
+  players: Player[],
+): Player | undefined => {
+  return players.find((p: Player) => p.id === playerId);
+};
+
+/**
+ * Get current player based on the most recent sail log.
+ * @param {Array} teamSailLogs - The list of sail logs for the team.
+ * @param {Array} teamPlayers - The list of players in the team.
+ * @returns {Object|null} The current player or null if not found.
+ */
+export const getCurrentPlayer = (
+  teamSailLogs: TimeLog[],
+  teamPlayers: Player[],
+): Player | null => {
+  if (teamSailLogs.length > 0) {
+    const sortedSailLogs = sortTimeLogsByTime(teamSailLogs);
+    const mostRecentSailLog = sortedSailLogs[sortedSailLogs.length - 1];
+    const curPlayer =
+      // Handles case when heat has started
+      getPlayer(mostRecentSailLog.player_id, teamPlayers) ||
+      // Handles case when heat has just started
+      teamPlayers[0] ||
+      // Fallback
+      null;
+    return curPlayer;
+  }
+  return teamPlayers[0] || null;
+};
+
+/**
+ * Gets the players given the team ID.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @returns {Array} The list of player IDs in the team.
+ */
+export const getTeamPlayerIds = (
+  teamId: Id<"teams">,
+  teams: Team[],
+): Player["id"][] => {
+  const team = teams.find((t) => t.id === teamId);
+  if (!team) return [];
+  return [
+    team.player_1_id,
+    team.player_2_id,
+    team.player_3_id,
+    team.player_4_id,
+  ].filter((id): id is Player["id"] => Boolean(id));
+};
+
+/**
+ * Get players given the team ID.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} teams - The list of teams.
+ * @param {Array} players - The list of players.
+ * @returns {Array} The list of players in the team.
+ */
+export const getTeamPlayer = (
+  teamId: Id<"teams">,
+  teams: Team[],
+  players: Player[],
+): Player[] => {
+  const playerIds = getTeamPlayerIds(teamId, teams);
+
+  return playerIds
+    .map((pId) => getPlayer(pId, players))
+    .filter((player): player is Player => player !== undefined);
+};
+
+/**
+ * Get current heat
+ * Note: With Convex, you should use the getCurrentHeat query directly.
+ * This is a helper function for backwards compatibility.
+ * @param {Heat[]} heats - The list of heats.
+ * @param {Object} alert - The alert object to set error messages (optional).
+ * @returns {Heat|null} The current heat or null if not found.
+ */
+export const getCurrentHeat = (
+  heats: Heat[],
+  alert?: AlertObject,
+): Heat | null => {
+  const currentHeat = heats.find((h: Heat) => h.is_current);
+
+  if (!currentHeat) {
+    const err = "No current heat found";
+    console.warn(err);
+    if (alert) {
+      alert.setOpen(true);
+      alert.setSeverity("warning");
+      alert.setText(err);
+      alert.setContext({
+        operation: "find_current_heat",
+        location: "getUtils.getCurrentHeat",
+        metadata: {
+          step: "find_current_heat",
+          heatsCount: heats.length,
+        },
+      });
+    }
+  }
+
+  return currentHeat || null;
+};
+
+/**
+ * Get the previous player given the team ID and heat ID.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Object} heat - The heat object.
+ * @param {Array} timeLogs - The list of time logs.
+ * @returns {Id<"players">} The previous player ID or a message if not found.
+ */
+export const getPrevPlayerId = (
+  teamId: Id<"teams"> | null,
+  heat: Heat | null,
+  timeLogs: TimeLog[],
+): Player["id"] | null => {
+  if (!teamId || !heat || !timeLogs) return null;
+
+  const logs = timeLogs.filter(
+    (e: TimeLog) => e.team_id === teamId && e.heat_id === heat.id,
+  );
+  const sortedByTimeDesc = logs.sort((a: TimeLog, b: TimeLog) => {
+    const aTime = a.time || "";
+    const bTime = b.time || "";
+    if (aTime < bTime) return 1;
+    if (aTime > bTime) return -1;
+    return 0;
+  });
+
+  const prevPlayer = !sortedByTimeDesc[0]
+    ? null
+    : sortedByTimeDesc[0].player_id;
+
+  return prevPlayer;
+};
+
+/**
+ * Get the time type given the time type string.
+ * @param {string} timeTypeString - The time type string.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object or undefined if not found.
+ */
+export const getTimeType = (
+  timeTypeString: string,
+  timeTypes: TimeType[],
+): TimeType | undefined => {
+  return timeTypes.find((e: TimeType) => e.time_eng === timeTypeString);
+};
+
+/**
+ * Get the time type for beer.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object for beer or undefined if not found.
+ */
+export const getTimeTypeBeer = (
+  timeTypes: TimeType[],
+): TimeType | undefined => {
+  return getTimeType(TIME_TYPE_BEER, timeTypes);
+};
+
+/**
+ * Get the time type for spin.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object for spin or undefined if not found.
+ */
+export const getTimeTypeSpinner = (
+  timeTypes: TimeType[],
+): TimeType | undefined => {
+  return getTimeType(TIME_TYPE_SPIN, timeTypes);
+};
+
+/**
+ * Get the time type for sail.
+ * @param {Array} timeTypes - The list of time types.
+ * @returns {Object|undefined} The time type object for sail or undefined if not found.
+ */
+export const getTimeTypeSail = (
+  timeTypes: TimeType[],
+): TimeType | undefined => {
+  return getTimeType(TIME_TYPE_SAIL, timeTypes);
+};
+
+/**
+ * Get the time type Id given the time type string.
+ * @param {string} timeTypeString - The time type string.
+ * @param {Array} timeTypes - The list of time types.
+ * @return {Id<"time_types">|null} The time type ID or null if not found.
+ */
+export const getTimeTypeId = (
+  timeTypeString: string,
+  timeTypes: TimeType[],
+): TimeType["id"] | null => {
+  return getTimeType(timeTypeString, timeTypes)?.id || null;
+};
+
+/**
+ * Get the best intra-heat time from the time logs.
+ * @param {Array} timeLogs - The list of time logs. It should be sorted by heat and time as well as only contain a single contestant.
+ * @return {Object|null} The best time object or null if multiple contestants are present or no valid time is found.
+ */
+export const getBestIntraHeatTime = (timeLogs: TimeLog[]): TimeEntry | null => {
+  const splitTimeLogs = splitTimeLogsPerHeat(timeLogs);
+
+  let bestTime: TimeEntry | null = null;
+
+  splitTimeLogs.forEach((heatTimes) => {
+    const times = calculateTimes(heatTimes);
+    const topTime = removeDuplicateTimeEntries(times)[0]; // As a single contestant, we can just take the first time
+
+    if (
+      topTime &&
+      topTime.duration &&
+      (!bestTime || topTime.duration < (bestTime.duration ?? Infinity))
+    ) {
+      bestTime = topTime;
+    }
+  });
+
+  return bestTime;
+};
+
+/**
+ * Get the fun fact of a player given their ID.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @returns {string|null} - The fun fact of the player or null if not found.
+ */
+export const getPlayerFunFact = (
+  playerId: Id<"players">,
+  players: Player[],
+): string | null => {
+  const player = players.find((p: Player) => p.id === playerId);
+  return player?.fun_fact || null;
+};
+
+/**
+ * Gets the team for a player given their ID
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @returns {Team|null} - The team for the player or null if not found.
+ */
+export const getPlayerTeam = (
+  playerId: Id<"players">,
+  teams: Team[],
+): Team | null => {
+  const team = teams.find(
+    (t: Team) =>
+      t.player_1_id === (playerId as Player["id"]) ||
+      t.player_2_id === (playerId as Player["id"]) ||
+      t.player_3_id === (playerId as Player["id"]) ||
+      t.player_4_id === (playerId as Player["id"]),
+  );
+  return team ? team : null;
+};
+
+/**
+ * Gets the player image URL with team image as fallback.
+ * If the player doesn't have an image, returns the team's image.
+ * @param {Id<"players">} playerId - The player ID.
+ * @param {Array} players - The list of players.
+ * @param {Array} teams - The list of teams.
+ * @returns {string} The player image URL or team image URL as fallback.
+ */
+export const getPlayerImageWithFallback = (
+  playerId: Id<"players">,
+  players: Player[],
+  teams: Team[],
+): string => {
+  const player = players.find((p: Player) => p.id === playerId);
+
+  // If player has an image, return it
+  if (player?.image_url) {
+    return player.image_url;
+  }
+
+  // Otherwise, get the team's image as fallback
+  const team = getPlayerTeam(playerId, teams);
+  return team?.image_url || "";
+};
+
+/**
+ * Get the player ID given the team ID and time logs.
+ * @param {Id<"teams">} teamId - The team ID.
+ * @param {Array} timeLogs - The list of time logs.
+ * @returns {Id<"players">|null} The player ID or null if not found.
+ */
+export const getPlayerIdGivenTeamAndTimeLogs = (
+  teamId: Id<"teams">,
+  timeLogs: TimeLog[],
+): Player["id"] | null => {
+  const teamLogs = filterTimeLogsByTeamId(timeLogs, teamId);
+  const recentLogs = sortTimeLogsByTime(teamLogs);
+  if (recentLogs.length === 0) return null;
+
+  // Sorry for the following if statements (When I wrote this code, only God and I understood what I did. Now only God knows.)
+  // Reasoning: As the teams change players, two time logs are inserted with the same start and stop times
+  // Thus to figure out the new player, we need to check the last three logs and choose the one that is the new player
+  // Last 3 logs: [PlayerA, PlayerA, PlayerB]
+  // Then we choose PlayerB as they appear only once in the last three logs
+  // Also if there are less than three logs, we just return the latest log's player as that means we are in the beginning of the game
+  const first = recentLogs[recentLogs.length - 1];
+  const second = recentLogs[recentLogs.length - 2];
+  const third = recentLogs[recentLogs.length - 3];
+  let latestLog: TimeLog | null;
+  if (
+    first?.player_id !== second?.player_id &&
+    first?.player_id !== third?.player_id
+  ) {
+    latestLog = first;
+  } else if (
+    second?.player_id !== first?.player_id &&
+    second?.player_id !== third?.player_id
+  ) {
+    latestLog = second;
+  } else {
+    latestLog = first;
+  }
+  const playerId = latestLog?.player_id;
+  return playerId ? playerId : null;
+};

@@ -1,0 +1,48 @@
+{
+  "projectName": "judge-it",
+  "projectOwner": "itu-campuscup",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "none",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "lucasfth",
+      "name": "Lucas Hanson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94063597?v=4",
+      "profile": "https://links.lucashanson.dk",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "anderswagner",
+      "name": "Anders Wagner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12821408?v=4",
+      "profile": "https://github.com/anderswagner",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "NatalieClaraPetersen",
+      "name": "NatalieCP",
+      "avatar_url": "https://avatars.githubusercontent.com/u/133771163?v=4",
+      "profile": "https://github.com/NatalieClaraPetersen",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "NaddiNadja",
+      "name": "NaddiNadja",
+      "avatar_url": "https://avatars.githubusercontent.com/u/74055632?v=4",
+      "profile": "https://github.com/NaddiNadja",
+      "contributions": [
+        "code"
+      ]
+    }
+  ]
+}

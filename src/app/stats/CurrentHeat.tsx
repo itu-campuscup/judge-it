@@ -1,0 +1,415 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import { Typography, Box, Avatar } from "@mui/material";
+import { Heat, Player } from "@/types";
+import {
+  getCurrentHeat,
+  getCurrentPlayer,
+  getTeamPlayer,
+  getTimeTypeSail,
+} from "@/utils/getUtils";
+import {
+  filterTimeLogsByHeatId,
+  filterTimeLogsByTimeType,
+  sortTimeLogsByTime,
+} from "@/utils/sortFilterUtils";
+import { timeToMilli, formatTime, calcTimeDifference } from "@/utils/timeUtils";
+import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
+
+interface TeamData {
+  teamId: Id<"teams">;
+  teamName: string;
+  teamImage?: string;
+  currentPlayer: Player | null;
+  sailCount: number;
+  isFinished: boolean;
+}
+
+const CurrentHeat: React.FC = () => {
+  const [currentHeat, setCurrentHeat] = useState<Heat | null>(null);
+  const [teamsData, setTeamsData] = useState<TeamData[]>([]);
+  const [raceTimer, setRaceTimer] = useState<string>("00:00");
+  const [raceStartTime, setRaceStartTime] = useState<string | null>(null);
+  const [raceFinished, setRaceFinished] = useState<boolean>(false);
+
+  const { alert, heats, players, teams, timeLogs, timeTypes } =
+    useFetchDataConvex();
+
+  const sailTypeId = getTimeTypeSail(timeTypes)?.id || "";
+
+  useEffect(() => {
+    const heat = getCurrentHeat(heats, alert || undefined);
+    if (heat) {
+      setCurrentHeat(heat);
+    }
+  }, [heats, alert]);
+
+  // Reset timer state when heat changes
+  useEffect(() => {
+    if (currentHeat) {
+      setRaceTimer("00:00");
+      setRaceStartTime(null);
+      setRaceFinished(false);
+      setTeamsData([]);
+    }
+  }, [currentHeat?.id]);
+
+  // Race timer effect
+  useEffect(() => {
+    if (!raceStartTime || raceFinished) return;
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}.${now
+        .getMilliseconds()
+        .toString()
+        .padStart(3, "0")}`;
+
+      const elapsedMs = calcTimeDifference(raceStartTime, currentTime);
+      const formatted = formatTime(elapsedMs);
+      const parts = formatted.split(":");
+      if (parts.length >= 2) {
+        const minutes = parseInt(parts[0], 10) % 60;
+        setRaceTimer(`${minutes.toString().padStart(2, "0")}:${parts[1]}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [raceStartTime, raceFinished]);
+
+  // Memoize expensive filtering operations
+  const currentHeatTimeLogs = useMemo(
+    () =>
+      currentHeat?.id ? filterTimeLogsByHeatId(timeLogs, currentHeat.id) : [],
+    [timeLogs, currentHeat?.id],
+  );
+
+  const allSailLogs = useMemo(
+    () =>
+      filterTimeLogsByTimeType(
+        currentHeatTimeLogs,
+        sailTypeId as Id<"time_types">,
+      ),
+    [currentHeatTimeLogs, sailTypeId],
+  );
+
+  useEffect(() => {
+    if (!currentHeat?.id) return;
+
+    const processHeatData = () => {
+      // Performance Optimization: Group sail logs by team_id in a single pass O(N)
+      // instead of multiple filter calls O(T*N)
+      const logsByTeam = new Map<Id<"teams">, typeof allSailLogs>();
+      allSailLogs.forEach((log) => {
+        if (!log.team_id) return;
+        const teamLogs = logsByTeam.get(log.team_id) || [];
+        teamLogs.push(log);
+        logsByTeam.set(log.team_id, teamLogs);
+      });
+
+      const teamIds = Array.from(logsByTeam.keys());
+      let raceComplete = false;
+      let winningTeamId: Id<"teams"> | null = null;
+
+      for (const teamId of teamIds) {
+        const teamSailLogs = logsByTeam.get(teamId) || [];
+        if (teamSailLogs.length >= 16) {
+          raceComplete = true;
+          winningTeamId = teamId;
+          break;
+        }
+      }
+
+      // Set race finished if any team reaches 16 sail logs
+      if (raceComplete && !raceFinished) {
+        setRaceFinished(true);
+      }
+
+      // Performance Optimization: Sort sail logs once and reuse
+      const sortedAllSailLogs =
+        allSailLogs.length > 0 ? sortTimeLogsByTime(allSailLogs) : [];
+
+      // Calculate final time from when winning team got their 16th sail log
+      let finalTime: string | null = null;
+      if (raceComplete && winningTeamId) {
+        const winningSailLogs = logsByTeam.get(winningTeamId) || [];
+        if (winningSailLogs.length >= 16) {
+          const sortedWinningSailLogs = sortTimeLogsByTime(winningSailLogs);
+          const sixteenthSailLog = sortedWinningSailLogs[15]; // 16th log (0-indexed)
+          const firstSailLog = sortedAllSailLogs[0]; // First sail log of the race
+
+          if (firstSailLog?.time && sixteenthSailLog?.time) {
+            const elapsedMs = calcTimeDifference(
+              firstSailLog.time,
+              sixteenthSailLog.time,
+            );
+            const formatted = formatTime(elapsedMs);
+            const parts = formatted.split(":");
+            if (parts.length >= 2) {
+              const minutes = parseInt(parts[0], 10) % 60;
+              finalTime = `${minutes.toString().padStart(2, "0")}:${parts[1]}`;
+            }
+          }
+        }
+      }
+
+      // Set race start time from first sail log
+      if (sortedAllSailLogs.length > 0 && !raceStartTime) {
+        const firstSailLog = sortedAllSailLogs[0];
+        if (firstSailLog?.time) {
+          setRaceStartTime(firstSailLog.time);
+        }
+      }
+
+      // Performance Optimization: Pre-calculate lookup Map for teams for O(1) access
+      const teamsMap = new Map<Id<"teams">, (typeof teams)[0]>();
+      teams.forEach((t) => teamsMap.set(t.id, t));
+
+      const processedTeams: TeamData[] = teamIds.map((teamId) => {
+        const team = teamsMap.get(teamId);
+        const teamPlayers = getTeamPlayer(teamId, teams, players);
+
+        // Get only sail logs for this team from our pre-computed Map
+        const teamSailLogs = logsByTeam.get(teamId) || [];
+        const sailCount = teamSailLogs.length;
+
+        return {
+          teamId,
+          teamName: team?.name || `Team ${teamId}`,
+          teamImage: team?.image_url,
+          currentPlayer: getCurrentPlayer(teamSailLogs, teamPlayers),
+          sailCount,
+          isFinished: raceComplete,
+        };
+      });
+
+      setTeamsData(processedTeams);
+
+      // Update timer display with final time if race is finished
+      if (raceComplete && finalTime) {
+        setRaceTimer(finalTime);
+      }
+    };
+
+    processHeatData();
+  }, [
+    timeLogs,
+    currentHeat,
+    teams,
+    players,
+    timeTypes,
+    raceStartTime,
+    raceFinished,
+  ]);
+
+  const team1 = teamsData[0];
+  const team2 = teamsData[1];
+
+  const winningTeam: TeamData | null = useMemo(() => {
+    if (!team1 || !team2) return null;
+
+    const team1SailLogs = allSailLogs.filter(
+      (log) => log.team_id === team1.teamId,
+    );
+    const team2SailLogs = allSailLogs.filter(
+      (log) => log.team_id === team2.teamId,
+    );
+
+    if (team1SailLogs.length >= 16 || team2SailLogs.length >= 16) {
+      let team1SixteenthTime: string | null = null;
+      let team2SixteenthTime: string | null = null;
+
+      if (team1SailLogs.length >= 16) {
+        const sortedTeam1Logs = sortTimeLogsByTime(team1SailLogs);
+        team1SixteenthTime = sortedTeam1Logs[15]?.time || null;
+      }
+
+      if (team2SailLogs.length >= 16) {
+        const sortedTeam2Logs = sortTimeLogsByTime(team2SailLogs);
+        team2SixteenthTime = sortedTeam2Logs[15]?.time || null;
+      }
+
+      if (team1SixteenthTime && team2SixteenthTime) {
+        const team1Time = timeToMilli(team1SixteenthTime);
+        const team2Time = timeToMilli(team2SixteenthTime);
+        return team1Time <= team2Time ? team1 : team2;
+      } else if (team1SixteenthTime) {
+        return team1;
+      } else if (team2SixteenthTime) {
+        return team2;
+      }
+    }
+    return null;
+  }, [team1, team2, allSailLogs]);
+
+  if (!currentHeat) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Typography variant="h4">No heat selected</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "70vh",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h2"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          mb: 2,
+          fontSize: "3rem",
+          fontWeight: "bold",
+          flexShrink: 0,
+        }}
+      >
+        🔥 Heat #{currentHeat?.heat ?? "🙈"}
+      </Typography>
+
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          minHeight: 0,
+        }}
+      >
+        {/* Team 1 */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            flex: 1,
+            position: "relative",
+          }}
+        >
+          {winningTeam?.teamId === team1?.teamId && (
+            <Typography variant="h1" sx={{ fontSize: "3rem", mb: 1 }}>
+              👑
+            </Typography>
+          )}
+          {team1 && (
+            <>
+              <Avatar
+                src={team1.teamImage}
+                sx={{ width: 160, height: 160, mb: 3 }}
+              />
+              <Typography
+                variant="h2"
+                sx={{
+                  mb: 2,
+                  textAlign: "center",
+                  fontSize: "2.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                {team1.teamName}
+              </Typography>
+              <Typography
+                variant="h3"
+                color="text.secondary"
+                sx={{
+                  textAlign: "center",
+                  fontSize: "2rem",
+                }}
+              >
+                {team1.currentPlayer?.name || "No player"}
+              </Typography>
+            </>
+          )}
+        </Box>
+
+        {/* Timer in the middle */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            flex: 1,
+          }}
+        >
+          <Typography
+            variant="h1"
+            sx={{ fontWeight: "bold", mb: 2, fontSize: "3.5rem" }}
+          >
+            {raceTimer}
+          </Typography>
+          {raceFinished && (
+            <Typography variant="h4" color="success.main">
+              Final Time!
+            </Typography>
+          )}
+        </Box>
+
+        {/* Team 2 */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            flex: 1,
+            position: "relative",
+          }}
+        >
+          {winningTeam?.teamId === team2?.teamId && (
+            <Typography variant="h1" sx={{ fontSize: "3rem", mb: 1 }}>
+              👑
+            </Typography>
+          )}
+          {team2 && (
+            <>
+              <Avatar
+                src={team2.teamImage}
+                sx={{ width: 160, height: 160, mb: 3 }}
+              />
+              <Typography
+                variant="h2"
+                sx={{
+                  mb: 2,
+                  textAlign: "center",
+                  fontSize: "2.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                {team2.teamName}
+              </Typography>
+              <Typography
+                variant="h3"
+                color="text.secondary"
+                sx={{
+                  textAlign: "center",
+                  fontSize: "2rem",
+                }}
+              >
+                {team2.currentPlayer?.name || "No player"}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default CurrentHeat;

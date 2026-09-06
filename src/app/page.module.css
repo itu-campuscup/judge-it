@@ -1,0 +1,255 @@
+.page {
+  --gray-rgb: 0, 0, 0;
+  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
+  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
+
+  display: grid;
+  grid-template-rows: 20px 1fr 20px;
+  align-items: center;
+  justify-items: center;
+  min-height: 100vh;
+  max-height: 100vh; /* Prevent overflow */
+  padding: 20px; /* Reduced padding for better space utilization */
+  gap: 16px; /* Reduced gap */
+  font-family: var(--font-geist-sans);
+  overflow: hidden; /* Prevent scrolling on main container */
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --gray-rgb: 255, 255, 255;
+    --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
+    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
+
+    --button-primary-hover: #ccc;
+    --button-secondary-hover: #1a1a1a;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Reduced gap between elements */
+  grid-row-start: 2;
+  width: 100%;
+  max-height: calc(100vh - 80px); /* Account for padding and grid gaps */
+  overflow-y: auto; /* Allow scrolling within main content only */
+}
+
+/* Special class for MainJudge to allow slightly more height */
+.mainJudgeContainer {
+  max-height: calc(110vh - 80px); /* MainJudge can be 10% taller */
+}
+
+/* Compact spacing for judge components */
+.judgeSection {
+  margin-bottom: 8px;
+}
+
+/* Ensure FormControl elements are compact */
+.compactForm {
+  margin: 8px 0 !important;
+}
+
+.main ol {
+  font-family: var(--font-geist-mono);
+  padding-left: 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  list-style-position: inside;
+}
+
+.main li:not(:last-of-type) {
+  margin-bottom: 8px;
+}
+
+.timeTypeButtonContainer {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 16px; /* Space between buttons */
+  width: 100%;
+}
+
+.timeTypeButton {
+  width: 100%; /* Full width buttons */
+  min-height: 80px; /* Minimum button height for touch targets */
+  font-size: clamp(1rem, 2.5vw, 1.5rem); /* Responsive font size */
+  padding: 16px; /* Padding for better touch targets */
+}
+
+.main code {
+  font-family: inherit;
+  background: var(--gray-alpha-100);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.ctas {
+  display: flex;
+  gap: 16px;
+}
+
+.ctas a {
+  appearance: none;
+  border-radius: 128px;
+  height: 48px;
+  padding: 0 20px;
+  border: none;
+  border: 1px solid transparent;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+a.primary {
+  background: var(--foreground);
+  color: var(--background);
+  gap: 8px;
+}
+
+a.secondary {
+  border-color: var(--gray-alpha-200);
+  min-width: 180px;
+}
+
+.footer {
+  grid-row-start: 3;
+  display: flex;
+  gap: 24px;
+}
+
+.footer a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer img {
+  flex-shrink: 0;
+}
+
+/* Enable hover only on non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+  a.primary:hover {
+    background: var(--button-primary-hover);
+    border-color: transparent;
+  }
+
+  a.secondary:hover {
+    background: var(--button-secondary-hover);
+    border-color: transparent;
+  }
+
+  .footer a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 16px; /* Further reduced padding for mobile */
+    padding-bottom: 20px;
+  }
+
+  .main {
+    align-items: center;
+    gap: 12px; /* Reduced gap for mobile */
+    max-height: calc(100vh - 60px); /* Adjust for smaller padding */
+  }
+
+  .main ol {
+    text-align: center;
+  }
+
+  .timeTypeButtonContainer {
+    /* Keep vertical layout on mobile too */
+    flex-direction: column;
+  }
+
+  .timeTypeButton {
+    min-height: 60px; /* Smaller buttons on mobile */
+    font-size: 0.9rem; /* Smaller font on mobile */
+  }
+
+  .ctas {
+    flex-direction: column;
+  }
+
+  .ctas a {
+    font-size: 14px;
+    height: 40px;
+    padding: 0 16px;
+  }
+
+  a.secondary {
+    min-width: auto;
+  }
+
+  .footer {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) and (min-width: 601px) {
+  .timeTypeButton {
+    font-size: 1.1rem; /* Medium font size for tablets */
+    min-height: 70px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    filter: invert();
+  }
+}
+
+/* Additional styles for FormControl and Select components */
+.MuiFormControl-root {
+  width: 100%;
+}
+
+.MuiInputLabel-root {
+  color: #1976d2; /* Blue color for the label */
+}
+
+.MuiSelect-root {
+  background-color: white;
+}
+
+.MuiSelect-select {
+  padding: 10px;
+  color: #1976d2; /* Blue color for the selected text */
+}
+
+.MuiMenuItem-root {
+  padding: 10px;
+}
+
+.MuiSelect-icon {
+  color: #1976d2; /* Blue color for the dropdown icon */
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important; /* Blue border color */
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important; /* Blue border color when focused */
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important; /* Blue border color on hover */
+}

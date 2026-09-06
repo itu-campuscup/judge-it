@@ -1,0 +1,354 @@
+"use client";
+
+import { Team, TimeLog } from "@/types";
+import {
+  getBestIntraHeatTime,
+  getTeamPlayerIds,
+  getTimeTypeBeer,
+  getTimeTypeSail,
+  getTimeTypeSpinner,
+} from "@/utils/getUtils";
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  filterTimeLogsByPlayerId,
+  filterTimeLogsByTimeType,
+  sortTimeLogsByHeatAndTime,
+} from "@/utils/sortFilterUtils";
+import {
+  PERFORMANCE_SCALES,
+  TIME_TYPE_BEER,
+  TIME_TYPE_SAIL,
+  TIME_TYPE_SPIN,
+} from "@/utils/constants";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
+import RadarChartComponent from "./components/RadarChartComponent";
+import { generateRadarChartData } from "@/utils/visualizationUtils";
+import { Id } from "convex/_generated/dataModel";
+import useFetchDataConvex from "../hooks/useFetchDataConvex";
+
+/**
+ * Helper to filter multiple players' log arrays by a specific time type.
+ * Moved outside component to maintain referential stability.
+ */
+const filterPlayerLogsByType = (logs: TimeLog[][], typeId: Id<"time_types">) =>
+  logs.map((playerLogs: TimeLog[]) =>
+    filterTimeLogsByTimeType(playerLogs, typeId),
+  );
+
+const Teams: React.FC = () => {
+  const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>("");
+  const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>("");
+
+  const { teams, timeLogs, timeTypes } = useFetchDataConvex();
+
+  const handleTeamChange = useCallback(
+    (
+      e:
+        | React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+        | (Event & { target: { value: string; name: string } }),
+      teamNumber: number,
+    ) => {
+      if (teamNumber === 1) {
+        setSelectedTeam1Id(e.target.value);
+      } else if (teamNumber === 2) {
+        setSelectedTeam2Id(e.target.value);
+      }
+    },
+    [],
+  );
+
+  const beerTypeId = useMemo(
+    () => getTimeTypeBeer(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const spinnerTypeId = useMemo(
+    () => getTimeTypeSpinner(timeTypes)?.id || "",
+    [timeTypes],
+  );
+  const sailTypeId = useMemo(
+    () => getTimeTypeSail(timeTypes)?.id || "",
+    [timeTypes],
+  );
+
+  const team1Players = useMemo(
+    () => getTeamPlayerIds(selectedTeam1Id as Id<"teams">, teams),
+    [selectedTeam1Id, teams],
+  );
+
+  const team2Players = useMemo(
+    () => getTeamPlayerIds(selectedTeam2Id as Id<"teams">, teams),
+    [selectedTeam2Id, teams],
+  );
+
+  const team1LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
+    () =>
+      team1Players.map((playerId: string) => {
+        const logsFilteredByPlayer = filterTimeLogsByPlayerId(
+          timeLogs,
+          playerId as Id<"players">,
+        );
+        return sortTimeLogsByHeatAndTime(logsFilteredByPlayer);
+      }),
+    [team1Players, timeLogs],
+  );
+
+  const team2LogsSortedByHeatAndTime: TimeLog[][] = useMemo(
+    () =>
+      team2Players.map((playerId: string) => {
+        const logsFilteredByPlayer = filterTimeLogsByPlayerId(
+          timeLogs,
+          playerId as Id<"players">,
+        );
+        return sortTimeLogsByHeatAndTime(logsFilteredByPlayer);
+      }),
+    [team2Players, timeLogs],
+  );
+
+  // Performance Optimization: Memoize all data transformations to prevent
+  // redundant O(N) operations and heavy visualization re-renders.
+
+  const team1BeerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team1LogsSortedByHeatAndTime,
+        beerTypeId as Id<"time_types">,
+      ),
+    [team1LogsSortedByHeatAndTime, beerTypeId],
+  );
+  const team1SpinnerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team1LogsSortedByHeatAndTime,
+        spinnerTypeId as Id<"time_types">,
+      ),
+    [team1LogsSortedByHeatAndTime, spinnerTypeId],
+  );
+  const team1SailLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team1LogsSortedByHeatAndTime,
+        sailTypeId as Id<"time_types">,
+      ),
+    [team1LogsSortedByHeatAndTime, sailTypeId],
+  );
+  const team2BeerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team2LogsSortedByHeatAndTime,
+        beerTypeId as Id<"time_types">,
+      ),
+    [team2LogsSortedByHeatAndTime, beerTypeId],
+  );
+  const team2SpinnerLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team2LogsSortedByHeatAndTime,
+        spinnerTypeId as Id<"time_types">,
+      ),
+    [team2LogsSortedByHeatAndTime, spinnerTypeId],
+  );
+  const team2SailLogs = useMemo(
+    () =>
+      filterPlayerLogsByType(
+        team2LogsSortedByHeatAndTime,
+        sailTypeId as Id<"time_types">,
+      ),
+    [team2LogsSortedByHeatAndTime, sailTypeId],
+  );
+
+  const getBestIntraHeatTimeAverage = useCallback(
+    (logs: TimeLog[][]): number =>
+      logs
+        .map(
+          (playerLog: TimeLog[]) =>
+            getBestIntraHeatTime(playerLog)?.duration || 0,
+        )
+        .reduce((acc, cur, _, arr) => acc + cur / (arr.length || 1), 0),
+    [],
+  );
+
+  const team1BestTimes = useMemo(
+    () => ({
+      [TIME_TYPE_BEER]: getBestIntraHeatTimeAverage(team1BeerLogs),
+      [TIME_TYPE_SPIN]: getBestIntraHeatTimeAverage(team1SpinnerLogs),
+      [TIME_TYPE_SAIL]: getBestIntraHeatTimeAverage(team1SailLogs),
+    }),
+    [
+      team1BeerLogs,
+      team1SpinnerLogs,
+      team1SailLogs,
+      getBestIntraHeatTimeAverage,
+    ],
+  );
+
+  const team2BestTimes = useMemo(
+    () => ({
+      [TIME_TYPE_BEER]: getBestIntraHeatTimeAverage(team2BeerLogs),
+      [TIME_TYPE_SPIN]: getBestIntraHeatTimeAverage(team2SpinnerLogs),
+      [TIME_TYPE_SAIL]: getBestIntraHeatTimeAverage(team2SailLogs),
+    }),
+    [
+      team2BeerLogs,
+      team2SpinnerLogs,
+      team2SailLogs,
+      getBestIntraHeatTimeAverage,
+    ],
+  );
+
+  const team1ChartData = useMemo(
+    () =>
+      generateRadarChartData(
+        selectedTeam1Id,
+        team1BestTimes,
+        [],
+        teams,
+        [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+        false,
+      ),
+    [selectedTeam1Id, team1BestTimes, teams],
+  );
+
+  const team2ChartData = useMemo(
+    () =>
+      generateRadarChartData(
+        selectedTeam2Id,
+        team2BestTimes,
+        [],
+        teams,
+        [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+        false,
+      ),
+    [selectedTeam2Id, team2BestTimes, teams],
+  );
+
+  return (
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h2"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          mb: 2,
+          fontSize: "3rem",
+          fontWeight: "bold",
+          flexShrink: 0,
+        }}
+      >
+        🏆 Teams Comparison
+      </Typography>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 3, flexShrink: 0 }}>
+        <FormControl fullWidth margin="normal" variant="filled">
+          <InputLabel id="team1-select-label" sx={{ fontSize: "1.2rem" }}>
+            Select Team 1
+          </InputLabel>
+          <Select
+            labelId="team1-select-label"
+            value={selectedTeam1Id}
+            onChange={(e) => handleTeamChange(e, 1)}
+            label="Select Team 1"
+            sx={{ fontSize: "1.2rem", minHeight: "60px" }}
+          >
+            {teams.map((team: Team) => (
+              <MenuItem
+                key={team.id}
+                value={team.id}
+                sx={{ fontSize: "1.1rem" }}
+              >
+                {team.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" variant="filled">
+          <InputLabel id="team2-select-label" sx={{ fontSize: "1.2rem" }}>
+            Select Team 2
+          </InputLabel>
+          <Select
+            labelId="team2-select-label"
+            value={selectedTeam2Id}
+            onChange={(e) => handleTeamChange(e, 2)}
+            label="Select Team 2"
+            sx={{ fontSize: "1.2rem", minHeight: "60px" }}
+          >
+            {teams.map((team: Team) => (
+              <MenuItem
+                key={team.id}
+                value={team.id}
+                sx={{ fontSize: "1.1rem" }}
+              >
+                {team.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          overflow: "hidden",
+          minHeight: 0,
+        }}
+      >
+        <RadarChartComponent
+          entity1={{
+            imageUrl: team1ChartData.imageUrl,
+            name: team1ChartData.name,
+            altTextType: "",
+            altText: "",
+          }}
+          data1={team1ChartData.data}
+          entity2={{
+            imageUrl: team2ChartData.imageUrl,
+            name: team2ChartData.name,
+            altTextType: "",
+            altText: "",
+          }}
+          data2={team2ChartData.data}
+        />
+      </Box>
+
+      <Typography
+        variant="h6"
+        color="text.secondary"
+        align="center"
+        sx={{
+          flexShrink: 0,
+          fontSize: "1.2rem",
+          p: 2,
+          mt: 2,
+        }}
+      >
+        100% = Excellent performance (under {PERFORMANCE_SCALES.BEER.min}s beer,{" "}
+        {PERFORMANCE_SCALES.SPIN.min}s spin, {PERFORMANCE_SCALES.SAIL.min}s
+        sail)
+        <br />
+        0% = Poor performance (over {PERFORMANCE_SCALES.BEER.max}s beer,{" "}
+        {PERFORMANCE_SCALES.SPIN.max}s spin, {PERFORMANCE_SCALES.SAIL.max}s
+        sail)
+        <br />
+        (On Average)
+      </Typography>
+    </Box>
+  );
+};
+
+export default Teams;

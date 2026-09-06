@@ -1,0 +1,4 @@
+id,time_eng,time_da,is_participant_side
+1,Sail,Sejl,true
+2,Beer,Øl,false
+3,Spin,Dreje,false
