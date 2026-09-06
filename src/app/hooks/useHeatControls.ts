@@ -4,7 +4,7 @@ import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { getCurrentHeat, getTimeType } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
-import type { AlertObject, Heat } from "@/types";
+import type { AlertObject } from "@/types";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
 interface MainJudgeProps {
@@ -18,55 +18,15 @@ const useHeatControls = (
   { teamA, playerA, teamB, playerB }: MainJudgeProps,
   alert: AlertObject,
 ) => {
-  const { heats, timeLogs, timeTypes } = useFetchDataConvex();
-  const createHeat = useMutation(api.mutations.createHeat);
-  const setCurrentHeat = useMutation(api.mutations.setCurrentHeat);
+  const { heats, timeTypes } = useFetchDataConvex();
+  const startHeat = useMutation(api.mutations.startHeat);
   const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const createTimeLog = useMutation(api.mutations.createTimeLog);
 
   const nextHeatNumber = useMemo(() => {
-    const current = getCurrentHeat(heats, alert);
+    const current = heats.find((heat) => heat.is_current);
     return current ? current.heat + 1 : 1;
-  }, [timeLogs]);
-
-  /**
-   * Create and set a new heat as current
-   */
-  const createAndSetNewHeat = async (): Promise<Heat | null> => {
-    try {
-      // Create new heat and set as current (setCurrentHeat will unset others automatically)
-      const newHeatId = await createHeat({
-        name: `Heat ${nextHeatNumber}`,
-        heat: nextHeatNumber,
-        date: new Date().toISOString().split("T")[0],
-        is_current: false,
-      });
-
-      // Set as current (this automatically unsets other heats)
-      await setCurrentHeat({ id: newHeatId as Id<"heats"> });
-
-      // Return the new heat object (use Convex _id)
-      return {
-        id: newHeatId as Id<"heats">,
-        heat: nextHeatNumber,
-        date: new Date().toISOString().split("T")[0],
-        is_current: true,
-      };
-    } catch (error) {
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText("Error creating new heat: " + (error as Error).message);
-      alert.setContext({
-        operation: "create_new_heat",
-        location: "MainJudge.createAndSetNewHeat",
-        metadata: {
-          step: "create_heat",
-          nextHeatNumber,
-        },
-      });
-      return null;
-    }
-  };
+  }, [heats]);
 
   /**
    * Handle global start timer with automatic heat increment
@@ -77,47 +37,18 @@ const useHeatControls = (
     if (!validateInputs("handleGlobalStart", teamA, teamB, playerA, playerB))
       return;
 
-    // Automatically create and set new heat
-    const newHeat = await createAndSetNewHeat();
-    if (!newHeat) {
-      return; // Error already shown in createAndSetNewHeat
-    }
-
-    const sailTimeType = timeTypes.find((e) => e.time_eng === TIME_TYPE_SAIL);
-    if (!sailTimeType) {
-      alert.setOpen(true);
-      alert.setSeverity("error");
-      alert.setText("Sailing time type not found");
-      alert.setContext({
-        operation: "global_start_timer",
-        location: "MainJudge.handleGlobalStart",
-        metadata: {
-          availableTimeTypes: timeTypes.map((t) => t.time_eng),
-          searchingFor: TIME_TYPE_SAIL,
-        },
-      });
-      return;
-    }
+    const date = new Date().toISOString().split("T")[0];
 
     try {
-      await createTimeLogsBatch({
-        logs: [
-          {
-            team_id: (teamA ?? undefined) as Id<"teams"> | undefined,
-            player_id: playerA as Id<"players">,
-            time_type_id: sailTimeType.id,
-            heat_id: newHeat.id,
-          },
-          {
-            team_id: (teamB || undefined) as Id<"teams"> | undefined,
-            player_id: playerB as Id<"players">,
-            time_type_id: sailTimeType.id,
-            heat_id: newHeat.id,
-          },
-        ],
+      const newHeat = await startHeat({
+        heat: nextHeatNumber,
+        date,
+        team_a_id: teamA!,
+        player_a_id: playerA!,
+        team_b_id: teamB!,
+        player_b_id: playerB!,
       });
 
-      // Success - show confirmation
       alert.setOpen(true);
       alert.setSeverity("success");
       alert.setText(`Heat ${newHeat.heat} started! Global timer running.`);
@@ -126,8 +57,11 @@ const useHeatControls = (
         location: "MainJudge.handleGlobalStart",
         metadata: {
           heatNumber: newHeat.heat,
+          date,
           teamA,
+          playerA,
           teamB,
+          playerB,
         },
       });
     } catch (error) {
@@ -139,12 +73,13 @@ const useHeatControls = (
         operation: "global_start_timer",
         location: "MainJudge.handleGlobalStart",
         metadata: {
-          step: "insert_time_logs",
+          step: "start_heat",
+          heatNumber: nextHeatNumber,
+          date,
           teamA,
           playerA,
           teamB,
           playerB,
-          heatId: newHeat.id,
         },
       });
     }
@@ -312,7 +247,7 @@ const useHeatControls = (
    * Check all inputs are present
    * Otherwise create alert
    */
-  const validateInputs = (caller: string, ...lst: any[]): boolean => {
+  const validateInputs = (caller: string, ...lst: unknown[]): boolean => {
     for (const elem of lst) {
       if (!elem) {
         alert.setOpen(true);
