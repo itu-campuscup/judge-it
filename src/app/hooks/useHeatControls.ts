@@ -4,6 +4,7 @@ import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { getCurrentHeat, getTimeType } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
+import { sailingTimerTransition } from "@/utils/sailingTimerTransition";
 import type { AlertObject } from "@/types";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
@@ -162,7 +163,7 @@ const useHeatControls = (
     teamId?: Id<"teams">,
   ) => {
     const currentHeat = getCurrentHeat(heats, alert);
-    if (!validateInputs("handleStartStop", playerId, teamId, currentHeat)) {
+    if (!validateInputs("handleStartStop", prevPlayerId, teamId, currentHeat)) {
       alert.setOpen(true);
       alert.setSeverity("error");
       alert.setText("Missing parameters");
@@ -189,22 +190,19 @@ const useHeatControls = (
       return;
     }
 
+    const playerIds = sailingTimerTransition(
+      prevPlayerId!,
+      playerId ?? undefined,
+    );
+
     try {
       await createTimeLogsBatch({
-        logs: [
-          {
-            team_id: teamId,
-            player_id: prevPlayerId!,
-            time_type_id: timeTypeId,
-            heat_id: currentHeat!.id,
-          },
-          {
-            team_id: teamId,
-            player_id: playerId!,
-            time_type_id: timeTypeId,
-            heat_id: currentHeat!.id,
-          },
-        ],
+        logs: playerIds.map((currentPlayerId) => ({
+          team_id: teamId,
+          player_id: currentPlayerId,
+          time_type_id: timeTypeId,
+          heat_id: currentHeat!.id,
+        })),
       });
     } catch (error) {
       const err = "Error inserting time log: " + (error as Error).message;

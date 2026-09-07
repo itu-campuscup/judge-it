@@ -37,10 +37,12 @@ const ParticipantsJudge: React.FC = () => {
     ).length;
   }, [timeLogs]);
 
-  const handleStartStopClick = (isFullStop: boolean) => () => {
-    if (isFullStop)
-      handleStartStop(prevPlayerId, prevPlayerId, teamId || undefined);
-    else handleStartStop(prevPlayerId, playerId, teamId || undefined);
+  const handleStartStopClick = (isFullStop: boolean) => async () => {
+    await handleStartStop(
+      prevPlayerId,
+      isFullStop ? undefined : playerId,
+      teamId ?? undefined,
+    );
     reload();
   };
 
