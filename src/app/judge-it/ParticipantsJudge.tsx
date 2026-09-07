@@ -12,6 +12,7 @@ import {
   getTimeType,
 } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
+import { sailingTimerTransition } from "@/utils/sailingTimerTransition";
 import type { Team, Player, Heat, AlertContext, AlertSeverity } from "@/types";
 import { Id } from "convex/_generated/dataModel";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
@@ -82,22 +83,19 @@ const ParticipantsJudge: React.FC<ParticipantsJudgeProps> = ({
       return;
     }
 
+    const playerIds = sailingTimerTransition(
+      prevPlayerId as Id<"players">,
+      playerId === prevPlayerId ? undefined : (playerId as Id<"players">),
+    );
+
     try {
       await createTimeLogsBatch({
-        logs: [
-          {
-            team_id: selectedTeam?.id,
-            player_id: prevPlayerId as Id<"players">,
-            time_type_id: timeTypeId,
-            heat_id: currentHeat.id,
-          },
-          {
-            team_id: selectedTeam?.id,
-            player_id: playerId as Id<"players">,
-            time_type_id: timeTypeId,
-            heat_id: currentHeat.id,
-          },
-        ],
+        logs: playerIds.map((currentPlayerId) => ({
+          team_id: selectedTeam?.id,
+          player_id: currentPlayerId,
+          time_type_id: timeTypeId,
+          heat_id: currentHeat.id,
+        })),
       });
     } catch (error) {
       const err = "Error inserting time log: " + (error as Error).message;
