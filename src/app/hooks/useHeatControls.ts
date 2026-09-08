@@ -5,6 +5,7 @@ import { Id } from "convex/_generated/dataModel";
 import { getCurrentHeat, getTimeType } from "@/utils/getUtils";
 import { TIME_TYPE_SAIL } from "@/utils/constants";
 import { sailingTimerTransition } from "@/utils/sailingTimerTransition";
+import { nextHeatNumber as calculateNextHeatNumber } from "@/utils/nextHeatNumber";
 import type { AlertObject } from "@/types";
 import useFetchDataConvex from "../hooks/useFetchDataConvex";
 
@@ -24,10 +25,11 @@ const useHeatControls = (
   const createTimeLogsBatch = useMutation(api.mutations.createTimeLogsBatch);
   const createTimeLog = useMutation(api.mutations.createTimeLog);
 
-  const nextHeatNumber = useMemo(() => {
-    const current = heats.find((heat) => heat.is_current);
-    return current ? current.heat + 1 : 1;
-  }, [heats]);
+  const nextHeatNumber = useMemo(
+    () =>
+      calculateNextHeatNumber(heats, new Date().toISOString().slice(0, 10)),
+    [heats],
+  );
 
   /**
    * Handle global start timer with automatic heat increment
@@ -42,7 +44,6 @@ const useHeatControls = (
 
     try {
       const newHeat = await startHeat({
-        heat: nextHeatNumber,
         date,
         team_a_id: teamA!,
         player_a_id: playerA!,

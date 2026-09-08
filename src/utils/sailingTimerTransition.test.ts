@@ -3,7 +3,12 @@ import { sailingTimerTransition } from "./sailingTimerTransition";
 
 describe("sailingTimerTransition", () => {
   test("records only the final sailor stop when no new sailor starts", () => {
+    expect(sailingTimerTransition("player-4", undefined)).toEqual(["player-4"]);
+  });
+
+  test("records both events when one sailor stops and restarts", () => {
     expect(sailingTimerTransition("player-4", "player-4")).toEqual([
+      "player-4",
       "player-4",
     ]);
   });
