@@ -9,6 +9,7 @@ import {
   TIME_TYPE_SPIN,
 } from "@/utils/constants";
 import type { TimeTypeKey } from "@/types";
+import { getBeerSidePhase } from "@/utils/beerSidePhase";
 import { useFetchDataConvex, useHeatControls, useCurrentHeat } from "../hooks";
 import JudgeButton from "../components/JudgeButton";
 import AlertComponent from "../components/AlertComponent";
@@ -38,7 +39,7 @@ const BeerJudge: React.FC = () => {
 
   const currentPhase = useMemo(() => {
     const logs = timeLogs.filter((tl) => tl.player_id === latestPlayer);
-    return logs.length;
+    return getBeerSidePhase(logs.length);
   }, [latestPlayer, timeLogs]);
 
   const currentTimeType = useMemo(() => {

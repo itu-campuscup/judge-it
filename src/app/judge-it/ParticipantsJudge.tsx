@@ -35,7 +35,7 @@ const ParticipantsJudge: React.FC = () => {
     return timeLogs.filter(
       (l) => l.team_id === teamId && l.time_type_id === sailTypeId,
     ).length;
-  }, [timeLogs]);
+  }, [timeLogs, teamId, sailTypeId]);
 
   const handleStartStopClick = (isFullStop: boolean) => async () => {
     await handleStartStop(
