@@ -18,6 +18,48 @@ import type {
   TimeEntry,
 } from "@/types";
 import { Id } from "convex/_generated/dataModel";
+export type PlayerTeamAssociations = ReadonlyMap<string, Team | null>;
+
+/**
+ * Resolves player teams once for contestant dropdowns and radar cards.
+ * Latest dated participation takes precedence over the existing roster fallback.
+ */
+export const getPlayerTeamAssociations = (
+  teams: Team[],
+  timeLogs: TimeLog[],
+): Map<string, Team | null> => {
+  const teamMap = new Map<string, Team>(teams.map((team) => [team.id, team]));
+  const associations = new Map<string, Team | null>();
+
+  for (const team of teams) {
+    const playerIds = [
+      team.player_1_id,
+      team.player_2_id,
+      team.player_3_id,
+      team.player_4_id,
+    ];
+
+    for (const playerId of playerIds) {
+      if (!playerId) continue;
+      if (!associations.has(playerId)) associations.set(playerId, team);
+    }
+  }
+
+  const latestTimes = new Map<string, number>();
+
+  for (const log of timeLogs) {
+    if (!log.player_id || !log.team_id || !log.time) continue;
+    const timestamp = Date.parse(log.time);
+    if (!Number.isFinite(timestamp)) continue;
+
+    const current = latestTimes.get(log.player_id);
+    if (current !== undefined && timestamp <= current) continue;
+    latestTimes.set(log.player_id, timestamp);
+    associations.set(log.player_id, teamMap.get(log.team_id) ?? null);
+  }
+
+  return associations;
+};
 
 /**
  * Gets the player name given the player ID.
@@ -44,9 +86,14 @@ export const getPlayerNameWithTeam = (
   playerId: Id<"players"> | null,
   players: Player[],
   teams: Team[],
+  playerTeamAssociations?: PlayerTeamAssociations,
 ): string => {
   const player = players.find((p) => p.id === playerId);
-  const team = getPlayerTeam(playerId as Player["id"], teams);
+  const team = getPlayerTeam(
+    playerId as Player["id"],
+    teams,
+    playerTeamAssociations,
+  );
   return player && team ? `${player.name} - ${team.name}` : "";
 };
 
@@ -370,7 +417,12 @@ export const getPlayerFunFact = (
 export const getPlayerTeam = (
   playerId: Id<"players">,
   teams: Team[],
+  playerTeamAssociations?: PlayerTeamAssociations,
 ): Team | null => {
+  if (playerTeamAssociations) {
+    return playerTeamAssociations.get(playerId) ?? null;
+  }
+
   const team = teams.find(
     (t: Team) =>
       t.player_1_id === (playerId as Player["id"]) ||
@@ -393,6 +445,7 @@ export const getPlayerImageWithFallback = (
   playerId: Id<"players">,
   players: Player[],
   teams: Team[],
+  playerTeamAssociations?: PlayerTeamAssociations,
 ): string => {
   const player = players.find((p: Player) => p.id === playerId);
 
@@ -402,7 +455,7 @@ export const getPlayerImageWithFallback = (
   }
 
   // Otherwise, get the team's image as fallback
-  const team = getPlayerTeam(playerId, teams);
+  const team = getPlayerTeam(playerId, teams, playerTeamAssociations);
   return team?.image_url || "";
 };
 

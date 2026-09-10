@@ -12,6 +12,7 @@ import {
   getTeamImageUrl,
   getPlayerNameWithTeam,
   getPlayerImageWithFallback,
+  type PlayerTeamAssociations,
 } from "./getUtils";
 import { REVOLUTIONS, PERFORMANCE_SCALES } from "./constants";
 import type { TimeLog, Heat, Player, Team } from "../types";
@@ -144,10 +145,9 @@ export const removeDuplicateTimeEntries = (
 
 /**
  * Generates the chart data for the top times.
- * Performance Optimization: Pre-computes lookup Maps for players, teams, heats,
- * and player-to-team associations to achieve O(1) entity resolution per entry
- * instead of nested array .find() scans, reducing total time complexity from
- * O(N * (P + T + H)) to O(N + P + T + H).
+ * Performance Optimization: Pre-computes lookup Maps for players, teams, and heats
+ * to achieve O(1) entity resolution per entry instead of nested array .find() scans,
+ * reducing total time complexity from O(N * (P + T + H)) to O(N + P + T + H).
  *
  * @param {Array} topTimes - The top times.
  * @param {Array} players - The list of players.
@@ -171,20 +171,11 @@ export const generateRankableData = (
   const teamMap = new Map<string, Team>(teams.map((t) => [t.id, t]));
   const heatMap = new Map<string, Heat>(heats.map((h) => [h.id, h]));
 
-  const playerTeamMap = new Map<string, Team>();
-  teams.forEach((t) => {
-    if (t.player_1_id) playerTeamMap.set(t.player_1_id, t);
-    if (t.player_2_id) playerTeamMap.set(t.player_2_id, t);
-    if (t.player_3_id) playerTeamMap.set(t.player_3_id, t);
-    if (t.player_4_id) playerTeamMap.set(t.player_4_id, t);
-  });
-
   return topTimes.map((time) => {
     const player = playerMap.get(time.playerId);
-    const playerTeam = playerTeamMap.get(time.playerId);
-    const imageUrl = player?.image_url || playerTeam?.image_url || "";
-    const playerName = player ? player.name : "";
     const team = time.teamId ? teamMap.get(time.teamId) : undefined;
+    const imageUrl = player?.image_url || team?.image_url || "";
+    const playerName = player ? player.name : "";
     const teamName = team ? team.name : "";
     const heat = heatMap.get(time.heatId);
     const heatNumber = heat ? heat.heat.toString() : "";
@@ -247,9 +238,15 @@ export const generateRadarChartData = (
   teams: Team[],
   timeTypes: string[],
   isPlayer: boolean = true,
+  playerTeamAssociations?: PlayerTeamAssociations,
 ) => {
   const name = isPlayer
-    ? getPlayerNameWithTeam(playerOrTeamId as Id<"players">, players, teams)
+    ? getPlayerNameWithTeam(
+        playerOrTeamId as Id<"players">,
+        players,
+        teams,
+        playerTeamAssociations,
+      )
     : getTeamName(playerOrTeamId as Id<"teams">, teams);
   const funFact = isPlayer
     ? getPlayerFunFact(playerOrTeamId as Id<"players">, players)
@@ -259,6 +256,7 @@ export const generateRadarChartData = (
         playerOrTeamId as Id<"players">,
         players,
         teams,
+        playerTeamAssociations,
       )
     : getTeamImageUrl(playerOrTeamId as Id<"teams">, teams);
 

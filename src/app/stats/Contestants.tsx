@@ -17,6 +17,7 @@ import {
 } from "@/utils/constants";
 import {
   getBestIntraHeatTime,
+  getPlayerTeamAssociations,
   getTimeTypeBeer,
   getTimeTypeSail,
   getTimeTypeSpinner,
@@ -66,27 +67,23 @@ const Contestants: React.FC = () => {
     [timeTypes],
   );
 
-  // Performance Optimization: Create a player-to-team lookup Map to reduce
-  // dropdown option generation complexity from O(P*T) to O(P+T).
-  const playerOptions = useMemo(() => {
-    // 1. Build team lookup map (PlayerID -> TeamName)
-    const playerToTeamMap = new Map<string, string>();
-    teams.forEach((team) => {
-      if (team.player_1_id) playerToTeamMap.set(team.player_1_id, team.name);
-      if (team.player_2_id) playerToTeamMap.set(team.player_2_id, team.name);
-      if (team.player_3_id) playerToTeamMap.set(team.player_3_id, team.name);
-      if (team.player_4_id) playerToTeamMap.set(team.player_4_id, team.name);
-    });
+  // Resolve all player associations once so dropdown labels and radar charts
+  // share the same latest-event context.
+  const playerTeamAssociations = useMemo(
+    () => getPlayerTeamAssociations(teams, timeLogs),
+    [teams, timeLogs],
+  );
 
-    // 2. Generate options using O(1) lookups
+  const playerOptions = useMemo(() => {
     return players.map((player) => {
-      const teamName = playerToTeamMap.get(player.id) || "No Team";
+      const teamName =
+        playerTeamAssociations.get(player.id)?.name || "No Team";
       return {
         id: player.id,
         label: `${player.name} - ${teamName}`,
       };
     });
-  }, [players, teams]);
+  }, [players, playerTeamAssociations]);
 
   // Performance Optimization: Memoize all data transformations to prevent
   // expensive re-computations and radar chart re-renders when parent state updates.
@@ -189,10 +186,17 @@ const Contestants: React.FC = () => {
         players,
         teams,
         [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+        true,
+        playerTeamAssociations,
       ),
-    [selectedPlayer1Id, player1BestTimes, players, teams],
+    [
+      selectedPlayer1Id,
+      player1BestTimes,
+      players,
+      teams,
+      playerTeamAssociations,
+    ],
   );
-
   const player2ChartData = useMemo(
     () =>
       generateRadarChartData(
@@ -201,8 +205,16 @@ const Contestants: React.FC = () => {
         players,
         teams,
         [TIME_TYPE_BEER, TIME_TYPE_SPIN, TIME_TYPE_SAIL],
+        true,
+        playerTeamAssociations,
       ),
-    [selectedPlayer2Id, player2BestTimes, players, teams],
+    [
+      selectedPlayer2Id,
+      player2BestTimes,
+      players,
+      teams,
+      playerTeamAssociations,
+    ],
   );
 
   return (
