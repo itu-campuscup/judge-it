@@ -36,7 +36,7 @@ const Contestants: React.FC = () => {
   const [selectedPlayer1Id, setSelectedPlayer1Id] = useState<string>("");
   const [selectedPlayer2Id, setSelectedPlayer2Id] = useState<string>("");
 
-  const { players, teams, timeLogs, timeTypes } = useFetchDataConvex();
+  const { players, teams, heats, timeLogs, timeTypes } = useFetchDataConvex();
 
   const handlePlayerChange = useCallback(
     (
@@ -70,8 +70,8 @@ const Contestants: React.FC = () => {
   // Resolve all player associations once so dropdown labels and radar charts
   // share the same latest-event context.
   const playerTeamAssociations = useMemo(
-    () => getPlayerTeamAssociations(teams, timeLogs),
-    [teams, timeLogs],
+    () => getPlayerTeamAssociations(teams, timeLogs, heats),
+    [teams, timeLogs, heats],
   );
 
   const playerOptions = useMemo(() => {

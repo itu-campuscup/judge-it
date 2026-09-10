@@ -27,6 +27,7 @@ export type PlayerTeamAssociations = ReadonlyMap<string, Team | null>;
 export const getPlayerTeamAssociations = (
   teams: Team[],
   timeLogs: TimeLog[],
+  heats: Heat[],
 ): Map<string, Team | null> => {
   const teamMap = new Map<string, Team>(teams.map((team) => [team.id, team]));
   const associations = new Map<string, Team | null>();
@@ -45,16 +46,34 @@ export const getPlayerTeamAssociations = (
     }
   }
 
-  const latestTimes = new Map<string, number>();
+  const heatDates = new Map(
+    heats.map((heat) => [heat.id, Date.parse(heat.date)]),
+  );
+  const latestParticipations = new Map<
+    string,
+    { heatDate: number; createdAt: number }
+  >();
 
   for (const log of timeLogs) {
-    if (!log.player_id || !log.team_id || !log.time) continue;
-    const timestamp = Date.parse(log.time);
-    if (!Number.isFinite(timestamp)) continue;
+    if (!log.player_id || !log.team_id) continue;
+    const heatDate = heatDates.get(log.heat_id);
+    if (heatDate === undefined || !Number.isFinite(heatDate)) continue;
+    const createdAt = Date.parse(log.created_at ?? "");
+    const creationTime = Number.isFinite(createdAt) ? createdAt : 0;
 
-    const current = latestTimes.get(log.player_id);
-    if (current !== undefined && timestamp <= current) continue;
-    latestTimes.set(log.player_id, timestamp);
+    const current = latestParticipations.get(log.player_id);
+    if (
+      current &&
+      (heatDate < current.heatDate ||
+        (heatDate === current.heatDate &&
+          creationTime <= current.createdAt))
+    ) {
+      continue;
+    }
+    latestParticipations.set(log.player_id, {
+      heatDate,
+      createdAt: creationTime,
+    });
     associations.set(log.player_id, teamMap.get(log.team_id) ?? null);
   }
 

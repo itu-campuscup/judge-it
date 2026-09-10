@@ -38,22 +38,24 @@ const team = (
 
 const log = (
   playerId: string,
-  teamId: string | undefined,
-  time: string,
+  teamId: string,
+  heatId: string,
+  created_at: string,
 ): TimeLog => ({
-  id: id<"time_logs">(`log-${playerId}-${time}`),
+  id: id<"time_logs">(`log-${playerId}-${heatId}`),
   player_id: id<"players">(playerId),
-  team_id: teamId ? id<"teams">(teamId) : undefined,
-  heat_id: id<"heats">("heat"),
+  team_id: id<"teams">(teamId),
+  heat_id: id<"heats">(heatId),
   time_type_id: id<"time_types">("type"),
   time_seconds: 1,
-  time,
+  time: "12:00:00.000",
+  created_at,
 });
 
-const heat = (heatId: string): Heat => ({
+const heat = (heatId: string, date = "2026-01-01"): Heat => ({
   id: id<"heats">(heatId),
   heat: 1,
-  date: "2026-01-01",
+  date,
   is_current: false,
 });
 
@@ -108,10 +110,17 @@ describe("rank and comparison visualization data", () => {
       team("new", "New Team", [], "new.jpg"),
     ];
     const players = [player("p")];
-    const associations = getPlayerTeamAssociations(teams, [
-      log("p", "new", "2026-09-10T12:00:00.000Z"),
-      log("p", "old", "2025-09-10T12:00:00.000Z"),
-    ]);
+    const associations = getPlayerTeamAssociations(
+      teams,
+      [
+        log("p", "new", "new-heat", "2026-09-10T12:00:00.000Z"),
+        log("p", "old", "old-heat", "2025-09-10T12:00:00.000Z"),
+      ],
+      [
+        heat("new-heat", "2026-09-10"),
+        heat("old-heat", "2025-09-10"),
+      ],
+    );
 
     const radar = generateRadarChartData(
       id<"players">("p"),
