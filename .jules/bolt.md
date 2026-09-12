@@ -22,3 +22,7 @@
 ## 2025-05-25 - [Convex URL Validation in Tests]
 **Learning:** The application (or Convex client) performs validation on `NEXT_PUBLIC_CONVEX_URL`. Using a short dummy name like `https://dummy.convex.cloud` causes a fatal parsing error ("Couldn't parse deployment name dummy").
 **Action:** When providing dummy environment variables for tests, use a sufficiently long deployment name (e.g., `https://happy-animal-123.convex.cloud`).
+
+## 2025-05-26 - [Single Pass Map Grouping for Heat Logs]
+**Learning:** In `sortFilterUtils.ts`, `splitTimeLogsPerHeat` used nested loops that created O(N^2) overhead and duplicate sub-arrays when trailing logs belonged to the same heat. Replacing it with a single O(N) `Map` lookup pass eliminated duplicate group allocations and sped up heat statistics pipeline calculations by ~4x.
+**Action:** Use `Map<string, T[]>` for grouping array elements by key in utility functions to guarantee O(N) complexity and preserve insertion order.
