@@ -91,27 +91,26 @@ export const filterTimeLogsByTimeType = (
 
 /**
  * Splits time logs into separate arrays based on heat ID.
+ * Performance Optimization: Replaced O(N^2) nested loop logic with an O(N) Map grouping.
+ * Eliminates duplicate tail group creation and drastically speeds up intra-heat statistics calculations.
  * @param {Array} timeLogs - The list of time logs.
  * @returns {Array} An array of arrays, where each sub-array contains logs for a specific heat.
  */
 export const splitTimeLogsPerHeat = (timeLogs: TimeLog[]): TimeLog[][] => {
-  const heatSplitLogs: TimeLog[][] = [];
+  if (timeLogs.length === 0) return [];
 
-  for (let i = 0; i < timeLogs.length; i++) {
-    const lst: TimeLog[] = [];
-    const heatId = timeLogs[i].heat_id;
-    for (let j = i; j < timeLogs.length; j++) {
-      if (timeLogs[j].heat_id === heatId) {
-        lst.push(timeLogs[j]);
-      } else {
-        i = j - 1;
-        break;
-      }
+  const heatMap = new Map<string, TimeLog[]>();
+  for (const log of timeLogs) {
+    const heatId = String(log.heat_id ?? "");
+    let group = heatMap.get(heatId);
+    if (!group) {
+      group = [];
+      heatMap.set(heatId, group);
     }
-    heatSplitLogs.push(lst);
+    group.push(log);
   }
 
-  return heatSplitLogs;
+  return Array.from(heatMap.values());
 };
 
 /**
