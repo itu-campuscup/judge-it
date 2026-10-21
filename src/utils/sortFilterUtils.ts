@@ -95,23 +95,18 @@ export const filterTimeLogsByTimeType = (
  * @returns {Array} An array of arrays, where each sub-array contains logs for a specific heat.
  */
 export const splitTimeLogsPerHeat = (timeLogs: TimeLog[]): TimeLog[][] => {
-  const heatSplitLogs: TimeLog[][] = [];
+  const groups = new Map<TimeLog["heat_id"], TimeLog[]>();
 
-  for (let i = 0; i < timeLogs.length; i++) {
-    const lst: TimeLog[] = [];
-    const heatId = timeLogs[i].heat_id;
-    for (let j = i; j < timeLogs.length; j++) {
-      if (timeLogs[j].heat_id === heatId) {
-        lst.push(timeLogs[j]);
-      } else {
-        i = j - 1;
-        break;
-      }
+  for (const log of timeLogs) {
+    const group = groups.get(log.heat_id);
+    if (group) {
+      group.push(log);
+    } else {
+      groups.set(log.heat_id, [log]);
     }
-    heatSplitLogs.push(lst);
   }
 
-  return heatSplitLogs;
+  return Array.from(groups.values());
 };
 
 /**
