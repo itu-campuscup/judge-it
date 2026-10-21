@@ -12,6 +12,7 @@
   <img alt="Convex" src="https://img.shields.io/badge/Convex-FF5733?logo=convex&logoColor=white" />
   <img alt="Material-UI" src="https://img.shields.io/badge/Material--UI-0081CB?logo=material-ui&logoColor=white" />
   <img alt="Bun" src="https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white" />
+  <a href="https://github.com/lucasfth/fafnir"><img alt="Fafnir: secrets" src="./docs/assets/fafnir-badge.svg" /></a>
 </p>
 <p align="center">
   <img alt="GitHub issues" src="https://img.shields.io/github/issues/itu-campuscup/judge-it" />
@@ -74,33 +75,44 @@ To contribute to this project, please read the [CONTRIBUTING](./CONTRIBUTING.md)
 ## 🏃‍➡️ Getting Started
 
 > **⚠️ Important:** This project **requires [Bun](https://bun.com)** as the package manager and runtime.
-> It will need modifications to run with npm or yarn, due to Bun-specific features like.
+> It uses Bun-specific CLI and keychain APIs.
+
+### Join the shared CampusCup setup
+
+Install [Bun](https://bun.com) and [Fafnir](./docs/fafnir.md#new-laptop-the-short-path) once. Then:
 
 ```bash
-# 1. Clone repository
-
-git clone --recurse-submodules <repository-url>
-
-# 2. Install dependencies
+git clone --recurse-submodules git@github.com:itu-campuscup/judge-it.git
+cd judge-it
 bun install
-
-# 3. Initialize Convex (if not already set up)
-bun cli.ts init
-
-# 4. Connect to Convex project
-bun auth:run
-
-# 5. Start development
-bun dev
-
-# 5a. Start with production credentials
-bun dev --prod
-
-# 5b. Start with staging credentials
-bun dev --stage
+fafnir key create  # once per laptop; skip if you already have an identity
+fafnir key public  # send this PUBLIC recipient to a maintainer
 ```
 
-For detailed setup and contribution guidelines, see [Getting Started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
+Once the maintainer grants your recipient, pull the updated policy and encrypted configuration:
+
+```bash
+git pull --rebase
+fafnir trust       # review and approve the recipients
+bun run fafnir:check
+```
+
+No manual environment-variable entry, personal Convex project or auth initialization is needed for an already-configured shared deployment. App login and admin approval still apply. Never share private decryption keys.
+
+**The shared configuration is production-only:** after receiving access, use `bun run dev:prod` or `bun run build:prod` only when deliberately targeting production. `dev:prod` connects the local app to live data; `build:prod` embeds the production URL. Neither deploys by itself. Optional `dev:shared` requires a separately initialized `.env.local.fafnir`; no shared development deployment is currently configured. [Onboarding and maintainer setup](./docs/fafnir.md) covers grants, updates and recovery.
+
+> The production policy and encrypted file are included; new contributors still need a recipient grant. Fafnir is experimental and not independently audited. CampusCup accepts this risk for production; keep independent recovery copies and restrict production recipients.
+
+### Use your own Convex project instead
+
+```bash
+cp .env.example .env.local  # edit the public development URL
+bun cli.ts init
+bun auth:run
+bun dev
+```
+
+Environment configuration takes precedence over the keychain fallback. Explicit `--prod` / `--stage` targets require `NEXT_PUBLIC_CONVEX_URL_PROD` / `_STAGE` or their matching keychain entries, never the unsuffixed development value. `NEXT_PUBLIC_*` values are public, and backend secrets remain on Convex. See [CONTRIBUTING.md](./CONTRIBUTING.md#getting-started) for the independent-project workflow.
 
 ## 🧪 Testing
 

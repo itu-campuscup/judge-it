@@ -1,6 +1,6 @@
 /**
- * Configuration management using Bun.secrets for secure credential storage
- * Falls back to environment variables for CI/CD environments
+ * Environment-first configuration, with Bun.secrets as a local fallback.
+ * Fafnir injects environment variables without writing plaintext files.
  */
 
 import { secrets } from "bun";
@@ -26,8 +26,8 @@ const isCI = (): boolean => {
 };
 
 /**
- * Get a configuration value from secrets, environment (CI only), or prompt
- * Priority: Bun.secrets (keychain) > Environment Variable (CI only) > Interactive Prompt
+ * Get a configuration value from the environment, local keychain, or prompt.
+ * Priority: Environment Variable > Bun.secrets (local only) > Interactive Prompt
  * @param envKey - The environment variable key
  * @param envSuffix - Optional suffix for different environments (e.g., '_PROD', '_STAGE')
  */
@@ -37,17 +37,17 @@ const getOrPrompt = async (
 ): Promise<string | null> => {
   const storageKey = envKey + envSuffix;
 
-  // In CI we must not access the OS keychain — read only from environment
-  if (isCI()) {
-    const fromEnv = Bun.env[envKey];
-    if (fromEnv) {
-      console.log(`[INFO]\t Loaded ${envKey} from environment (CI)`);
-      return fromEnv;
-    }
-    return null;
+  // Explicit targets must not inherit a development URL from Bun’s dotenv loader.
+  const fromEnv = Bun.env[storageKey];
+  if (fromEnv) {
+    console.log(`[INFO]\t Loaded ${storageKey} from environment`);
+    return fromEnv;
   }
 
-  // Local/dev flow: try Bun.secrets for keychain storage first
+  // Never access the OS keychain or prompt in CI.
+  if (isCI()) return null;
+
+  // Preserve the keychain fallback for existing local setups.
   try {
     const stored = await secrets.get({
       service: SECRET_SERVICE,
@@ -103,7 +103,7 @@ export const readConvexConfig = async (env?: string): Promise<ConvexConfig> => {
 
   if (!url) {
     throw new Error(
-      "Missing required Convex configuration. Please set NEXT_PUBLIC_CONVEX_URL",
+      `Missing required Convex configuration. Please set NEXT_PUBLIC_CONVEX_URL${envSuffix}. See docs/fafnir.md for shared configuration setup.`,
     );
   }
 

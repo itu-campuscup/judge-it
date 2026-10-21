@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "pairs": [
+    {
+      "plain": ".env.prod",
+      "encrypted": ".env.prod.fafnir",
+      "recipients": [
+        "age1va4f3ygt3z7xtkzzwgdkk3v2y4uu4v8lcgcl0qnw88zzstgdjcmsjuguqq"
+      ]
+    }
+  ]
+}

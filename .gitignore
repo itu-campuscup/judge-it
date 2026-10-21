@@ -34,8 +34,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (credentials managed via CLI using Bun.secrets keychain storage)
+# Plaintext environment files; examples and Fafnir ciphertext stay trackable
 .env*
+!.env.example
+!.env.fafnir
+!.env.local.fafnir
+!.env.prod.fafnir
+!.env.prod.example
 
 # vercel
 .vercel
@@ -50,3 +55,8 @@ SUMMARY_*.md
 
 # ESLint config (CommonJS format causes linting issues)
 .eslintrc.js
+
+# fafnir managed paths
+/.env.prod
+!/.env.prod.fafnir
+# fafnir managed end

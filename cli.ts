@@ -297,7 +297,7 @@ switch (command) {
       "  bun cli.ts dev [--prod|--stage]                 - Start dev server (prompts for credentials if needed)",
     );
     console.log(
-      "  bun cli.ts build [--prod|--stage]               - Build for production",
+      "  bun cli.ts build [--prod|--stage]               - Build using the selected backend configuration",
     );
     console.log(
       "  bun cli.ts auth:run [--prod|--stage] [args]     - Run `bunx @convex-dev/auth` against target deployment",
@@ -306,31 +306,32 @@ switch (command) {
       "  bun cli.ts env [--prod|--stage] <subcommand>    - Manage Convex deployment env vars (list/get/set/remove)",
     );
     console.log(
-      "  bun cli.ts secrets:view [--prod|--stage]        - View stored credentials (masked)",
+      "  bun cli.ts secrets:view [--prod|--stage]        - View legacy app keychain values (not Fafnir)",
     );
     console.log(
-      "  bun cli.ts secrets:clear [--prod|--stage]       - Clear stored credentials",
+      "  bun cli.ts secrets:clear [--prod|--stage]       - Clear legacy app keychain values (not Fafnir)",
     );
     console.log("\nFlags:");
     console.log(
-      "  --prod   Use production credentials (stored separately in keychain)",
+      "  --prod   Use production configuration; local app actions affect live data",
     );
     console.log(
-      "  --stage  Use staging credentials (stored separately in keychain)",
+      "  --stage  Use staging configuration (environment first, keychain fallback)",
     );
     console.log("\nEnvironments:");
     console.log(
-      "  Credentials are stored under separate keychain keys per environment:",
+      "  Environment variables take precedence over the matching keychain keys:",
     );
-    console.log("  (default) → NEXT_PUBLIC_CONVEX_URL, JWT_PRIVATE_KEY");
+    console.log("  (default) → NEXT_PUBLIC_CONVEX_URL");
+    console.log("  --prod    → NEXT_PUBLIC_CONVEX_URL_PROD");
+    console.log("  --stage   → NEXT_PUBLIC_CONVEX_URL_STAGE");
     console.log(
-      "  --prod    → NEXT_PUBLIC_CONVEX_URL_PROD, JWT_PRIVATE_KEY_PROD",
+      "  JWT_PRIVATE_KEY stays on the Convex deployment, not in local config.",
     );
+    console.log("  Shared development: bun run dev:shared");
+    console.log("  Setup and recovery: docs/fafnir.md");
     console.log(
-      "  --stage   → NEXT_PUBLIC_CONVEX_URL_STAGE, JWT_PRIVATE_KEY_STAGE",
-    );
-    console.log(
-      "\nTip: Use package.json scripts, e.g. 'bun dev --prod', 'bun auth:run --stage'",
+      "  Production: bun run dev:prod / bun run build:prod (explicit production intent only)",
     );
     break;
 }

@@ -117,8 +117,9 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/itu-ca
 ### Your First Code Contribution
 
 This code uses a Convex database, and thus defines the schema and API in the `convex/` directory.
-You should thus be able to make contributions without access to the Convex CampusCup organization, as long as you have a Convex project set up locally.
-Continue with [Getting Started](#getting-started) to set up your own Convex project and connect it to the application.
+For the shared CampusCup deployment, follow the [short shared setup](./README.md#join-the-shared-campuscup-setup): request access with your Fafnir public recipient, pull, approve the policy and run `bun run dev:shared`. You do not need your own Convex project or to rerun auth setup. Existing app login and admin approval still apply. Production maintainers have a separate `.env.prod.fafnir` and `bun run dev:prod` command.
+
+The independent-project instructions below remain available if you do not need shared access.
 
 #### Getting Started
 
@@ -169,10 +170,9 @@ If not, you can create one for free at [convex.dev](https://convex.dev/).
    bun dev
    ```
 
-   On first run, you'll be prompted to enter:
-   - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL (can be found in your Convex dashboard for the project you created, in the form of https://\<project-name\>.\<server-location\>.convex.cloud)
+   Environment variables (including Bun's `.env.local` loading) take precedence over the local keychain. Copy `.env.example` to `.env.local` for your own development deployment, or follow [Fafnir onboarding](./docs/fafnir.md) for encrypted shared configuration and run `bun run fafnir:run bun dev`.
 
-   Your credentials are securely stored in your system keychain and will be automatically loaded on future runs.
+   Without either source, an interactive run prompts for `NEXT_PUBLIC_CONVEX_URL` and saves it in your system keychain. `bun secrets:view` and `bun secrets:clear` manage only this legacy keychain fallback, not Fafnir identities or files. Explicit `--prod` / `--stage` targets read `NEXT_PUBLIC_CONVEX_URL_PROD` / `_STAGE` or the matching keychain entry, never the unsuffixed development URL.
 
    > You might run into an issue that says something like:
    > ```bash
