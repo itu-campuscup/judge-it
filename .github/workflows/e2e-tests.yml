@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright 1.58 does not support ubuntu-26.04 (ubuntu-latest)
 
     steps:
       - name: Checkout code
