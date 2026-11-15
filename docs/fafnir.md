@@ -2,9 +2,21 @@
 
 ## New laptop: the short path
 
-Install [Bun](https://bun.com), Git and [Go 1.27+](https://go.dev/doc/install). On macOS, install Apple Command Line Tools if missing (`xcode-select --install`); native keychain storage needs CGO and the Apple SDK. On Linux, use a running Secret Service or Fafnir’s documented protected key-file option.
+Install [Bun](https://bun.com) and Git. On Linux, use a running Secret Service or Fafnir’s documented protected key-file option.
 
-Fafnir has no published binary releases yet. Clone and review its source, then install:
+Install Fafnir (a beta, built from source by the package manager; no prebuilt binaries):
+
+```sh
+brew install lucasfth/tap/fafnir   # Homebrew
+# or, with flakes enabled:
+nix profile install github:lucasfth/fafnir
+fafnir version
+```
+
+<details>
+<summary>Build from source instead</summary>
+
+Needs [Go 1.27+](https://go.dev/doc/install). On macOS, install Apple Command Line Tools if missing (`xcode-select --install`); native keychain storage needs CGO and the Apple SDK.
 
 ```sh
 git clone https://github.com/lucasfth/fafnir.git
@@ -16,9 +28,9 @@ cd fafnir
       echo "Install Apple Command Line Tools with xcode-select --install, then retry." >&2
       exit 1
     fi
-    CGO_ENABLED=1 SDKROOT="$(xcrun --show-sdk-path)" CC="$(xcrun --find clang)" go build -trimpath -o bin/fafnir ./cmd/fafnir
+    CGO_ENABLED=1 SDKROOT="$(xcrun --show-sdk-path)" CC="$(xcrun --find clang)" make build
   else
-    go build -trimpath -o bin/fafnir ./cmd/fafnir
+    make build
   fi
   mkdir -p "$HOME/.local/bin"
   install -m 755 bin/fafnir "$HOME/.local/bin/fafnir"
@@ -26,6 +38,8 @@ cd fafnir
 ```
 
 Keep the `export PATH="$HOME/.local/bin:$PATH"` line in your shell startup file (`~/.zshrc` or `~/.bashrc`) if needed; the export above only affects the current terminal. The macOS command selects Apple’s compiler explicitly, including when a Nix compiler is on PATH.
+
+</details>
 
 Return to your CampusCup checkout (clone with submodules if necessary) and run `bun install`.
 
